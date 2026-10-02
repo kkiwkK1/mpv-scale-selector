@@ -1,0 +1,14 @@
+# Portable source/documentation line endings
+* text=auto eol=lf
+*.py text eol=lf
+*.lua text eol=lf
+*.md text eol=lf
+
+# Downloaded research evidence is byte-exact; do not normalize its SHA256 inputs
+docs/证据/** -text -whitespace
+
+# Treat archives and media as binary
+*.zip binary
+*.png binary
+*.jpg binary
+*.webm binary

@@ -1,0 +1,34 @@
+# Private configuration backups and local automation state
+/.pi/
+/.local/
+/backups/
+/backup/
+*.local.json
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated playback/test captures; keep machine-readable curated reports in docs
+/artifacts/
+/test-output/
+*.log
+
+# Earlier interrupted research scratch files (preserved on disk, not baseline sources)
+/agy.json
+/agy1.json
+/agy_tree.json
+/cas.h
+/ddg.html
+/ddg2.html
+/disc.html
+/ff.json
+/gh1.json
+/gh2.json
+/gh3.json
+/grepapp.json
+/reddit.json
+/tree.json
+/usershaders.md
+/wb.json
+/wb_page.html
+/wiki.html

@@ -1,0 +1,113 @@
+[
+  {
+    "file": "fsr-readme.md",
+    "url": "https://raw.githubusercontent.com/GPUOpen-Effects/FidelityFX-FSR/master/README.md",
+    "utc": "2026-10-02T14:48:20.587025+00:00",
+    "status": "FAILED",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "file": "fsr-license.txt",
+    "url": "https://raw.githubusercontent.com/GPUOpen-Effects/FidelityFX-FSR/master/license.txt",
+    "utc": "2026-10-02T14:48:20.588026+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/GPUOpen-Effects/FidelityFX-FSR/master/license.txt",
+    "bytes": 1094,
+    "sha256": "db089274ce766da70f5b7d791029c3486f9f9e27c8c79c652689603d3192e802"
+  },
+  {
+    "file": "nis-readme.md",
+    "url": "https://raw.githubusercontent.com/NVIDIAGameWorks/NVIDIAImageScaling/main/README.md",
+    "utc": "2026-10-02T14:48:20.588026+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/NVIDIAGameWorks/NVIDIAImageScaling/main/README.md",
+    "bytes": 16421,
+    "sha256": "d227c22868350b9aa481def8b5594977bf0891c0d092c0e9ce37afc611d6c32f"
+  },
+  {
+    "file": "nis-license.txt",
+    "url": "https://raw.githubusercontent.com/NVIDIAGameWorks/NVIDIAImageScaling/main/LICENSE.txt",
+    "utc": "2026-10-02T14:48:20.589028+00:00",
+    "status": "FAILED",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "file": "sgsr-readme.md",
+    "url": "https://raw.githubusercontent.com/SnapdragonGameStudios/snapdragon-gsr/main/README.md",
+    "utc": "2026-10-02T14:48:20.589028+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/SnapdragonGameStudios/snapdragon-gsr/main/README.md",
+    "bytes": 3700,
+    "sha256": "ddd1ddd1aadd01d2da26dfc183baf0b01f6ad7004ff628e41a14f6b733f96da0"
+  },
+  {
+    "file": "sgsr-tree.json",
+    "url": "https://api.github.com/repos/SnapdragonGameStudios/snapdragon-gsr/git/trees/main?recursive=1",
+    "utc": "2026-10-02T14:48:20.589028+00:00",
+    "status": 200,
+    "final_url": "https://api.github.com/repos/SnapdragonGameStudios/snapdragon-gsr/git/trees/main?recursive=1",
+    "bytes": 13001,
+    "sha256": "dc8dc25b7aefaf4d4f6fc10300bcce4d4c53715141bfc6cadaf7fa8336117f1f"
+  },
+  {
+    "file": "sgsr-license.txt",
+    "url": "https://raw.githubusercontent.com/SnapdragonGameStudios/snapdragon-gsr/main/LICENSE",
+    "utc": "2026-10-02T14:48:32.720797+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/SnapdragonGameStudios/snapdragon-gsr/main/LICENSE",
+    "bytes": 1556,
+    "sha256": "bc496633d3db8c6ca1362216ec382d361b69c7d5518acd6bbfd91503febfb3ef"
+  },
+  {
+    "file": "agyild-gists.json",
+    "url": "https://api.github.com/users/agyild/gists?per_page=100",
+    "utc": "2026-10-02T14:48:32.721795+00:00",
+    "status": 200,
+    "final_url": "https://api.github.com/users/agyild/gists?per_page=100",
+    "bytes": 8689,
+    "sha256": "62f8b63ce05a4f895ead84c2f33990042c5666b5760acb1daf62b0fcf25b63cd"
+  },
+  {
+    "file": "mpv-user-shaders.md",
+    "url": "https://raw.githubusercontent.com/wiki/mpv-player/mpv/User-Shaders.md",
+    "utc": "2026-10-02T14:48:32.763044+00:00",
+    "status": "FAILED",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "file": "mpv-options.rst",
+    "url": "https://raw.githubusercontent.com/mpv-player/mpv/ad59ff1b4/DOCS/man/options.rst",
+    "utc": "2026-10-02T14:48:32.763963+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/mpv-player/mpv/ad59ff1b4/DOCS/man/options.rst",
+    "bytes": 387281,
+    "sha256": "14e936a60da6a5179d9ec71535f14b6b077463737e8188447a700fc67f81bd3c"
+  },
+  {
+    "file": "mpv-gpu-next.c",
+    "url": "https://raw.githubusercontent.com/mpv-player/mpv/ad59ff1b4/video/out/vo_gpu_next.c",
+    "utc": "2026-10-02T14:48:33.010532+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/mpv-player/mpv/ad59ff1b4/video/out/vo_gpu_next.c",
+    "bytes": 91749,
+    "sha256": "bdd1943d2e66d85f7bc8be7fdba6beba26e0e4cee7b61983e55f541c5860813a"
+  },
+  {
+    "file": "lossless-app.json",
+    "url": "https://store.steampowered.com/api/appdetails?appids=993090&l=english",
+    "utc": "2026-10-02T14:48:33.590101+00:00",
+    "status": 200,
+    "final_url": "https://store.steampowered.com/api/appdetails?appids=993090&l=english",
+    "bytes": 14949,
+    "sha256": "2ea103a09e9b9b1ca495f58396bfcb45dfbb44f739de009b47c5b2c90407c469"
+  },
+  {
+    "file": "lossless-news.json",
+    "url": "https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=993090&count=100&maxlength=0&format=json",
+    "utc": "2026-10-02T14:48:33.919487+00:00",
+    "status": 200,
+    "final_url": "https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=993090&count=100&maxlength=0&format=json",
+    "bytes": 44567,
+    "sha256": "d169e2a6e3af1618390ae67288f02661092c7188f478ad7d012a5ee905db5c6a"
+  }
+]

@@ -1,0 +1,282 @@
+## mpv.com --no-config --version
+Exit: 0
+mpv v0.40.0-393-gad59ff1b4 Copyright © 2000-2025 mpv/MPlayer/mplayer2 projects
+ built on Oct 12 2025 00:05:46
+libplacebo version: v7.357.0 (v7.351.0-87-g9bffcaf-dirty)
+FFmpeg version: N-121425-g0bc54cddb
+FFmpeg library versions:
+   libavcodec      62.16.100
+   libavdevice     62.2.100
+   libavfilter     11.9.100
+   libavformat     62.6.101
+   libavutil       60.13.100
+   libswresample   6.2.100
+   libswscale      9.3.100
+
+
+## mpv.com --no-config --vo=help
+Exit: 0
+Available video outputs:
+  gpu-next         Video output based on libplacebo
+  gpu              Shader-based GPU Renderer
+  direct3d         Direct3D 9 Renderer
+  sdl              SDL 2.0 Renderer
+  libmpv           render API for libmpv
+  null             Null video output
+  image            Write video frames to image files
+  tct              true-color terminals
+  kitty            Kitty terminal graphics protocol
+
+
+
+## mpv.com --no-config --scale=help
+Exit: 0
+Valid values for option scale are:
+    bilinear
+    bicubic_fast
+    oversample
+    spline16
+    spline36
+    spline64
+    sinc
+    lanczos
+    ginseng
+    bicubic
+    hermite
+    catmull_rom
+    mitchell
+    robidoux
+    robidouxsharp
+    box
+    nearest
+    triangle
+    gaussian
+    jinc
+    ewa_lanczos
+    ewa_hanning
+    ewa_ginseng
+    ewa_lanczossharp
+    ewa_lanczos4sharpest
+    ewa_lanczossoft
+    haasnsoft
+    ewa_robidoux
+    ewa_robidouxsharp
+    bartlett
+    cosine
+    hanning
+    tukey
+    hamming
+    quadric
+    welch
+    kaiser
+    blackman
+    sphinx
+
+
+## mpv.com --no-config --show-profile=high-quality
+Exit: 0
+Profile high-quality: 
+ scale=ewa_lanczossharp
+ hdr-peak-percentile=99.995
+ hdr-contrast-recovery=0.30
+
+
+## mpv.com --no-config --video-unscaled=help
+Exit: 0
+Valid values for option video-unscaled are:
+    no
+    yes
+    downscale-big
+
+
+## mpv.com --no-config --vf=libplacebo=help
+Exit: 0
+Options:
+
+ inputs     <int>        Number of inputs
+ w          <string>     Output video frame width
+ h          <string>     Output video frame height
+ fps        <string>     Output video frame rate
+ crop_x     <string>     Input video crop x
+ crop_y     <string>     Input video crop y
+ crop_w     <string>     Input video crop w
+ crop_h     <string>     Input video crop h
+ pos_x      <string>     Output video placement x
+ pos_y      <string>     Output video placement y
+ pos_w      <string>     Output video placement w
+ pos_h      <string>     Output video placement h
+ format     <string>     Output video format
+ force_original_aspect_ratio <int>        decrease or increase w/h if necessary to keep the original AR
+    disable                 
+    decrease                
+    increase                
+ force_divisible_by <int>        enforce that the output resolution is divisible by a defined integer when force_original_aspect_ratio is used
+ reset_sar  <bool>       force SAR normalization to 1:1 by adjusting pos_x/y/w/h
+ normalize_sar <bool>       like reset_sar, but pad/crop instead of stretching the video
+ pad_crop_ratio <float>      ratio between padding and cropping when normalizing SAR (0=pad, 1=crop)
+ fit_mode   <int>        Content fit strategy for placing input layers in the output
+    fill                    Stretch content, ignoring aspect ratio
+    contain                 Stretch content, padding to preserve aspect
+    cover                   Stretch content, cropping to preserve aspect
+    none                    Keep input unscaled, padding and cropping as needed
+    place                   Keep input unscaled, padding and cropping as needed
+    scale_down              Downscale only if larger, padding to preserve aspect
+ fit_sense  <int>        Output size strategy (for the base layer only)
+    target                  Computed resolution is the exact output size
+    constraint              Computed resolution constrains the output size
+ fillcolor  <color>      Background fill color
+ corner_rounding <float>      Corner rounding radius
+ lut        <string>     Path to custom LUT file to apply
+ lut_type   <int>        Application mode of the custom LUT
+    auto                    
+    native                  
+    normalized              
+    conversion              
+ extra_opts <dict>       Pass extra libplacebo-specific options using a :-separated list of key=value pairs
+ shader_cache <string>     Set shader cache path
+ colorspace <int>        select colorspace
+    auto                    keep the same colorspace
+    gbr                     
+    bt709                   
+    unknown                 
+    bt470bg                 
+    smpte170m               
+    smpte240m               
+    ycgco                   
+    bt2020nc                
+    bt2020c                 
+    ictcp                   
+ range      <int>        select color range
+    auto                    keep the same color range
+    unspecified             
+    unknown                 
+    limited                 
+    tv                      
+    mpeg                    
+    full                    
+    pc                      
+    jpeg                    
+ color_primaries <int>        select color primaries
+    auto                    keep the same color primaries
+    bt709                   
+    unknown                 
+    bt470m                  
+    bt470bg                 
+    smpte170m               
+    smpte240m               
+    film                    
+    bt2020                  
+    smpte428                
+    smpte431                
+    smpte432                
+    jedec-p22               
+    ebu3213                 
+ color_trc  <int>        select color transfer
+    auto                    keep the same color transfer
+    bt709                   
+    unknown                 
+    bt470m                  
+    bt470bg                 
+    smpte170m               
+    smpte240m               
+    linear                  
+    iec61966-2-4            
+    bt1361e                 
+    iec61966-2-1            
+    bt2020-10               
+    bt2020-12               
+    smpte2084               
+    arib-std-b67            
+ rotate     <int>        rotate the input clockwise
+    0                       
+    90                      
+    180                     
+    270                     
+    360                     
+ alpha_mode <int>        select alpha moda
+    auto                    keep the same alpha mode
+    unspecified             
+    unknown                 
+    premultiplied           
+    straight                
+ upscaler   <string>     Upscaler function
+ downscaler <string>     Downscaler function
+ frame_mixer <string>     Frame mixing function
+ antiringing <float>      Antiringing strength (for non-EWA filters)
+ sigmoid    <bool>       Enable sigmoid upscaling
+ apply_filmgrain <bool>       Apply film grain metadata
+ apply_dolbyvision <bool>       Apply Dolby Vision metadata
+ deinterlace <int>        Deinterlacing mode
+    weave                   Weave fields together (no-op)
+    bob                     Naive bob deinterlacing
+    yadif                   Yet another deinterlacing filter
+    bwdif                   Bob weaver deinterlacing filter
+ skip_spatial_check <bool>       Skip yadif spatial check
+ send_fields <bool>       Output a frame for each field
+ deband     <bool>       Enable debanding
+ deband_iterations <int>        Deband iterations
+ deband_threshold <float>      Deband threshold
+ deband_radius <float>      Deband radius
+ deband_grain <float>      Deband grain
+ brightness <float>      Brightness boost
+ contrast   <float>      Contrast gain
+ saturation <float>      Saturation gain
+ hue        <float>      Hue shift
+ gamma      <float>      Gamma adjustment
+ temperature <float>      Color temperature adjustment (kelvin)
+ peak_detect <bool>       Enable dynamic peak detection for HDR tone-mapping
+ smoothing_period <float>      Peak detection smoothing period
+ scene_threshold_low <float>      Scene change low threshold
+ scene_threshold_high <float>      Scene change high threshold
+ percentile <float>      Peak detection percentile
+ gamut_mode <int>        Gamut-mapping mode
+    clip                    Hard-clip (RGB per-channel)
+    perceptual              Colorimetric soft clipping
+    relative                Relative colorimetric clipping
+    saturation              Saturation mapping (RGB -> RGB)
+    absolute                Absolute colorimetric clipping
+    desaturate              Colorimetrically desaturate colors towards white
+    darken                  Colorimetric clip with bias towards darkening image to fit gamut
+    warn                    Highlight out-of-gamut colors
+    linear                  Linearly reduce chromaticity to fit gamut
+ tonemapping <int>        Tone-mapping algorithm
+    auto                    Automatic selection
+    clip                    No tone mapping (clip
+    st2094-40               SMPTE ST 2094-40
+    st2094-10               SMPTE ST 2094-10
+    bt.2390                 ITU-R BT.2390 EETF
+    bt.2446a                ITU-R BT.2446 Method A
+    spline                  Single-pivot polynomial spline
+    reinhard                Reinhard
+    mobius                  Mobius
+    hable                   Filmic tone-mapping (Hable)
+    gamma                   Gamma function with knee
+    linear                  Perceptually linear stretch
+ tonemapping_param <float>      Tunable parameter for some tone-mapping functions
+ inverse_tonemapping <bool>       Inverse tone mapping (range expansion)
+ tonemapping_lut_size <int>        Tone-mapping LUT size
+ contrast_recovery <float>      HDR contrast recovery strength
+ contrast_smoothness <float>      HDR contrast recovery smoothness
+ dithering  <int>        Dither method to use
+    none                    Disable dithering
+    blue                    Blue noise
+    ordered                 Ordered LUT
+    ordered_fixed           Fixed function ordered
+    white                   White noise
+ dither_lut_size <int>        Dithering LUT size
+ dither_temporal <bool>       Enable temporal dithering
+ cones      <flags>      Colorblindness adaptation model
+    l                       L cone
+    m                       M cone
+    s                       S cone
+ cone-strength <float>      Colorblindness adaptation strength
+ custom_shader_path <string>     Path to custom user shader (mpv .hook format)
+ custom_shader_bin <binary>     Custom user shader as binary (mpv .hook format)
+ skip_aa    <bool>       Skip anti-aliasing
+ disable_linear <bool>       Disable linear scaling
+ disable_builtin <bool>       Disable built-in scalers
+ force_dither <bool>       Force dithering
+ disable_fbos <bool>       Force-disable FBOs
+
+Total: 77 options
+

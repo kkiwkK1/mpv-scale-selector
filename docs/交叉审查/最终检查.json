@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-02T15:20:35.492003+00:00",
+  "candidate": "feasibility-v1",
+  "report_sha256": "40dcbe946372a88a78a19eb888bbd02282365f0c24083a24531daa21fa8f5fb0",
+  "scoped_files_count": 30,
+  "candidate_hashes": "PASS",
+  "active_config_hashes": "PASS",
+  "technical_review": "PASS",
+  "risk_review": "PASS",
+  "blocking_findings": 0,
+  "deployment_tested": false,
+  "performance_tested": false,
+  "run_id": "mpv-scale-candidate-cros-mur3tx5b-c86ffc"
+}

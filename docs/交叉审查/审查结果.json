@@ -1,0 +1,17 @@
+{
+  "technical": {
+    "candidate_sha256": "40dcbe946372a88a78a19eb888bbd02282365f0c24083a24531daa21fa8f5fb0",
+    "verdict": "pass",
+    "findings": [],
+    "reason": "审查范围为主报告、勘误说明、候选快照、网络与移植取证索引，以及与核心断言有关的已下载官方说明、许可、shader 源码和本机只读查询记录；不对六份旧研究初稿逐条背书。审查开始及结束均复核候选快照所列文件的 SHA-256，全部一致，主报告保持指定指纹。已核对：SGSR 属于 Qualcomm，SGSR1 空间方案与 SGSR2 时域方案区分正确；FSR port 为两个 LUMA fragment pass，NIS NVScaler 为一个 LUMA compute pass并绑定两张系数纹理，SGSR port 为一个 LUMA fragment pass且使用 PARAM；对应 MIT/BSD-3-Clause 许可结论有证据支持。FSR port 每轴最多2倍与面积4倍、Sharp Bilinear AUTO 在1080p至1440p时退化为双线性、严格整数像素复制需要nearest、固定hook尺寸限制与MAIN/OUTPUT颜色处理位置，均与源码或对应mpv文档相符。LS1神经网络身份有官方公告支持，未取得实现与授权、BCAS身份未明及替代方案不能冒充原版的结论保持保守。保存的本机查询确证high-quality包含scale=ewa_lanczossharp，但不等于活动播放实例的运行时状态验证。未读取home或credentials，未接触活动mpv，未安装、写文件、联网或启动播放。不能独立验证活动配置当前内容、硬件与历史播放结论，也未验证新port编译运行、后端兼容、HDR/RGB、几何边界、实际画质、性能及RIFE共存余量；报告已明确这些证据边界或待实测事项，不据此重复判为事实错误。工作量仅按估计理解。未发现需要返工的确定性核心错误或误导断言；通过仅表示本次技术事实审查通过，不表示部署或性能验收通过。"
+  },
+  "risk": {
+    "candidate_sha256": "40dcbe946372a88a78a19eb888bbd02282365f0c24083a24531daa21fa8f5fb0",
+    "verdict": "pass",
+    "findings": [],
+    "reason": "独立交叉审查范围为主报告、勘误说明、候选快照、对应 mpv options/input 文档及相关 shader 源码；不对归档旧稿背书。审查前后均重新校验候选报告及快照列明文件的 SHA256，全部匹配，未发现候选变化。八项工程路线未发现足以推翻可行结论的明显缺环：现成亮度 port、stock Anime4K、xBR/Sharp Bilinear 接口移植、整数显示策略及原生 nearest 的能力边界区分合理。报告明确一次仅管理一种主缩放链，关恢复接管前配置、保留兼容无关效果、外部 CTRL 档位修改后让出控制，并禁止陈旧 snapshot 覆盖外部状态；这些是合理的实施约束，而非已完成的并发安全验收。整数路线限定简单几何场景，要求 vf 后有效尺寸与窗口像素尺寸分开处理，并列明 resize、SAR、DPI、旋转与对齐验证，未将 video-out 尺寸等同实际窗口或承诺无条件像素完美。LUMA 对 RGB 输入可能不触发、WHEN 静默跳过与多 pass 依赖、HDR 颜色域、NIS compute/backend/边界写入等关键风险均已纳入回退或延期验证；FSR 源码中 EASU 有 WHEN 而 RCAS 依赖 EASUTEX 的情形也已被报告明确列为验证项，不重复认定为研究报告当前 bug。原生 mpv 的视频平面处理与 LS 屏幕 RGB、字幕/UI 处理差异已有说明，不承诺同名算法逐像素一致。RIFE 共存预算、fresh-frame pass 测量和纳秒换算表述审慎，未保留旧稿绝对性能承诺。阶段优先级及保留用户 stock Anime4K 偏好已落实为明确路线。此次仅静态、只读审查，未修改文件、安装软件、播放视频、访问活动配置或凭证，也未运行性能测试；pass 仅认可可行性研究与风险边界，不代表 shader 编译、实际切换恢复、画质收益、HDR 支持或 GPU 余量已经验收。"
+  },
+  "overall": "pass",
+  "run_id": "mpv-scale-candidate-cros-mur3tx5b-c86ffc",
+  "acceptance_scope": "Feasibility study only. No deployment, shader runtime, picture quality or performance acceptance."
+}

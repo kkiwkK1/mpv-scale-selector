@@ -1,0 +1,5 @@
+Options:
+
+ n          <int>        set scale factor
+
+Total: 1 options
