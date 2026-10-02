@@ -1,0 +1,19 @@
+{
+  "schema": "mpv-scaler-preparation-backup/v1",
+  "created_local": "2026-10-02T23:39:44.408057+08:00",
+  "backup_directory": "D:/workspace/小项目/mpv插件/_备份/缩放插件/mpv-config-20261002-233943",
+  "source_config_directory": "C:/Users/kkiw/AppData/Roaming/mpv",
+  "extra_source_file": "D:/MPV/mpv-RIFE.cmd",
+  "files_total": 55,
+  "config_files": 54,
+  "payload_bytes": 2441579,
+  "manifest_sha256": "232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6",
+  "archive_sha256": "207e8d3ffc701a819871eef99a8ede14ed96d6002353dcc30991e123018b6864",
+  "created_before_git_init_and_implementation_planning": true,
+  "initial_copy_verification": "PASS",
+  "initial_zip_content_verification": "PASS",
+  "source_unchanged_during_backup": true,
+  "raw_configuration_committed_to_git": false,
+  "scope_exclusions": ["mpv binaries", "portable VapourSynth runtime", "RIFE DLLs and model weights", "ACLs and registry"],
+  "notes": "Metadata only. Full manifest, payload, ZIP and initial verification receipt are outside this Git repository. Rehearsal does not restore the live configuration."
+}

@@ -1,0 +1,40 @@
+{
+  "scope": "Preparation only; no shader runtime, playback, quality or performance acceptance",
+  "attempt": "v1",
+  "python_version": "3.9.1",
+  "checks": {
+    "backup": {
+      "status": "PASS",
+      "files": 55,
+      "bytes": 2441579,
+      "manifest_sha256": "232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6",
+      "archive_sha256": "207e8d3ffc701a819871eef99a8ede14ed96d6002353dcc30991e123018b6864",
+      "source_unchanged": true
+    },
+    "rehearsal": {
+      "status": "PASS",
+      "action": "REHEARSAL_ONLY",
+      "restore_files": 54,
+      "old_simulated_config_preserved": true,
+      "live_config_restored": false,
+      "launcher_restored": false
+    },
+    "unit_tests": {
+      "total": 26,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration_s": 2.578,
+      "status": "PASS"
+    },
+    "document_structure_and_links": "PASS",
+    "prior_research_worktree_and_git_hashes": "PASS",
+    "git_integrity_and_privacy_rules": "PASS",
+    "source_configuration_unchanged_after_tests": "PASS",
+    "candidate_unchanged_during_tests": "PASS"
+  },
+  "status": "PASS",
+  "candidate": "preparation-v1",
+  "candidate_sha256": "2c05d835daec7db227876ba063813be34acd180f628da6688127d34667ec3c26",
+  "candidate_snapshot": "docs/验证/准备候选-v1.json"
+}

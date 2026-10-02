@@ -1,0 +1,120 @@
+{
+  "checks": {
+    "scope": "Preparation only; no shader runtime, playback, quality or performance acceptance",
+    "attempt": "v2",
+    "python_version": "3.9.1",
+    "checks": {
+      "backup": {
+        "status": "PASS",
+        "files": 55,
+        "bytes": 2441579,
+        "manifest_sha256": "232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6",
+        "archive_sha256": "207e8d3ffc701a819871eef99a8ede14ed96d6002353dcc30991e123018b6864",
+        "source_unchanged": true
+      },
+      "rehearsal": {
+        "status": "PASS",
+        "action": "REHEARSAL_ONLY",
+        "restore_files": 54,
+        "old_simulated_config_preserved": true,
+        "live_config_restored": false,
+        "launcher_restored": false
+      },
+      "unit_tests": {
+        "total": 32,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "duration_s": 3.312,
+        "status": "PASS"
+      },
+      "document_structure_and_links": "PASS",
+      "prior_research_worktree_and_git_hashes": "PASS",
+      "git_integrity_and_privacy_rules": "PASS",
+      "source_configuration_unchanged_after_tests": "PASS",
+      "candidate_unchanged_during_tests": "PASS"
+    },
+    "status": "PASS",
+    "candidate": "preparation-v2",
+    "candidate_sha256": "da28acedea7f993c618a238031941468673664b2aa995b5b58220a7bf04523a8",
+    "candidate_snapshot": "docs/验证/准备候选-v2.json"
+  },
+  "plan": {
+    "candidate": "preparation-v2",
+    "candidate_sha256": "da28acedea7f993c618a238031941468673664b2aa995b5b58220a7bf04523a8",
+    "verdict": "pass",
+    "closed_findings": [
+      "F1",
+      "SEC-1",
+      "SEC-2",
+      "SEC-3",
+      "SEC-4"
+    ],
+    "accepted_residuals": [
+      "SEC-3 TOCTOU：校验/复制/改名间非跨进程事务，残余风险按说明接受并以文档限制约束（docs/备份与恢复.md:82 明示非OS沙箱、恢复期间不得启动mpv或并行修改目标；docs/备份与恢复.md:81 明示断电/权限/并发仍可阻止回滚且不强制覆盖）",
+      "进程检测仅为mock单测，未做真实运行中mpv进程检测（复审说明明确不要求对隔离临时目录做真实进程检测）",
+      "BAK-04真实OS句柄占用与BAK-05真实恢复属P4/P5未执行，矩阵已标注『不是已完成的工具mock单测』，未被冒充为已完成",
+      "候选文件当前仅Git暂存未提交，完整性由候选快照SHA-256锚定（沿袭v1已披露的流程残余风险）"
+    ],
+    "findings": [],
+    "checks": [
+      "重算 docs/验证/准备候选-v2.json 快照SHA-256 = da28acedea7f993c618a238031941468673664b2aa995b5b58220a7bf04523a8，与声明一致；候选JSON内10文件SHA-256逐一重算全部匹配，backup_manifest_sha256=232fcda3…d7b6一致",
+      "HEAD=0cea666a4d4c88d2fc3af22de4436ed4f50baab3 与基线一致；git ls-files暂存对象与工作区10源文件及全部验证JSON/TXT字节相同（.gitattributes对docs/验证/*采用-text -whitespace防止换行破坏指纹，已实测成立）；工作区无未暂存/未跟踪改动；固定基线准备候选-v1.json快照SHA=2c05d835…c26复核一致",
+      "F1核实关闭：实施计划.md:88 P2门槛保留SHD-08…SHD-11并明文『SHD-11仅检查HDR的识别/禁用/回退，不是HDR画质验收；完整公平画质对照PIC-01统一留在P4』；测试计划.md:80 SHD-11标P2/P3『HDR输入识别守卫（不评价HDR画质）』且指向PIC-06另行立项；PIC-01仅存于P4（测试计划.md:97、实施计划.md:111），『初步对照』措辞已消除（全仓仅剩无关的『用户（初步偏好）』），两文档阶段/门槛/HDR画质边界一致",
+      "SEC-1核实关闭：tools/mpv_config_backup.py:172-174 check_target拒绝含mpv.exe/mpv.com/portable_config的安装目录；:202-203 非APPDATA目标跳过tasklist时输出人工关闭警告；:227 结果JSON含NOT_CHECKED_NON_APPDATA状态；APPDATA守卫（:180-189）保留",
+      "SEC-2核实关闭：tools/mpv_config_backup.py:235-237 失败目录改名包入try/except OSError；:239-245 归位前检查目标仍存在则拒绝覆盖，old.rename异常亦入rollback_errors；:246-248 同时报告原始错误、回滚错误、原现场old、目标target与failed候选路径",
+      "SEC-4核实关闭：tests/test_mpv_config_backup.py含32个test_函数，新增test_running_live_player_guard_rejects_without_mutation（运行中拒绝且目标与现场不变、无stage残留）、test_tasklist_failure_refuses_restore_without_mutation（命令失败拒绝）、test_closed_live_player_guard_returns_checked_status（关闭时返回APPDATA_CHECK_PASSED且无警告）、test_non_appdata_restore_warns_about_process_check、test_player_installation_is_not_valid_configuration_target、test_secondary_rollback_failure_preserves_state_and_diagnostics（双错误入异常消息、before-restore目录内容与原inventory一致）",
+      "本机重跑 python -B -X utf8 -m unittest discover -s tests -v：Ran 32 tests，OK，3.669s，0失败/0错误/0跳过（Windows下3个skipUnless(nt)进程守卫测试实际执行），与报告32/0/0/0一致；全部目标在系统临时目录，复测后候选快照与10文件SHA逐字节未变",
+      "docs/验证/准备检查-v2.json与机器基线逐字段核对一致（55文件/2441579字节/manifest与archive SHA/54恢复文件/REHEARSAL_ONLY/32单测/python 3.9.1/status PASS/candidate=preparation-v2）；仓库外备份manifest.json与mpv-config.zip实测SHA-256与备份记录.json及检查记录一致（verification.json为工具运行输出，不属锚定哈希，不适用）",
+      "相邻更新核实：实施计划.md:38,62与测试计划.md:5,12,127均指向32项/准备检查-v2.json且v1记录仅作追溯保留，无残留『26项』计数；SGSR1拼写全文统一无变体；测试计划.md第3节『vo-passes…不是所有可用GPU分析工具的唯一来源；若补用其他工具单独记录口径』及『连续读取滚动samples要防重复统计，不把avg/peak重采样伪装为逐帧原始分布』在案；测试计划.md第2节明示『Windows临时目录可能物理位于用户目录内，但不会改动日常配置/凭据』；BAK-04明确标P4/P5未执行且非mock冒充；测试计划.md头部与第5节『本计划自身不构成任何测试完成的声明』及README.md:3『插件尚未实现或安装』保持，scope未扩大到产品验收"
+    ],
+    "limitations": [
+      "按scope未执行、未验证：任何shader运行时行为、真实恢复/安装、mpv播放、画质A/B、HDR表现、GPU性能/掉帧/温度；本结论仅为preparation-v2准备成果复审，不构成插件功能、画质、性能或真实配置恢复验收",
+      "未重审既有30文件研究内容的实质，仅核对其Git表示与哈希未变（暂存对象与工作区字节一致）；归档研究材料未重新审计",
+      "未做真实进程检测（tasklist分支仅mock验证）、未验证真实OS句柄占用路径（BAK-04留待P4/P5）、未验证both-renames-fail的最深回滚分支（代码路径经审计可报双错误并保留现场，实机验证属BAK-04范围）",
+      "TOCTOU残余风险为明示接受，本复审不要求也未验证任何消除手段",
+      "另一路reviewer结论未读取；源码或文档在本审查后改变将使受影响证据失效"
+    ],
+    "summary": "限域独立复审通过：候选快照及10个范围文件SHA-256全部实测一致，基线commit、v1固定基线、暂存对象字节一致性均成立。F1按声明关闭——SHD-11在两文档统一为P2/P3的HDR识别/禁用守卫且明确不评价HDR画质，P2未定义的PIC-01初步要求已删除，完整PIC-01仅存P4。SEC-1/2/4经代码与测试审计确认关闭（安装目录拒绝、非APPDATA警告与NOT_CHECKED_NON_APPDATA状态、双异常回滚诊断与旧现场保留、三个tasklist mock分支等新增测试），SEC-3残余风险已按说明接受并保留文档限制。本机重跑32项单测全过无跳过，复测后候选未变；相邻更新（32项/v2路径、SGSR1拼写、vo-passes与samples口径、临时目录物理位置披露、BAK-04未冒充已执行、scope未扩大）逐项属实；仓库外备份manifest/ZIP哈希复核一致。无未解决或新增限域问题，无blocker/major，予以pass；本结论仅认可本次准备成果，不含插件运行、画质、性能、HDR或真实配置恢复验收。"
+  },
+  "backup": {
+    "candidate": "preparation-v2",
+    "candidate_sha256": "da28acedea7f993c618a238031941468673664b2aa995b5b58220a7bf04523a8",
+    "verdict": "pass",
+    "closed_findings": [
+      "SEC-1",
+      "SEC-2",
+      "SEC-4"
+    ],
+    "accepted_residuals": [
+      "SEC-3"
+    ],
+    "findings": [],
+    "checks": [
+      "快照核对：docs/验证/准备候选-v2.json 实测 SHA-256=da28aced…23a8 与 candidate_sha256 一致；10 个范围文件（.gitignore/.gitattributes/README.md/docs/实施计划.md/docs/测试计划.md/docs/备份与恢复.md/docs/备份记录.json/tools/mpv_config_backup.py/tools/check_preparation.py/tests/test_mpv_config_backup.py）逐文件 SHA-256 全部与快照一致，复审结束前二次抽查快照 hash 未变",
+      "读 docs/验证/准备审查-v1.json：SEC-1..4 与计划 F1 原始意见定位（均为 minor）",
+      "tools/mpv_config_backup.py 限域审查：require_live_player_closed 非 APPDATA/非 Windows 返回 False，restore_config 生成手动关闭警告并在结果 JSON 输出 player_closed_check=NOT_CHECKED_NON_APPDATA/APPDATA_CHECK_PASSED（行180-181、227、234-235）；check_target 拒绝含 mpv.exe/mpv.com/portable_config 的目标（行168前后）；回滚阶段对 failed 改名 try/except，仅当目标不存在时才 old.rename(target)，否则报告 Target still exists; refusing to overwrite，并在 BackupError 中同时携带原始错误、回滚错误、previous preserved at、target、failed candidate（行229-252）",
+      "tests 新增 6 测试核对（26→32）：test_non_appdata_restore_warns_about_process_check(242)、test_player_installation_is_not_valid_configuration_target(247，写入合成非可执行 mpv.exe 标记字节)、test_running_live_player_guard_rejects_without_mutation(256，tasklist mock 返回运行中→拒绝且目标不变且无残留 stage)、test_tasklist_failure_refuses_restore_without_mutation(267，tasklist 失败→拒绝且不变更)、test_closed_live_player_guard_returns_checked_status(276，关闭→APPDATA_CHECK_PASSED 且 warnings 为空)、test_secondary_rollback_failure_preserves_state_and_diagnostics(285，断言同时含原始+回滚错误、before-restore 现场保留、当前目标仍通过 check_tree)；3 个 Windows 分支用 skipUnless(nt) 且 mock.patch.dict APPDATA 指向临时目录",
+      "docs 边界核对：docs/备份与恢复.md:79 安装目录拒绝、:80 非 APPDATA NOT_CHECKED_NON_APPDATA+手动关闭警告且 dry-run 不证明播放器已关闭、:81 回滚受阻同时报告原始/回滚错误及现场且绝不强行覆盖、:82 明示非跨进程事务/非OS沙箱/不支持ACL逐位还原并要求恢复期间不启动mpv不让其他程序修改——未宣称TOCTOU已消除",
+      "55/54 边界：docs/备份记录.json files_total=55/config_files=54/payload_bytes=2441579/manifest 232fcda3…d7b6/archive 207e8d3f…6864；对真实仓库外备份执行只读 verify_backup：PASS，55 文件/2,441,579 字节，两哈希逐一相符，未执行任何真实恢复/写入；rehearse 代码确认仅写 tempfile.TemporaryDirectory 且恢复仅限 mpv-config 根（launcher 不恢复）",
+      "运行 python -B -X utf8 -m unittest discover -s tests -v：Ran 32 tests, OK，0失败/0错误/0跳过，3.548s，与机器数据 32/0/0/0 一致",
+      "限域相邻攻击测试（仅系统临时目录合成文件，已清理）：mpv.com 与 portable_config 标记目标均被拒（Target is a player installation…）；非 APPDATA 临时目标 --apply 成功且 subprocess 零调用、player_closed_check=NOT_CHECKED_NON_APPDATA、warnings 非空、旧配置保留为兄弟目录；合成安装后校验失败→旧目录自动归位、失败现场保留为 mpv.failed-restore-*、原始错误在消息中；二次回滚受阻分支由测试285覆盖",
+      "攻击面复核：全部工具仅读 APPDATA 环境变量，无凭据/网络/eval/exec/os.system/shell=True；subprocess 仅固定参数 tasklist 与只读 git",
+      "Git：HEAD=0cea666a4d4c88d2fc3af22de4436ed4f50baab3 与基线一致；候选文件为暂存新增/修改，复审前后哈希未变"
+    ],
+    "limitations": [
+      "未对 APPDATA 或 D:/MPV 做真实恢复，未真实启动 mpv 验证 tasklist 真实行为（BAK-04 真实OS句柄/产品集成验证留待后续）；运行中/失败/关闭三分支均为 mock 证据",
+      "未测断电/kill 中途、ACL/NTFS 权限、外部并发修改下的回滚——SEC-3 非事务/TOCTOU 残余风险按披露接受，文档限制仍在",
+      "manifest/receipt/ZIP 为无签名哈希核验，只证完整性不证来源真实性",
+      "未用 --compare-source 对活动配置做源一致性复核（作者检查记录 source_unchanged=true，本轮遵守活动配置只读原则未重复执行）",
+      "复审仅覆盖准备成果：不含插件运行、画质、HDR、性能或真实配置恢复验收；通过不构成运行环境/产品验收"
+    ],
+    "summary": "限域独立安全复审通过：候选快照 SHA-256=da28aced…23a8 与 10 文件逐文件哈希全部相符，复审全程候选未变；32/32 单测通过且与机器数据 32/0/0/0 一致。SEC-1 关闭：非 APPDATA 目标不再静默跳过，结果 JSON 给出 NOT_CHECKED_NON_APPDATA 与手动关闭警告，APPDATA tasklist 守卫保留且失败即拒绝，另拒绝含 mpv.exe/mpv.com/portable_config 的安装目录（合成标记实测均拒）；按授权范围不对隔离演练做全局进程检测（实测非 APPDATA 恢复零 subprocess 调用）。SEC-2 关闭：回滚对 failed 改名捕获异常，仅在目标不存在时归位旧目录，绝不覆盖仍存在的目标，二次受阻时同时报告原始+回滚错误并保留 before/failed 现场（mock 测试与合成安装后失败实测均符合）。SEC-4 关闭：tasklist mock 三分支（运行中拒绝不变更/命令失败拒绝不变更/关闭返回已检查状态）加非APPDATA警告、安装目录拒绝、二次回滚失败共 6 项新测试，26→32。SEC-3 残余风险接受成立：文档明示非跨进程事务/非OS沙箱/不支持ACL还原并要求恢复期单用户，未宣称消除TOCTOU。55备份/54恢复边界未变：真实备份只读核验 55 文件/2,441,579 字节、manifest/archive 哈希与记录一致，未做真实恢复。无新增限域内 blocker/major/minor 问题。通过仅认可本轮准备成果，不含运行、画质或真实恢复验收。"
+  },
+  "status": "PASS",
+  "candidate": "preparation-v2",
+  "candidate_sha256": "da28acedea7f993c618a238031941468673664b2aa995b5b58220a7bf04523a8",
+  "model_request": "zai-coding-cn/glm-5.3-flash",
+  "thinking_request": "xhigh",
+  "independence": "Two roles and independent contexts; same model, not heterogeneous model review"
+}

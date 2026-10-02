@@ -6,6 +6,9 @@
 
 # Downloaded research evidence is byte-exact; do not normalize its SHA256 inputs
 docs/证据/** -text -whitespace
+# Keep fingerprinted review snapshots and raw test output byte-identical after checkout.
+docs/验证/*.json -text -whitespace
+docs/验证/*.txt -text -whitespace
 
 # Treat archives and media as binary
 *.zip binary

@@ -1,0 +1,144 @@
+{
+  "checks": {
+    "scope": "Preparation only; no shader runtime, playback, quality or performance acceptance",
+    "attempt": "v1",
+    "python_version": "3.9.1",
+    "checks": {
+      "backup": {
+        "status": "PASS",
+        "files": 55,
+        "bytes": 2441579,
+        "manifest_sha256": "232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6",
+        "archive_sha256": "207e8d3ffc701a819871eef99a8ede14ed96d6002353dcc30991e123018b6864",
+        "source_unchanged": true
+      },
+      "rehearsal": {
+        "status": "PASS",
+        "action": "REHEARSAL_ONLY",
+        "restore_files": 54,
+        "old_simulated_config_preserved": true,
+        "live_config_restored": false,
+        "launcher_restored": false
+      },
+      "unit_tests": {
+        "total": 26,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "duration_s": 2.578,
+        "status": "PASS"
+      },
+      "document_structure_and_links": "PASS",
+      "prior_research_worktree_and_git_hashes": "PASS",
+      "git_integrity_and_privacy_rules": "PASS",
+      "source_configuration_unchanged_after_tests": "PASS",
+      "candidate_unchanged_during_tests": "PASS"
+    },
+    "status": "PASS",
+    "candidate": "preparation-v1",
+    "candidate_sha256": "2c05d835daec7db227876ba063813be34acd180f628da6688127d34667ec3c26",
+    "candidate_snapshot": "docs/验证/准备候选-v1.json"
+  },
+  "plan": {
+    "candidate": "preparation-v1",
+    "candidate_sha256": "2c05d835daec7db227876ba063813be34acd180f628da6688127d34667ec3c26",
+    "verdict": "pass",
+    "findings": [
+      {
+        "id": "F1",
+        "severity": "minor",
+        "file": "docs/实施计划.md",
+        "line": 88,
+        "issue": "P2 验收门槛写『SHD-08…SHD-11、PIC-01 初步对照』，但测试计划将 SHD-11（HDR 输入，docs/测试计划.md:75）标注为 P4、PIC-01 完整版标注为 P4（docs/测试计划.md:97）且未定义『初步对照』变体；HDR 已被 §1.5 约束为『另行立项承诺』，两文档阶段划分不一致，可能使 P2 关卡误要求 HDR 项或产生矩阵外测试。",
+        "fix": "将 P2 门槛范围改为 SHD-08…SHD-10（SHD-11 的 HDR 禁用/回退检测按测试计划留在 P4 或明确改标 P2/P3），并在测试计划矩阵中为 PIC-01 增加明确的 P2『初步对照』子条目或删除该表述。"
+      }
+    ],
+    "checks": [
+      "逐文件核对快照 docs/验证/准备候选-v1.json 的 10 个范围内文件 SHA-256，全部与实际文件一致；快照自身 SHA-256 = candidate_sha256（2c05d835…c26），无篡改",
+      "仓库外备份只读哈希复核：manifest SHA-256=232fcda3…d7b6、ZIP SHA-256=207e8d3f…6864，与备份记录.json 及机器检查一致；payload 实测 55 文件、2,441,579 字节",
+      "本机重跑 python -B -X utf8 -m unittest discover -s tests -v：26 项全部通过（2.623s），与报告 26/0/0/0 一致；tests/test_mpv_config_backup.py 共 26 个 test_ 函数，全部使用 tempfile.TemporaryDirectory，未触碰 HOME/APPDATA/活动配置，含篡改拒绝、路径穿越/大小写冲突/payload 逃逸拒绝、dry-run 不变形、--confirm 缺失拒绝、复制/改名/终验失败回滚、rehearsal 非 live 等覆盖",
+      "审计 tools/mpv_config_backup.py 源码：restore 默认 DRY_RUN，真实写入需 --apply + --confirm RESTORE-MPV-CONFIG + mpv.exe 运行检测（检测失败亦中止）+ 目标名/父目录/与仓库及备份重叠/链接 reparse 守卫 + 暂存目录先验证再原子换名 + 失败回滚并保留 mpv.failed-restore-*；rehearse 仅在临时目录恢复 54 个配置文件，launcher_restored=False，与『恢复演练 REHEARSAL_ONLY、未动 live 配置与启动器』的报告一致",
+      "docs/验证/准备检查-v1.json 磁盘内容与所给机器检查逐字段一致（含 python_version 3.9.1，本机实测同版本）；基线 commit 0cea666 与标签 research-baseline-20261002 存在，既有研究文件 worktree 与 Git 哈希双核对通过",
+      "实施计划 P0–P5 依赖链、各阶段负责人角色、验收门槛、退出条件与回退均可执行；§2 状态模型（off/active/external/fallback、外部改链让出、禁止 glsl-shaders-clr 全清、禁用陈旧快照覆写）与 CTL-02/03/08 一一对应；几何数值复核正确（1080p→1440p Integer k=1、左右 320px/上下 180px 黑边；Sharp Bilinear AUTO floor(1440/1080+0.01)=1 退化双线性）",
+      "算法边界与最终研究报告（docs/可行性研究报告.md，非归档素材）一致：LS1 无原实现/权重/移植许可→禁用+原因；BCAS 身份未核实→禁用，CAS/Bicubic+CAS 仅可独立命名；stock Anime4K 复用本机 stock v4 链零修改不重下、保留 CTRL+1…6 与 F7；FSR MIT、NIS MIT 且不叠 NVSharpen、SGSR1 BSD-3-Clause（Qualcomm 亮度适配差异记录）、xBR≠xBRZ 按所选文件核验",
+      "真实测试与未来计划分离成立：测试计划第 1 节明确本轮仅证明准备工具、第 4 节产品项全部标未执行、第 5 节声明计划不构成完成声明；实施计划 §7 明确本轮不做清单；README 状态行明示插件尚未实现或安装"
+    ],
+    "limitations": [
+      "按 scope 未执行、也未验证：任何 shader 运行时行为（FSR/SGSR/NIS/xBR 等实际编译与 pass）、画质 A/B、GPU 性能/掉帧/温度、HDR 表现",
+      "未执行真实恢复、部署、mpv 播放或 live 配置写回；verify --compare-source 与 rehearse 仅为只读哈希与临时目录演练",
+      "BAK-04/BAK-05（恢复失败路径与真实恢复）属 P4/P5 未执行；require_live_player_closed 的 tasklist 分支无单测覆盖（本机实测受限）",
+      "候选文件当前未提交 Git（工作区新文件），完整性由候选快照 SHA-256 锚定而非 Git 历史；终审入库前的物理丢失风险由快照检测但不提供恢复，属残余流程风险",
+      "备份快照不含 mpv 二进制、VS 运行时、RIFE DLL/模型与 ACL，配置恢复不等于运行环境重建（备份与恢复.md 已如实声明，本轮仅核对文档口径）"
+    ],
+    "summary": "独立复核通过：快照及 10 个范围内文件 SHA-256、仓库外备份 manifest/ZIP SHA-256 与 55 文件/2,441,579 字节全部实测一致；26 项单测本机重跑全过且确认全部隔离在系统临时目录；恢复工具默认 dry-run、真实恢复需显式确认与多重守卫，演练确为 REHEARSAL_ONLY 未动活动配置与启动器；实施计划阶段/依赖/角色/回退可执行，外部改链让出与 Off 语义有对应测试项；LS1/BCAS 禁用理由、stock Anime4K 零修改偏好、各算法许可边界与最终研究报告一致；真实测试与未来计划边界表述清晰，无错误承诺或危险操作。唯一 finding 为 P2 验收门槛与测试矩阵在 SHD-11/PIC-01 阶段标注上的轻微不一致（minor，仅文档层面）。本结论仅覆盖准备候选 v1 本身，不构成插件任何功能、画质或性能验收；无 blocker/major，予以通过。"
+  },
+  "backup": {
+    "candidate": "preparation-v1",
+    "candidate_sha256": "2c05d835daec7db227876ba063813be34acd180f628da6688127d34667ec3c26",
+    "verdict": "pass",
+    "findings": [
+      {
+        "id": "SEC-1",
+        "severity": "minor",
+        "file": "tools/mpv_config_backup.py",
+        "line": 181,
+        "issue": "require_live_player_closed 仅对 APPDATA/mpv 目标检查 mpv.exe 是否运行；若用户对便携目标（如 D:/MPV）执行 --apply 恢复且该便携 mpv 正在运行，工具不会阻止（仅靠文档提醒先关闭）。运行时/启动器不恢复，风险限于配置文件被运行中实例覆盖回读，属低风险。",
+        "fix": "对所有目标做尽力而为的 tasklist 检查并在输出中警示，或至少在结果 JSON 中提示便携目标未做运行检测。"
+      },
+      {
+        "id": "SEC-2",
+        "severity": "minor",
+        "file": "tools/mpv_config_backup.py",
+        "line": 227,
+        "issue": "回滚路径中，若把安装失败目录重命名为 mpv.failed-restore-* 本身抛异常（句柄占用/权限），后续 old.rename(target) 不会执行，原现场停留在隔离名下且原始错误被新异常掩盖；数据未丢失（quarantine 与 failed 目录均在）但不自动归位。",
+        "fix": "将 failed 重命名包入 try/except，无论成败都继续尝试 old.rename(target)，并在错误信息中同时报告两者。"
+      },
+      {
+        "id": "SEC-3",
+        "severity": "minor",
+        "file": "tools/mpv_config_backup.py",
+        "line": 36,
+        "issue": "no_links/inventory 校验与后续复制/重命名之间存在检查-使用间隙（TOCTOU）：备份或目标在校验后被并发修改不在事务防护内。文档已声明非跨进程事务并要求恢复期间不动目标，故仅列为加固项。",
+        "fix": "恢复流程中已无可行低成本修复；可在安装后 check_tree 失败时依赖现有回滚，并在文档继续强调单用户、恢复期间不并行操作。"
+      },
+      {
+        "id": "SEC-4",
+        "severity": "minor",
+        "file": "tests/test_mpv_config_backup.py",
+        "line": 1,
+        "issue": "26 个测试覆盖了篡改拒绝、路径穿越、大小写碰撞、重复root、payload逃逸、目标重叠、默认dry-run、确认门、三段回滚与演练非live，但 require_live_player_closed 的 tasklist 守卫无任何测试（含拒绝运行中mpv的分支）。",
+        "fix": "补一个 mock subprocess.run/tasklist 输出的单测：APPDATA 目标检测到 mpv.exe 时 restore --apply 必须拒绝且不改动目标。"
+      }
+    ],
+    "checks": [
+      "重算候选10个文件SHA-256，全部与 docs/验证/准备候选-v1.json 逐一匹配",
+      "重算快照文件自身SHA-256=2c05d835…c26，与机器结果 candidate_sha256 一致",
+      "只读哈希真实备份 manifest.json=232fcda3…7b6、mpv-config.zip=207e8d3f…864，与快照、docs/备份记录.json、机器结果三方一致",
+      "解析备份manifest结构（仅元数据）：mpv-config 54文件/3目录 + mpv-launcher 1文件 = 55文件、2,441,579字节，receipt PASS，无 ..、: 或绝对路径等危险相对路径",
+      "通读 tools/mpv_config_backup.py：relative_name 拒绝 ../、盘符、反斜杠、非规范POSIX路径；no_links 拒绝符号链接与 Windows reparse(0x400)含父链；check_target 双向拒绝与备份/项目重叠且强制目标名为mpv；restore 默认 DRY_RUN，--apply 需 --confirm RESTORE-MPV-CONFirm 令牌；stage于目标父目录mkdtemp→校验→旧目录改mpv.before-restore-时间戳→换入→复检，失败回滚；restore只恢复mpv-config根54文件，launcher_root不触碰",
+      "确认 ZIP 永不解包到磁盘（仅按成员集精确比对+逐文件哈希），zip-slip 不可达；payload 目录树本身经 check_tree 逐文件SHA-256校验",
+      "通读 tools/check_preparation.py：对源配置仅 inventory/哈希只读比较；attempt 参数经 v[0-9]+ 白名单后才拼文件名；subprocess 仅 git 与只读操作；输出只写 docs/验证/",
+      "grep 全部脚本：无 environ 凭据读取（仅APPDATA路径定位）、无网络、无 shell=True/os.system/eval/exec；subprocess 仅 tasklist 与 git",
+      "运行 python -B -X utf8 -m unittest discover -s tests -v：26/26 通过（2.6s），与机器结果26/0/0一致；测试全部使用系统临时目录，无 APPDATA/D:/MPV 写入",
+      "核对55/54边界：55=54配置+1启动器；自动恢复仅54且测试断言启动器字节未被改动；演练结果 restore_files=54、old_simulated_config_preserved=true、live_config_restored=false、launcher_restored=false 与代码逻辑一致",
+      "审查后 git status 与候选哈希未变化，未执行任何真实恢复/部署/播放，未改动候选、真实配置与备份"
+    ],
+    "limitations": [
+      "未执行对 APPDATA 或 D:/MPV 的真实恢复（任务禁止），实际恢复路径仅经代码审查+临时目录演练与单测验证",
+      "未验证 ACL/注册表/NTFS 权限还原——备份明确不含，文档已声明非完整运行环境",
+      "未测试断电/进程被杀/外部并发修改场景；断电窗口（旧目录已隔离、新目录未换入）与权限导致的回滚失败为文档声明的残余风险",
+      "manifest/receipt/ZIP 为无签名哈希自校验，不构成防恶意篡改的认证（任务已明示该边界）",
+      "工具非OS沙箱、非跨进程事务；未测运行时/启动器恢复（设计上不自动恢复）",
+      "不含shader运行时、播放、画质与性能验收（准备阶段范围之外，不作为block依据）"
+    ],
+    "summary": "独立安全复审通过。10个候选文件SHA与快照逐一相符，快照自身SHA等于candidate_sha256，真实备份manifest与ZIP哈希同快照/记录/机器结果三方一致，无block级不匹配。恢复工具安全设计扎实：清单驱动+逐文件SHA-256、ZIP成员集精确比对且从不解包（zip-slip不可达）、拒绝../与盘符/反斜杠/符号链接/reparse、目标双向拒绝与备份及项目重叠、默认dry-run加--apply与--confirm双门、旧现场隔离保留、复制/换名/装后校验三段均有回滚且被单测覆盖；脚本无凭据读取、无网络、无shell注入面；测试26/26通过且只在系统临时目录操作；55备份/54自动恢复边界正确，启动器与运行时不被自动覆盖，演练确认不动活动配置。发现4项minor：便携目标无mpv.exe运行检测、回滚中failed改名失败会跳过自动归位、校验与复制间TOCTOU为已声明非事务、tasklist守卫缺测试；均不构成blocker/major。无失实验收：文档如实声明哈希非签名、非完整环境、断电/并发残余风险。建议按minor条目加固后进入下一阶段。"
+  },
+  "status": "PASS",
+  "candidate": "preparation-v1",
+  "candidate_sha256": "2c05d835daec7db227876ba063813be34acd180f628da6688127d34667ec3c26",
+  "run_id": "mpv-scaler-preparation-mur61rvu-ca2331",
+  "model_request": "zai-coding-cn/glm-5.3-flash",
+  "thinking_request": "xhigh",
+  "independence": "Two roles, independent contexts, same model",
+  "orchestration_note": "4 phases completed. Final record phase failed because text outputs included Markdown JSON fences. Export recovered from stored contract-validated review objects; no candidate change."
+}

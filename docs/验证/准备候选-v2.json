@@ -1,0 +1,20 @@
+{
+  "candidate": "preparation-v2",
+  "baseline_commit": "0cea666a4d4c88d2fc3af22de4436ed4f50baab3",
+  "files": {
+    ".gitignore": "5b4d6b8b03188cff8ee8fbb59ba7bc8f430787f10666ef9bdf29015f066e8743",
+    ".gitattributes": "230d031ce5622a5d8acd59c9de6760f0365fd68c1c4cc08487953cd8c6e40c8f",
+    "README.md": "d48adfef08bade28294391eff8677570afce463d8fe4459d44b51f8e575bbfa0",
+    "docs/实施计划.md": "177029793d626b7b786872311e8459c8e69322d6a205371d8b7e12f9a39056ae",
+    "docs/测试计划.md": "605fc14c452362e3854a919e457da91120ddbd64233767d55fdd566da0bf62ff",
+    "docs/备份与恢复.md": "63c286aa7b7989ea25020cc40a4f610b8fd23483c652662da84b4fc47d02e9a8",
+    "docs/备份记录.json": "85a405f0abd343ef77211af75cbf684d45d8497554300f96db264ffce9bb1567",
+    "tools/mpv_config_backup.py": "940851626a36d3295ad8685562133e1d6e1378bc80ccaf372a8fd78d02bba084",
+    "tools/check_preparation.py": "fb209b94da5cc79d874a870468aa89d105c7966fd35668ea8a4829d80e4b8eb1",
+    "tests/test_mpv_config_backup.py": "d0d18bf784d68390bc7114062fd4d70c1b3e2309668d155a2a39f465920df557"
+  },
+  "backup_manifest_sha256": "232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6",
+  "model_request": "zai-coding-cn/glm-5.3-flash",
+  "thinking_request": "xhigh",
+  "acceptance_scope": "Preparation only; no shader runtime, playback, quality or performance acceptance"
+}

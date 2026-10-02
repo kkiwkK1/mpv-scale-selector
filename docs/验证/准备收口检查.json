@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "checked_at_local": "2026-10-03T01:22:46.531904+08:00",
+  "candidate": "preparation-v2",
+  "candidate_sha256": "da28acedea7f993c618a238031941468673664b2aa995b5b58220a7bf04523a8",
+  "candidate_files_worktree_and_git_stage_match": 10,
+  "prior_research_files_worktree_and_git_stage_match": 30,
+  "review_verdicts": {
+    "plan": "pass",
+    "backup": "pass"
+  },
+  "unresolved_findings": [],
+  "accepted_residual_risks": [
+    "SEC-3: disclosed TOCTOU/non-transactional filesystem operations"
+  ],
+  "backup_source_unchanged_after_reviews": {
+    "status": "PASS",
+    "files": 55,
+    "bytes": 2441579,
+    "manifest_sha256": "232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6",
+    "archive_sha256": "207e8d3ffc701a819871eef99a8ede14ed96d6002353dcc30991e123018b6864",
+    "source_unchanged": true
+  },
+  "audit_json_staged_byte_exact": 6,
+  "summary_staged_byte_exact": true,
+  "summary_local_links": "PASS",
+  "git_diff_cached_check": "PASS",
+  "git_fsck": "PASS",
+  "remote_configured": false,
+  "raw_private_backup_in_git": false,
+  "active_configuration_restored": false,
+  "shader_runtime_or_quality_performance_tested": false,
+  "summary_sha256": "5c2be33cae7d187e222399a0a529a2f7c4e54542dd5c6c6882ebba13fad66c38",
+  "note": "Final integration-owner check of the same 10-file candidate; report is outside source snapshot and is not an independent product review."
+}
