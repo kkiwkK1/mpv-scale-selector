@@ -1,0 +1,144 @@
+{
+ "schema": "p3-author-delivery/v1",
+ "stage": "P3",
+ "session": "p3-001",
+ "role": "author-local verification (source READ-ONLY; tools/libs/controller/shaders/tests untouched during testing)",
+ "round": "full-r2",
+ "status": "PASS",
+ "generated_at": "2026-10-06T08:58:00+0800",
+ "authority": {
+  "frozen_plan_sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d",
+  "brief": "docs/P3/P3全矩阵首轮限域修正brief-v4.json (本轮权威; 含 brief-v3 五根因全部真实新原始证据要求)",
+  "build_handoff": "docs/验证/开发/p3-001/verifier-build/build-handoff-r4.json (status READY_FOR_AUTHOR)",
+  "evidence_contract": "docs/验证/开发/p3-001/verifier-build/evidence-tools-contract.json",
+  "prior_author_report": "docs/验证/开发/p3-001/implementer/author-delivery.json (round full-r1, status REWORK, 原字节保留未覆写)",
+  "prior_gate": "docs/验证/开发/p3-001/implementer/full-r1/evidence-gate.json (status FAIL, 6 problems 原样保留)"
+ },
+ "source_prechecks_vs_build_handoff_r4": {
+  "result": "PASS",
+  "method": "运行前对 build-handoff-r4 actual_source_sha256 4 项逐一实算匹配；full-r1 source-pins.json 其余 10 项 pinned 文件实算全部字节一致（scale-selector.lua/p2_verify/p3_verify 为 r4 声明的唯一限域变更，tests/test_p2_support.py 为 r4 声明的 +5 用例变更）",
+  "pre_full_r2_snapshot": "docs/验证/开发/p3-001/pre-full-r2-source/ (full-r1 字节基线, 保留)"
+ },
+ "actual_source_sha256": {
+  "scripts/scale-selector.lua": "85f13b4945377010df2ba6e19fa08c363f9312530aaafac07a2cd3dccb3bacf6",
+  "tools/p2_verify.py": "a599e04023ffb11c8cbdec5e399becda154eb545704eeee4575fc2ce0397f8a4",
+  "tools/p3_verify.py": "2cceb8513c2ad54a62ac7684b0d188b38ea3398358f4963285e47a0e9e087952",
+  "tools/p3_lib.py": "a266d32da16818f3805d96acdd254aec9b94abff58b558dc9bca7a4d3f3d0eb6",
+  "tools/p3_check_evidence.py": "848f155e5e3e696de2b4bb67a1577db3d3c13e98409c0199e4ceda4154007b31",
+  "tools/p2_lib.py": "69abc64c711ba51c537185a02b5e496229070085bb7a40e2ecb962b333c5427d",
+  "tools/p1_lib.py": "36448e8e635ad9410ee6c7825e90b0e2cd0baf6fdd445b5b3560a4de4195b698",
+  "tools/p1_verify.py": "aa48b78d7f41269dfe8ed9a7137a6c99c8497b070ccd22fe33bf6d04a3c88c8f",
+  "tests/test_p2_support.py": "97e9b5601830f2c9cc07504421a0aff998c3b339edc7e67208aec321062da3cb",
+  "tests/test_p3_support.py": "752f3c6908a3f79ee8e505534783991ff6e1fad907bf6535245b8c6d4ad31150",
+  "tests/test_p3_evidence.py": "2dc342f777ea7bdde93a449dd01579a41efee208d64e92bcc188d3ae69d98e53",
+  "tests/test_p3_geometry.py": "e70eb3c5c92a1b9aaa420fe805a409a8debf27b810b5560d9f0113a43bc47c23",
+  "script-opts/scale-selector-gears.conf": "62e1bb838eb2e5768b2992d38b025ca5cd869316945a14f1824f76b11d7c19a3",
+  "shaders/p3-NIS.glsl": "046693c49bad8ca9f125694793ae8da32f7c0a5b6aaeb42c60334e1ece8bc358",
+  "shaders/p3-xBR-lv2.glsl": "ce31e8c26b1aace9cbe2b8d1de2ba52ac8fbd453374a80a720720916379fe2b5",
+  "shaders/p3-Sharp-Bilinear-AUTO.glsl": "e2aac70b32026dcc4cf97b367fb8bcd3ad704a7ee46dc6670f1fa312738319ff",
+  "shaders/p3-Sharp-Bilinear-2x.glsl": "877ec2aecde40cdf03e6c5d0404aaa9189aa4a04c3498bc8cbe2ac55c04d021e"
+ },
+ "required_test_ids_all_35": ["CTL-01", "CTL-02", "CTL-03", "CTL-04", "CTL-05", "CTL-06", "CTL-07", "CTL-08", "CTL-09", "SHD-01", "SHD-02", "SHD-03", "SHD-04", "SHD-05", "SHD-06", "SHD-07", "SHD-08", "SHD-09", "SHD-10", "SHD-11", "SHD-12", "SHD-13", "GEO-01", "GEO-02", "GEO-03", "GEO-04", "GEO-05", "GEO-06", "GEO-07", "WINDOW-01", "PIC-05", "UNIT-P2-01", "UNIT-P3-01", "PER-04-COMPUTE", "EVI-01"],
+ "case_summary": {
+  "total": 35,
+  "pass": 35,
+  "fail_case_status": [],
+  "pass_but_gate_blocked": [],
+  "required_unmeasured": [],
+  "note": "本轮 full 35 全部真实新跑于 full-r2 全新目录（非拼接前轮 33 PASS）；full-r1 旧证据 create-only 保留未复用/未洗白"
+ },
+ "unit_tests": {
+  "standalone_author_run": {
+   "command": "python -X utf8 -m unittest discover -s tests -p \"test_*.py\" -v",
+   "result": "Ran 270 tests: OK (skipped=1)",
+   "exit": 0,
+   "log": "docs/验证/开发/p3-001/implementer/author-logs/author-unit-tests-full-r2.txt",
+   "log_sha256": "c7f751cbd94f44c03b5f0160aaac03bf453add15ad36a4ba13190d2756ddf4cf",
+   "skip_disclosure": "唯一 skip 为既有 Windows symlink 权限跳过（tests/test_p3_evidence.py::test_symlink_inside_evidence_dir_rejected，非行为跳过，按约束保留并披露）",
+   "old_baseline": "原 259 项（含原 fail test_edge_discriminator_prefers_exact_replica，自 P3 修复后持续 PASS）全部保留；265 项 + 新增 V4 5 项（TestV4FallbackDefaultRegistry / TestV4PassRaceNewChainProof）= 270 全 PASS；无删除/skip/断言放宽"
+  },
+  "in_matrix_live": {
+   "UNIT-P2-01": "PASS (84.4s, whole suite re-run live)",
+   "UNIT-P3-01": "PASS (77.5s, 144 tests incl. EVI negative matrix)"
+  }
+ },
+ "brief_v4_three_root_closures_new_evidence": {
+  "V4-FALLBACK_CTL06": {
+   "case": "CTL-06 (8/8 variants PASS, 9.4s)",
+   "evidence": "full-r2/objective-results.json cases[CTL-06].variants[a-missing-gears-key]: entry_count=12 == 发布 conf 注册表派生计数（full-r1 为 11 → FAIL 已闭）；missing gears= / 空值两条回退均从唯一 DEFAULT_GEARS_IDS 完整 12 档回退；off_first_enabled=true、placeholder_ids_all_disabled=true、selftest=pass；断言未削弱（期望计数不降）",
+   "console": "docs/验证/开发/p3-001/implementer/full-r2/CTL-06-a-missing-gears-key.console.txt"
+  },
+  "V4-PASS-RACE_SHD04": {
+   "case": "SHD-04 (PASS, 46.1s)",
+   "evidence": "full-r2/objective-results.json cases[SHD-04]: 六模式 a-f stock/gear 新链 proof 全部正计数且相等 (20==20, 20==20, 3==3, 28==28, 28==28, 11==11)，count_positive=true 双侧成立；lists_identical/required_desc_hits/chain_verified 原断言全保留；无 0==0、无盲睡放宽",
+   "consoles": "full-r2/SHD-04-mode-{a,b,c,d,e,f}.console.txt (6 triplets)"
+  },
+  "V4-GEO-CONTRACT_GEO04_05": {
+   "case": "GEO-04 (PASS, 21.4s) / GEO-05 (PASS, 20.1s)",
+   "evidence": "full-r2/objective-results.json: GEO-04 sessions=['GEO-04-a-resize-recompute','GEO-04-b-external-priority-transfer'] 去重无重复名；GEO-04 freshness={render_fresh:true, method:'vo-passes-fresh-increase', chain_epoch:12, fresh_before:0, fresh_after:226} 与变体 chain_epoch 配对；GEO-05 freshness={fresh:568→600, epoch:16} 配对；两 case 变体级 native_unscaled={value:.., native_type:'bool'} 真实 S.get bool 读回（非 yes/no 字符串、非 dict 形状搬运）；0<=before<after 成立，无解码活性兜底",
+   "checker_confirmation": "full-r1 六条 gate problems（CTL-06/SHD-04 FAIL + GEO-04 三条形状 + GEO-05 一条形状）本轮全部消失：--require-tests 0 problems"
+  }
+ },
+ "brief_v3_five_root_causes_real_new_raw_evidence": {
+  "V3-Q1_quantization": "full-r2 SHD-06.a pixel_oracle.edge_discriminator: mean_diff_to_xbr_replica=0.15 vs mean_diff_to_bilinear_baseline=4.51, ok=true（CPU golden 解码像素独立于采集；单测 270 OK 含 byte-oracle 与 exact-replica 零断言）",
+  "V3-C1_osd_free_window": "full-r2 SHD-06.a window_gate={expected:[288,162], osd:{w:288,h:162}, ok:true} 采样前精确尺寸 gate（不匹配即硬失败）；osd_free_scan={checked_px:11664, out_of_bound_px:0, worst_diff:1.0, tol_max:90.0} 全帧 OSD-free 密网格扫描；SHD-07 同契约 png_dims_exact_ok 全部 true",
+  "V3-M1_same_moment_media_ready": "full-r2 SHD-10/SHD-11 same_moment 记录 pixelformat 非空 + video_out_params_ready 先于采样；SHD-09 12/12 variants depth_matches_decode=true；same_window 采样契约由 checker 全树机器校验通过",
+  "V3-M2_ten_bit_payload": "full-r2 SHD-09 每新档 8/10bit 共 12 variants：10bit media_sha256=8d7741807f12…（真实 LE16 C420p10 y4m 载荷，与 8bit 3beeb374493a… 不同——载荷字节真实不同非仅 header/pixfmt 声明）、解码身份 pixelformat=yuv420p10、depth_matches_decode=true；8bit 全部 pixelformat=yuv420p 且与 10bit media sha 集合不相交（机器断言本轮实测）；byte-oracle 单测 5/5 在 270 全绿内",
+  "V3-E1_semantics_links": "full-r2 objective-results.json semantics_authority 指向 docs/P3/ 实际存在文件（本轮运行前已核对存在）；source_pins 落盘 sha256=0e2b41f75e10b7f2029eadc4abe61401fe788b60d452a569610e3bba395718f1（实际计算非手抄）",
+  "perf_not_gain": "full-r2 PER-04-COMPUTE: facts.perf_samples_ns=194 个正整数原始 fresh/redraw ns 样本（全>0）+ samples_note 明示原始样本无聚合、绝不宣称性能收益、RIFE 竞争未测留 P4；无 FPS/收益宣称"
+ },
+ "gate_pass_proof": {
+  "checker": "tools/p3_check_evidence.py (只读, 未改) --evidence-dir docs/验证/开发/p3-001/implementer/full-r2 --session p3-001 --require-tests --write-gate",
+  "checker_exit_code": 0,
+  "checker_log": "docs/验证/开发/p3-001/implementer/author-logs/author-check-evidence-full-r2.txt",
+  "checker_log_sha256": "9ac9de482a56bd246903b62874ec59a4db351618a7945394f45adbff8843ee2c",
+  "evidence_gate": "docs/验证/开发/p3-001/implementer/full-r2/evidence-gate.json",
+  "evidence_gate_status": "PASS",
+  "evidence_gate_sha256": "9b74c9704d0d84de5f3856136e04e3ec3286e23046b54585d1337d5d48190a65",
+  "evidence_gate_problems": [],
+  "manifest_sha256": "fac476ec97d4a7d16ab895604fe3f6cba81a1d3b38b4a6ff8650e736dd7d421b",
+  "manifest_verify_sha256": "95ceb429073bcf3ec5da1f3db1cb376c75c2366c60b592474088db66e49f869b",
+  "note": "全树机器事实（--require-tests 0 problems, exit 0, evidence-gate.json PASS create-only 落盘），非文案；阻断已由 full-r1 实际发生并保留，本轮闭合经机器核验"
+ },
+ "fail_details": [],
+ "non_corroborative_screenshot_annotation": {
+  "policy": "同 SHA-256 重复内容组由 runner 诚实标注于 objective-results.json non_corroborative_png（证据仅计一次，不伪造重采成功）；本轮 full-r2 共 10 组重复组，png_captures=50 条全部绑定真实解码尺寸+sha256",
+  "ctl06_menu_screenshots": "CTL-06 事实由 user-data 机器可读导出承担（entry_count 等结构化字段），与 full-r1 相同的非佐证标注策略",
+  "representative_duplicates": [
+   "SHD-07.b-auto-real-2x-window.png = SHD-07.c-manual-2x-window.png（AUTO floor=2 与手动 2x 同一定点映射，公式一致；各变体判定基于各自 CPU golden 解码像素，不基于 PNG 字节）"
+   ],
+  "full_list": "docs/验证/开发/p3-001/implementer/full-r2/objective-results.json non_corroborative_png"
+ },
+ "evidence_paths": {
+  "run_dir_create_only": "docs/验证/开发/p3-001/implementer/full-r2",
+  "objective_results": "docs/验证/开发/p3-001/implementer/full-r2/objective-results.json",
+  "objective_results_sha256": "e3a2ad62d3e23a44e6fa1e091809e95888e628e392f79f24964f14520affb5e2",
+  "source_pins": "docs/验证/开发/p3-001/implementer/full-r2/source-pins.json",
+  "runner_console": "docs/验证/开发/p3-001/implementer/full-r2/runner.console.txt",
+  "author_console": "docs/验证/开发/p3-001/implementer/author-logs/author-full-r2-console.txt",
+  "author_console_sha256": "01b3000df9891d741775933fb75867067a6ece7eae46d440150d84661fbce08b",
+  "sessions_collected": "96 个会话 triplet（<stem>.console.txt + <stem>.mpv.log + <stem>.mpv.transcript.jsonl）+ 56 份 <stem>.inputs.json（配置/媒体 SHA source inputs）全部进清单（evidence-manifest 全目录覆盖机器校验通过，无孤儿会话）",
+  "restart_chain": "SHD-05 3 sessions / SHD-06 3 / SHD-07 5（>=2 重启链覆盖 P2R-F2）",
+  "full_r1_preserved": "docs/验证/开发/p3-001/implementer/full-r1 与 author-delivery.json 原字节保留（create-only，未复用未覆写）"
+ },
+ "isolation_compliance": {
+  "backend": "D:/MPV/mpv.exe 直启（mpv v0.40.0-393-gad59ff1b4）, vo=gpu-next, gpu-api=vulkan（各会话 mpv.log 命令行与 vulkan enabled 构建特性可复核）",
+  "isolation": "合成媒体；临时 config-dir/HOME/USERPROFILE/APPDATA/LOCALAPPDATA/TEMP/cache/watch-later/截图目录（%TEMP%\\p3-001-<case>-*）；子进程 env 无 API 凭据；只停自启 PID（运行后系统无 mpv 残留，tasklist 实测为空）",
+  "forbidden_done_none": [
+   "活动 APPDATA/mpv、D:/MPV、备份 payload 零写",
+   "无全局 kill",
+   "无真实 restore/deploy",
+   "无系统 DPI 修改",
+   "无 git commit/push",
+   "无用户验收签字/acceptance 伪造"
+  ],
+  "gpu_serial": "主 GPU 独占串行（运行前 nvidia-smi 1%/954MiB 桌面基线，运行后 0%/954MiB；全程无并行 GPU 任务，35 case 单进程顺序执行）"
+ },
+ "author_readonly_attestation": "测试全程未改任何 tools/libs/controller/shaders/tests 源；运行后复核 17 项实际引用源 SHA-256 与 build-handoff-r4/full-r1 pins 完全一致（POST-RUN SOURCE READ-ONLY ATTESTATION: PASS）。full-r1 的 2 个真实 FAIL（CTL-06/SHD-04）未被代码修改掩盖——修复由前一限域写者完成并留 build-handoff-r4 留痕，本轮仅以只读身份全 35 复跑核验。",
+ "downstream_obligations": {
+  "independent_integration": "另一负责人以同源码新候选独立复跑全 35 矩阵 + --require-tests 才可冻结（本轮 author-local PASS 不构成冻结）；两审不省略",
+  "two_reviews": "同候选只读技术审查 + 对抗安全审查待执行",
+  "human_check": "菜单/像素风真人偏好、全局 DPI/跨屏实操、主观画质仍 pending；本交付不构成验收，不签 acceptance",
+  "perf_rife": "P4 性能/RIFE 与 P5 部署未触碰"
+ }
+}

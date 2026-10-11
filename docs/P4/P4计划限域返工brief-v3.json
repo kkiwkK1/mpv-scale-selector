@@ -1,0 +1,20 @@
+{
+  "stage":"P4",
+  "session":"p4-001",
+  "prior_plan_sha256":"4bf4db395e579c918691c935574d55ba71e75b9c0ed7b8159682846c5f73f60b",
+  "retained_review":"docs/验证/开发/p4-001/plan-v2-blocked/plan-adversarial-review.json",
+  "retained_snapshot":"docs/验证/开发/p4-001/plan-v2-blocked/snapshot.json",
+  "delta":{
+    "R2-01":"pixelart明确延长到30s/720帧，与所有timing run协议一致；原生成器参数/seed不变，仍受每段128MB/媒体700MB/总盘1.94GB门，实际生成超限阻断不删原件。",
+    "R2-02":"still用途改默认参数身份(无扫档)。",
+    "R2-03":"cost_estimate.disk同步1.94GB及明细。",
+    "R2-04":"部分事实更正：35是原P1-P3已有guard测试总数，不是P4独有数。保留原35不可删，新增P4 guard13项，当前全发现48；计划明确三者口径。",
+    "R2-05":"B6明确53 timing+2 RIFE capture(48/60各1)=55 trials；计时35.34min+capture0.5min，45min预算含余量。",
+    "R2-06":"B2 GPU探针≤10min显式纳入总账，B2+B3+B5+B6=226.2min<300min。"
+  },
+  "write_scope":"领导者仅precise edit未批准plan/method两文件；原字节和review已保留。无产品/工具实现/媒体/真实GPU运行。",
+  "recheck_scope":"独立只读检查六项修正、相关字段一致和旧F/LF修法未退化，不宽泛重审、不重跑旧writer；相同新SHA通过后才发原隔离校准许可。",
+  "required_checks":["p4_guard.py plan-check", "unittest discover -s taskflows -p test_*.py (既有35+P4新增13)"],
+  "model":"zai-coding-cn/glm-5.3-flash",
+  "thinking":"xhigh"
+}

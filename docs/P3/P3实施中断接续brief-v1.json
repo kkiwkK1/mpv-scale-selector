@@ -1,0 +1,24 @@
+{
+  "schema": "mpv-scaler-recovery-brief/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "failed_run": "mpv-scale-p3-plan-rework-mutuelfw-d015f8",
+  "error": "Stream ended without finish_reason",
+  "implementation_turns": 151,
+  "implementation_status": "partial_unverified",
+  "approved_plan_sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d",
+  "plan_review": "plan-adversarial-review.json已pass，5原findings均复核关闭；work-permit已签发隔离源码工作，不是用户approval。不重做preflight/规划/permit/资源复制，不编辑原flow/guard/基线/授权/冻结计划。",
+  "observed_state": "P3四shader/许可/资源清单、p3_lib、Lua/registry与共享harness部分修改、P3geometry/support两份测试已写入；tools/p3_verify.py、p3_check_evidence.py、test_p3_evidence.py、P3两说明和完整自测尚缺。没有真实35ID矩阵、候选或独立通过结论。CIM命令行匹配p3-001/compile的测试mpv残留为空。",
+  "local_unit_result": "190项，5 fail/0 errors，原121未丢弃。原输出C:/Users/kkiw/AppData/Local/Temp/mpv-p3-execution/interruption-unit-v1.txt。以下为真实草稿缺陷，不是最终审核findings或PASS。",
+  "known_draft_roots": [
+    "Lua约2174行p3atk parse_gears_conf新selftest字符串含未经转义的真实换行，普通双引号字符串语法非法；需用\\n或Lua长字符串，实际mpv加载与selftest而非仅Python源码包含断言。该selftest #p3atk.by_id.integer.chain == nil还可能对nil取长导致运行时异常。检查邻近新增selftest与registry/set数量，不只改一处语法。",
+    "test_p2_support.test_stage_export_is_p2仍要求旧P2标记，按新P3阶段合法迁移，保留原阶段身份断言严格性并注释，不删测试/放宽任意值。",
+    "test_p3_support guard ENV_FILES测试写assertIn(single) or assertIn(double)：单引号首检查成功返回None导致第二个也执行/失败，实际guard已经正确含4项；修测试逻辑为成员OR再assertTrue并用真实import ENV_FILES语义核对，不编辑P3guard。",
+    "same_moment_sample文档断言要求same_window文字而doc未该词：不能只补词假证明VL-F1关闭，要验证真正采样顺序/返回内容/帧epoch与几何一致、在真实P3矩阵采样点采集。",
+    "assertNotIn NVSharpen整Lua会误拒本来正确的禁止叠加说明文字；应核真实注册recipe无NVSharpen资源/真实DESC，而不禁说明文本。",
+    "PLACEHOLDER_GEARS提取regex非贪婪到第一个'}'，只抓ls1内部记录漏bcas；修定界/解析检查准确仅ls1 bcas，保留新增5builtin断言。"
+  ],
+  "scope_exception": "原作者新建tools/tmp_p3_compile_probe.py未在计划枚举且把四主链串起来进行一次throwaway探针，不能当产品单链证据。领导者将其字节归档到本会话partial-run1并删除自有仓库外域文件（记录hash）；接续不要重新放repo tools临时探针，用系统TEMP或证据目录中新安全单链探针。",
+  "split_recovery": "避免一mega写者继续151回合再丢流，按顺序两次单写者：finish-core只收敛现有算法/controller/libs/tests与真实Lua/selftest/各单shader/core ownership smoke；build-verifier独立角色仅构建新P3真实35ID/EVI harness及说明/全作者自测，不擅改core，发现core bug留实证返作者；随后原单一integration独立全量重跑冻结与同候选两路对抗。职责串行无并发源码/无并行GPU。",
+  "acceptance": "所有P3brief/冻结新计划及correction_notes继续权威：21参考坐标、conf只members/comments同步所有审计/DEFAULT/selftest、NIS原WHEN与barrier后bounds、Integer同会话paused换片防k陈旧、单主链和几何所有权、8/10bit各档、RGB/HDR明示、windowPNG真实块/黑边/SARrotatecrop/k<1、121保留+新tests，35必测全部真实。三个旧harness根因必须闭环EVI负例。活动APPDATA/mpv/DMPV/备份/旧证据零写，禁部署/提交/系统DPI修改，真人pending、性能/RIFE留P4。"
+}

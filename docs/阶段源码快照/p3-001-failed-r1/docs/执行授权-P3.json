@@ -1,0 +1,21 @@
+{
+  "schema": "mpv-scaler-chat-authorization/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "source": "explicit_user_chat",
+  "user_text": "开始下一阶段，注意继续沿用taskflow的开发流程和对抗性审查机制",
+  "interpretation": "明确启动P3规划、隔离实施、测试和独立对抗审查；承接此前计划就绪直接执行的授权。重复的同一消息视为一次阶段授权，不启动两个并发流程。",
+  "model": "zai-coding-cn/glm-5.3-flash",
+  "thinking_request": "xhigh",
+  "allow_isolated_implementation_and_tests": true,
+  "allow_live_configuration_write": false,
+  "allow_backup_payload_write": false,
+  "allow_install_or_restore": false,
+  "allow_global_display_settings_write": false,
+  "human_subjective_acceptance_claimed": false,
+  "prior_stage": "P2",
+  "prior_session": "p2-001",
+  "prior_objective_candidate_sha256": "78770240f8cf15cbf837c792c6ccf9206af1cddf69f0c18fc36c42c36b142a66",
+  "prior_human_checks": "P1-UC-1..4、P2-UC-1/2和系统DPI/跨屏仍PENDING_USER；P2是客观通过，不是已批准acceptance.json。",
+  "workflow": "复用规范阶段流程结构，按真实聊天授权建立P3衍生Taskflow，保持原mpv-scale-dev的精确人工审批语义不变，不伪造(approve)。"
+}

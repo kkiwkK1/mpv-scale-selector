@@ -1,0 +1,12 @@
+{
+  "type": "representation-only-normalization",
+  "original_path": "docs/P4/计划原始输出-v1.json",
+  "original_sha256": "cac60d377a4d429ca660c3206546b9857fa9425244809ed792afa799cd14d420",
+  "changes": {
+    "execution_batches": "list -> object.items retaining every original entry/order",
+    "limitations": "list -> object.items retaining every original entry/order"
+  },
+  "ready_and_method_content_changed": false,
+  "reason": "Original planner reported shape check passed but machine rejected missing object execution_batches; limitations also array. Preserve original, normalize only container type, keep methodological review pending.",
+  "normalized_sha256": "3012110a21cb5477a913b31b4b618374525f283a8eccc6c59b0d1ef5b5110cab"
+}

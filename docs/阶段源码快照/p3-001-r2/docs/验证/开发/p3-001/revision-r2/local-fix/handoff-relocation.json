@@ -1,0 +1,12 @@
+{
+  "status": "RELOCATED_CREATE_ONLY_BYTE_IDENTICAL",
+  "finding": "read-only closeout report was written at project root, outside authorized r2 evidence path; no source changes",
+  "original_path": "implementer-handoff.json",
+  "archive_path": "docs/验证/开发/p3-001/revision-r2/local-fix/misplaced-handoff-original.json",
+  "correct_path": "docs/验证/开发/p3-001/revision-r2/implementer-handoff.json",
+  "sha256": "9365c0e3f164c953d4b36c4030ffb85f550b91c2a1c1ff403340bb201ff84f0e",
+  "source_hashes_verified": 4,
+  "original_bytes_preserved": true,
+  "root_misplaced_artifact_removed": true,
+  "effect": "bookkeeping path only; no GPU evidence changed/no rerun source-writer or closeout required"
+}

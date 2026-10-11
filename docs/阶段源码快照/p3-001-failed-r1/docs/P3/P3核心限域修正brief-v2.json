@@ -1,0 +1,34 @@
+{
+  "stage": "P3",
+  "session": "p3-001",
+  "source_run": "mpv-scale-p3-continue-v1-mutxubd1-b5fad1",
+  "error": "Connection error after 75 tools",
+  "status": "REWORK_CORE_NOT_VERIFIED",
+  "plan_sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d",
+  "prior_findings": "继续保留五条计划意见和P3实施中断接续brief-v1，不重做planning/permit。新的190 Python单测领导者复跑已PASS，但真实core smoke run-001为12个case仅1 PASS/11 FAIL，而且这唯一PASS也在fallback状态，不是Integer生效证明。所有原证据原样留存。",
+  "root_corrections": [
+    {
+      "id": "CORE-R1",
+      "severity": "major",
+      "file": "scripts/scale-selector.lua（property读回和事务rollback）",
+      "issue": "Integer写video-unscaled='yes'/'no'，mpv native读回boolean true/false，通用比较判不一致，激活失败。失败后实际video-unscaled仍True：rollback账本未完整恢复已写property，导致fallback留下unscaled几何残留。",
+      "fix": "限域property-aware规范化（video-unscaled bool或downscale-big字符串），通用类型严格相等保持（True不能等1），激活/lastwritten/off/transfer/observer/读回统一语义。rollback先记录每个实际成功写入的property，再读回验证；首次读回不一致也要回滚已写，不靠已commit ownership。正反例实际mpv输入true/false与yes/no、非法值/故障读回、外改保留，保证fallback恢复基线零残留。"
+    },
+    {
+      "id": "CORE-R2",
+      "severity": "major",
+      "file": "scripts/scale-selector.lua:run_selftest",
+      "issue": "实际selftest 108项2失败：reserved missingmode还用已转builtin的旧id，HDR independent guard文案仍含LUMA但新断言不允许。190Python pass未覆盖真实Lua测试。",
+      "fix": "合法stage迁移：missingmode负例针对仍保留ls1/bcas或无mode自定义test id，保留防伪active保障；HDR guard独立判断与文案不借LUMA泛化，SDR MAIN拒HDR原因准确。所有108+真实selftest必须PASS；不删/放宽case。"
+    },
+    {
+      "id": "CORE-R3",
+      "severity": "major",
+      "file": "p3-001/core-checks/run-001/smoke-runner.py 与其系统TEMP副本",
+      "issue": "真实各shader全部文件缺失（P3+FSR），探针未实际复制assets且流结束帧固定768；Integer全屏未生效（窗口捕获1920x1080/1280x720而非2560x1440），其旋转/SAR case在fallback却ok=true，仅比较遗留k空真。最新TEMP p3-smoke-precheck/smoke-runner.py已有copy/loop修正但还没实跑，不能把修改草稿当通过。",
+      "fix": "新run002复制全部实际文件后inputsha/目录证据，loop并用帧两采样新鲜度，开始前读回fullscreen/window2560x1440且window screenshot尺寸核对；所有case必须state active+gear correct+runtime实际pass或Integer空链/属性+新几何成立，rotate/crop/SAR不能只算expectedk==staleplugin_k。旧run001的唯一PASS标为不具生效佐证但原文件不改，在新报告纠正。"
+    }
+  ],
+  "split": "本轮进一步限域：fix-core只改R1/R2 controller和必要配对tests，真实短positive/fault smoke+108Lua+190回归，不再承担12完整probe或35matrix；之后独立core-validation只修最新TEMP探针并实跑新run002，源码不写，失败返作者；再新build-verifier35矩阵与独立integration，两审不省略。",
+  "frozen_constraints": "冻结P3计划、2128保护与P2源码档案保持；GLM flash only；tmp config/HOMEAPPDATAcache无凭据、自有PID，固定gpu-next/vulkan/directmpv.exe；不部署/提交/真实configrestore，不改old source/evidence/guardplanflow，只写批准30paths，190原行为不删skip降门槛。"
+}

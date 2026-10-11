@@ -1,0 +1,32 @@
+test_acceptance_is_create_only_and_not_live_installation (test_guard.GuardTests) ... ok
+test_both_reviews_bind_same_candidate (test_guard.GuardTests) ... ok
+test_candidate_matches (test_guard.GuardTests) ... ok
+test_empty_cases_rejected (test_guard.GuardTests) ... ok
+test_existing_session_not_overwritten (test_guard.GuardTests) ... ok
+test_invalid_session_names (test_guard.GuardTests) ... ok
+test_json_approval_cannot_override_explicit_argv_permission (test_guard.GuardTests) ... ok
+test_live_write_report_rejected (test_guard.GuardTests) ... ok
+test_machine_gate_requires_planned_test_ids (test_guard.GuardTests) ... ok
+test_major_finding_rejected_even_with_pass_verdict (test_guard.GuardTests) ... ok
+test_only_explicit_approve_is_permission (test_guard.GuardTests) ... ok
+test_previous_stage_must_be_accepted_and_unchanged (test_guard.GuardTests) ... ok
+test_private_or_traversal_source_rejected (test_guard.GuardTests) ... ok
+test_report_tamper_detected (test_guard.GuardTests) ... ok
+test_required_unmeasured_rejected (test_guard.GuardTests) ... ok
+test_source_tamper_detected (test_guard.GuardTests) ... ok
+test_blocked_plan (test_p3_guard.P3GuardTests) ... ok
+test_create_only (test_p3_guard.P3GuardTests) ... ok
+test_duplicate_case (test_p3_guard.P3GuardTests) ... ok
+test_invalid_paths (test_p3_guard.P3GuardTests) ... ok
+test_missing_case (test_p3_guard.P3GuardTests) ... ok
+test_plan_review_major_not_accepted (test_p3_guard.P3GuardTests) ... ok
+test_plan_review_wrong_fingerprint (test_p3_guard.P3GuardTests) ... ok
+test_ready_plan (test_p3_guard.P3GuardTests) ... ok
+test_required_matrix (test_p3_guard.P3GuardTests) ... ok
+test_unapproved_scope (test_p3_guard.P3GuardTests) ... ok
+test_utf8_lf_required (test_p3_guard.P3GuardTests) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.269s
+
+OK

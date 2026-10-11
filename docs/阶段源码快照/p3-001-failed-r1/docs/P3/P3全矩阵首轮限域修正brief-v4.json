@@ -1,0 +1,36 @@
+{
+  "stage": "P3",
+  "session": "p3-001",
+  "source_run": "mpv-scale-p3-harness-fin-muvuyh6v-9a61b9",
+  "prior_author_report": "docs/验证/开发/p3-001/implementer/author-delivery.json",
+  "prior_gate": "docs/验证/开发/p3-001/implementer/full-r1/evidence-gate.json",
+  "candidate_before_fix": "Not yet frozen. 35 required cases all ran:33 PASS, CTL06 and SHD04 FAIL, GEO04/05 casePASS but full-tree gate rejects4 shape/proof problems. All first-full artifacts immutable.",
+  "baseline": "Use full-r1 source-pins.json plus author-delivery actual_source_sha256; leader checked current source before assigning. Preserve source snapshot pre-full-r2.",
+  "roots": [
+    {
+      "id": "V4-FALLBACK",
+      "severity": "major",
+      "implementation": "scripts/scale-selector.lua parse_gears_conf two fallback default lists lack sharpbilinear2x (11 vs shipped12).",
+      "correction": "Unify defaults/order to complete12 immutable productregistry (Off/LS1/FSR/NIS/SGSR/BCAS/Anime4K/xBR/SharpAUTO/Sharp2X/Integer/Nearest). Cover both missing gears= and emptygears= defaults in actualLua selftest/runtimeconfigcase. Retain LS1/BCASdisabled/Offidentity/authfailclosed and no custommodeactive spoof; no CTL06 expectedcount weakening. Add targeted missing/empty fallback validID order/builtin flags/only2disabled regression and run realLua112+.",
+      "verification": "CTL06 affected8 variants actual newdir, missing/empty default all12; allPython265+ kept and guard suites. Product source edited so entire35 rerun afterwards; old12smoke no currentcandidatePASS reuse."
+    },
+    {
+      "id": "V4-PASS-RACE",
+      "severity": "major",
+      "implementation": "tools/p2_verify.py case_shd04 stock glsl property change readback precedes actualrecipe DESC+samples;0 vs20/28 modesA/B/D/E. Correct recipe identical and required desc genuine, but stalecounter race trueFAIL.",
+      "correction": "Wait actual new complete recipe pass/DESC with nonempty samples AFTER chain replace on stock and selector sides, ensure media/decode and stable epoch/correct recipe. Counts mustpositive and equalequivalent no0==0, retain all6 stockmodes exact chain and actualrequiredkeywords. Don't fix by timeout-onlyblind sleep/skip/relax equalcount. If propertyupdate doesn'tcreate freshpasses issueforce actualpresentthenprove actualnewpass; no previouschain stale borrow.",
+      "verification": "New6mode SHD04 records stock&selector desc/samples/count positive samecontract; regression delayedreadback/newpass and zerozero rejected; P2source archive preserved even though sharedcurrentverifier permitted planwritepath."
+    },
+    {
+      "id": "V4-GEO-CONTRACT",
+      "severity": "major",
+      "implementation": "tools/p3_verify.py GEO04 sessionsduplicate and lackfreshness, GEO04/05 native vsnative_unscaled key mismatch.",
+      "correction": "Fix emitter only; deduplicate one insertion notdelete rawtriplets, align native_unscaled genuinebool, actuallymeasurefreshness at pairedcurrentepoch aftergeometryupdates. No copied/inventedfreshness from priorcase and no purelymetadataGEO04PASS withoutrenderproof. nativekeyrename mustcaptureactualS.get bool data notdictshape alone. Checker itselfread-only unchanged.",
+      "verification": "AffectedGEO04/05 rawrerun newdir and full-tree subset gate clean; full35 nextfull-r2 then checker --require-tests must be0."
+    }
+  ],
+  "nonblocking_correction_note": "verifier-build/build-handoff.json has generated_at=2025-12-27 inconsistent with actual2026 run; olddoc retained, newhandoff uses actual systemtimeand notes externalerratum rather than rewriting previousrecord. Neither date is candidateproof; allsha actualcomputed.",
+  "write_scope": "Exactly productLua defaults/selftests, sharedtools/p2_verify SHD04 and P3verify GEO04/05, necessary scopedtests and docs in existing30writepaths. No EVI tools rewrite/no resourcealgomath/no original frozenplan/permit/baseline/guardedoldfile changes. New rootreport/build-handoff-r4 and evidenceonlycreateonly. No author-delivery.json overwrite: next author output author-delivery-r2.json, full-r2. Preserve all previousrootfailures/v1planfindings/oldstage archives.",
+  "acceptance": "Singleboundedwriterlocal265+tests/no weakenedold121/onlyexistingWindowspermission1skip disclosed, actualaffectedCTL06/SHD04/GEO04/GEO05+selftests PASS withtrueframe/passproof, builds newdelivery with sourceSHA. Then source-readonlyauthor35full-r2→machinegate→oneindependentintegration35+candidatefreeze→samecandidate technical+safetyread-onlydual. Anyblocker/majorREWORK originalreviews retained, no fakeresumeapprovedacceptance.",
+  "safety": "GLMflash/xhigh allsubagents, gpu-next/Vulkan/directmpv.exe, synthetic/noAPIchildenv/tempconfigHOMEAPPDATATEMPcache/selfPID, no concurrentwriter/GPU; no live APPDATAmpv/DMPV/backupwrites/DPI/globalKill/installrestore/gitcommit/push. Humanuserchecks pending/P4perf,RIFE and P5deployment untouched."
+}

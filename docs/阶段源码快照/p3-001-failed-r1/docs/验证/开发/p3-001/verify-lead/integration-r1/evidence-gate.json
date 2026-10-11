@@ -1,0 +1,17 @@
+{
+  "schema": "p3-evidence-gate/v1",
+  "session": "p3-001",
+  "stage": "P3",
+  "evidence_dir": "docs/验证/开发/p3-001/verify-lead/integration-r1",
+  "checker": "tools/p3_check_evidence.py run_full_gate",
+  "evidence_manifest_sha256": "bd2ba6e6cd9cd1a7697ae5cd60052e9eab80e8e742a733892c5c34c39ee6dba7",
+  "manifest_verify_sha256": "dd6e5359761b712f1ca8dabb9d3a1f33d77d4b08f594e53b614e74848c46a3a2",
+  "status": "FAIL",
+  "problems": [
+    "必需测试非 PASS: GEO-03 ('FAIL')"
+  ],
+  "checked_at": "2026-10-06T09:24:46+0800",
+  "human_subjective_acceptance_claimed": false,
+  "live_configuration_written": false,
+  "note": "create-only 门禁产物；FAIL 原样保留，复跑须用全新证据目录"
+}

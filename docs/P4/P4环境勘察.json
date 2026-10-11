@@ -1,0 +1,208 @@
+{
+  "stage": "P4",
+  "session": "p4-001",
+  "artifact": "P4环境勘察",
+  "role": "read-only environment scout output (侦察, 不做 benchmark/readiness 代签)",
+  "created_at": "2026-10-07T01:52:34+0800",
+  "authorization": {
+    "source": "docs/执行授权-P4.json",
+    "authorization_sha256": "160373c4482b7c6d1a5590ef33dc996e46c5349761a89723f876631538253cac",
+    "user_request": "P4：公平画质与性能 A/B、帧节奏和真实 RIFE 余量测试；",
+    "brief": "docs/P4/P4执行约束与验收brief.md",
+    "brief_sha256": "5f39865478799794529d0f8d48d2148e27ea954787f3e67c532e02c35a1ded50",
+    "brief_integrity_matches_P4_baseline_preserved_hashes": true,
+    "prior_stage_inherited": {
+      "stage": "P3",
+      "status": "PASS_OBJECTIVE",
+      "note": "客观 PASS 已继承，本阶段不等真人验收；未伪造任何真人 approval",
+      "candidate_path": "docs/验证/开发/p3-001/revision-r2/candidate.json",
+      "candidate_sha256": "0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67",
+      "baseline_key_fields_from": "docs/P4启动基线.json"
+    },
+    "model_directive": "zai-coding-cn/glm-5.3-flash, thinking=xhigh"
+  },
+  "scope_compliance": {
+    "tool_call_budget": "30-45",
+    "tool_calls_used": 21,
+    "no_broad_internet_research": true,
+    "no_private_video_library_scan": true,
+    "no_gpu_playback": true,
+    "no_real_vapoursynth_or_rife_import": "未运行任何 import/加载；真实加载前需 单计划+隔离许可",
+    "no_pip_install_model_download_updater": true,
+    "no_system_changes": "未改 DPI/刷新率/电源/驱动；无提权；仅终止自有子进程(未发生需终止者)",
+    "zero_write_to_protected_trees": "活动 %APPDATA%/mpv、D:/MPV 未写；唯一写入为 TEMP 探针目录与本文档证据树"
+  },
+  "environment_entry": {
+    "host_gpu": "NVIDIA GeForce RTX 2080 SUPER, driver 610.47, 8192 MiB",
+    "display": "2560x1440, CurrentRefreshRate=164 (CIM 原始值; 未改任何显示设置)",
+    "mpv": "D:/MPV/mpv.exe v0.40.0-393-gad59ff1b4 (built Oct 12 2025), libplacebo v7.357.0, FFmpeg N-121425-g0bc54cddb",
+    "rife_runtime": "VapourSynth R80 + Python 3.13.15 embeddable @ D:/MPV/vs; RIFE ncnn-Vulkan 插件 D:/MPV/rife/librife_windows_x86-64.dll; 模型 rife-v4.25-lite_ensembleFalse",
+    "active_engagement": "%APPDATA%/mpv/mpv.conf 内 vf-add=@rife:vapoursynth=file=~~/rife/rife.vpy:buffered-frames=4:concurrent-frames=4 (仅摘录该选项行)",
+    "present_time_source": "PresentMon 未安装; ETW 工具需提权未用 → 真实 present 帧时长未测 (TIME-01 限制)"
+  },
+  "runtime_files": {
+    "%APPDATA%/mpv/rife/rife.vpy": {
+      "sha256": "8beb574c00e7e5acc5a61d3d921d2bd6aeeaccfdc9957ea6ae1761da64d314c7",
+      "bytes": 1446,
+      "role": "active_vapoursynth_script (活动脚本, 正文不入 Git; 仅摘算法参数行)"
+    },
+    "D:/MPV/rife/rife.vpy": {
+      "sha256": "8beb574c00e7e5acc5a61d3d921d2bd6aeeaccfdc9957ea6ae1761da64d314c7",
+      "bytes": 1446,
+      "role": "rife_dir_copy_byte_identical_to_active (cmp -s 一致)"
+    },
+    "D:/MPV/mpv-RIFE.cmd": {
+      "sha256": "4beffb5f5efda71674616e639025227b7b46687a99180c1575f744ea37478c0f",
+      "bytes": 279,
+      "role": "launcher (设定 VSSCRIPT_PATH=D:/MPV/vs/Lib/site-packages/vapoursynth/vsscript.dll 并前置 PATH; 正文不入 Git)"
+    },
+    "D:/MPV/rife/librife_windows_x86-64.dll": {
+      "sha256": "36a25b471be88e6f915320c818022dc8657dd9beac22a8c3158bd7f4260cc410",
+      "bytes": 5244416,
+      "role": "rife_plugin_dll (ncnn/Vulkan; PE 依赖 KERNEL32/MSVCP140/MSVCP140_ATOMIC_WAIT/VCOMP140/VCRUNTIME140/140_1/ucrt api-ms-*)"
+    },
+    "D:/MPV/rife/models/rife-v4.25-lite_ensembleFalse/flownet.bin": {
+      "sha256": "350a15e464bea5ad378e06c0fb43996e90a0d35653d5a6ef6bc980d832538fb7",
+      "bytes": 11276252,
+      "role": "selected_model_weights (磁盘上唯一模型目录)"
+    },
+    "D:/MPV/rife/models/rife-v4.25-lite_ensembleFalse/flownet.param": {
+      "sha256": "f750ec6723f05a800c8fb07ac0bf3537e741b6ff7fe61b3894e407bd10373a63",
+      "bytes": 35830,
+      "role": "selected_model_param"
+    },
+    "D:/MPV/vs/Lib/site-packages/vapoursynth/vsscript.dll": {
+      "sha256": "bf61b999abcc8c537882d32017efb14a4636fea17f0abab873e748629f26d3c0",
+      "bytes": 72192,
+      "role": "vsscript_entry_dll (mpv vf_vapoursynth 加载入口)"
+    },
+    "D:/MPV/vs/Lib/site-packages/vapoursynth/libvapoursynth.dll": {
+      "sha256": "cf2c35b3e9e9eb8af6969562f8fad21cc5d17a3d12c40c3561687bf25c565e23",
+      "bytes": 4109824,
+      "role": "vapoursynth_core"
+    },
+    "D:/MPV/vs/Lib/site-packages/vapoursynth/vapoursynth.pyd": {
+      "sha256": "081f3b8319d9393ba72381a9ae54fb54af1fee65d3bf788e1a3c0215a8c7a19f",
+      "bytes": 731648,
+      "role": "vapoursynth_python_module (R80, cp312-abi3 wheel 安装产物)"
+    },
+    "D:/MPV/vs/python313.dll": {
+      "sha256": "e820bf024efd2b56bb2b82791e6b6ddc7303f070f8e72cba7637482a8a906238",
+      "bytes": 6135008,
+      "role": "python_runtime_dll (3.13.15)"
+    },
+    "D:/MPV/mpv.exe": {
+      "sha256": "306f49323f846eca7a9a708bc35c505d5e6a4e246c5588c2fc7c1c68f9f53d6a",
+      "bytes": 115166208,
+      "role": "measured_player_binary (固定构建, 全量 sha256 已流式计算)"
+    }
+  },
+  "read_only_observations": {
+    "rife_active_chain_static": {
+      "engagement_line_excerpt_only": "vf-add=@rife:vapoursynth=file=~~/rife/rife.vpy:buffered-frames=4:concurrent-frames=4",
+      "engagement_source": "%APPDATA%/mpv/mpv.conf 第54行 (私有配置, 仅摘录此选项行, 其余行未读取/未复制)",
+      "algorithm_params_excerpt": [
+        "core.std.LoadPlugin('D:/MPV/rife/librife_windows_x86-64.dll')",
+        "工作图上限: scale=min(1, 960/w, 540/h), 偶数化后 Bicubic 缩放 (540p 上限工作图)",
+        "YUV->RGBS: matrix '709' if w>=1280 or h>576 else '470bg'",
+        "core.rife.RIFE(rgb, model=70, factor_num=2, factor_den=1, gpu_thread=2)",
+        "core.std.SelectEvery(interpolated, cycle=2, offsets=1)  # 仅取插入的中间帧",
+        "中间帧 Bicubic 还原至源分辨率/源格式",
+        "core.std.Interleave([source, middle])  # 保留全部源帧 + 每源帧插1中间帧 (输出2x fps)"
+      ],
+      "semantics_confirmation": "确为 540p 上限工作图推理 + 保源帧插中间帧; 不是全1080p神经网络插帧; 输出帧序=源帧/插帧交替, P4 分析必须按此分层(源24→48, 源30→60)",
+      "gpu_pollution_note": "勘察时 GPU util 1%, 显存已用 1004 MiB, 54C, P0 1650MHz 63.05W → 存在其它显存占用者, 测量期需按 brief 记录污染并暂停/拒绝, 不杀他人进程"
+    },
+    "vapoursynth_python_runtime": {
+      "vapoursynth_version": "R80 (vapoursynth-80.dist-info; 安装来源 D:/MPV/vs/wheel/vapoursynth-80-cp312-abi3-win_amd64.whl)",
+      "python_version": "3.13.15 embeddable (vs-temp-dl/python-3.13.15-embed-amd64.zip + get-pip.py 为历史安装产物)",
+      "site_packages_extra": ["pip 26.2.1 (pip.bat 存在, 禁运行)", "psutil", "py7zr", "brotli", "Cryptodome 等"],
+      "vs_autoload_plugins": ["VMAF.dll", "avscompat.dll (位于 vapoursynth 包 plugins/, core 初始化时自动加载, 隔离树内同样会加载)"],
+      "vspipe_available": true
+    },
+    "write_risk_inventory": {
+      "D:/MPV/vs/Lib/site-packages/__pycache__": "已存在 (历史 import 产物) → 原树非零写证明, 真实加载前必须先 clone",
+      "D:/MPV/vs/vs-temp-dl/": "历史下载目录 (R80 zip/get-pip/embed zip), 证明该树历史上发生过写入",
+      "rife.vpy 执行路径": ".vpy 经 exec 执行通常不产 pyc, 但 vapoursynth 模块 import 可能在可写 site-packages 产/更新 __pycache__ → 未证明只读",
+      "模型自动下载": "未发现下载器或非本地模型目录; 磁盘仅 1 个模型目录; 首次隔离加载前后须做树 diff 复核"
+    },
+    "display_and_gpu_readonly": {
+      "query": "nvidia-smi --query-gpu=... (只读) + Get-CimInstance Win32_VideoController (只读)",
+      "results": "见 environment_entry; 未改任何设置",
+      "nvidia_smi_output_privacy": "查询输出仅 name/driver/mem/util/temp/pstate/clocks/power, 无任何路径"
+    },
+    "subprocess_safety_used": {
+      "env_allowlist": ["SystemRoot", "windir", "PATH(System32 仅)", "TEMP", "TMP", "HOME/USERPROFILE/APPDATA/LOCALAPPDATA→TEMP探针目录", "PYTHONDONTWRITEBYTECODE=1", "PYTHONNOUSERSITE=1"],
+      "api_env_removed": true,
+      "cwd": "TEMP 探针目录 (%TEMP%/p4-001-scout)",
+      "commands_run": ["D:/MPV/vs/python.exe --version", "D:/MPV/mpv.exe --version", "mpv --list-options 未在本阶段运行(留测量计划阶段在固定构建上做)"],
+      "pycache_check_after": "探针目录无 __pycache__/*.pyc 生成 (注意: --version 不触发 import, 该验证仅覆盖命令本身, 非完整 import 证明)"
+    }
+  },
+  "safe_clone_recipe": {
+    "status": "PLAN_ONLY_NOT_EXECUTED (真实加载前需单计划写者+对抗审查+机器许可)",
+    "target": "所有缓存/pycache/引擎/模型写入全部落 TEMP 隔离树; 原树零写",
+    "steps": [
+      "1. robocopy D:/MPV/vs → %TEMP%/p4-001/clone/vs (整树 ~223,289,169 B ≈ 213 MiB, 保持相对布局含 Lib/site-packages/vapoursynth 与 plugins/)",
+      "2. 复制 D:/MPV/rife/librife_windows_x86-64.dll 与 models/rife-v4.25-lite_ensembleFalse/ → %TEMP%/p4-001/clone/rife/ (dll 与 models/ 相对布局不变, 11,312,082 B + 5,244,416 B)",
+      "3. 克隆 vpy: 仅改 LoadPlugin 一行路径指向克隆 DLL; 其余算法行字节不变; 记录 diff=仅路径行 (符合 brief 限定路径重定向差异要求)",
+      "4. 环境: PATH=clone/vs;clone/vs/Lib/site-packages/vapoursynth;System32; VSSCRIPT_PATH=克隆 vsscript.dll; PYTHONPYCACHEPREFIX/PYTHONDONTWRITEBYTECODE=1; TEMP/TMP/HOME/USERPROFILE/APPDATA/LOCALAPPDATA=克隆沙箱; 无 API 凭据 env; cwd=TEMP",
+      "5. 加载前后对原 D:/MPV/vs、D:/MPV/rife、活动 %APPDATA%/mpv 做清单+哈希快照 diff, 证明零写; 克隆树内捕获插件报告的模型名, 核对 model=70 身份",
+      "6. 任何越树写入 → 立即中止, RIFE 记 BLOCKED_ENV, 不假称已测"
+    ],
+    "size_estimate": {
+      "full_vs_tree_bytes": 223289169,
+      "rife_dll_bytes": 5244416,
+      "selected_model_bytes": 11312082,
+      "total_clone_budget_bytes_approx": 239745667,
+      "note": "整树克隆而非最小子集, 保持 DLL/插件相对布局; 不克隆 models 全集(本机仅1个模型, 天然最小)"
+    },
+    "forbidden": ["pip / get-pip / updater", "模型下载", "改原 runtime", "提权", "对原树任何写入"]
+  },
+  "instrumentation_sources": {
+    "vo_passes": {
+      "source_docs": "docs/证据/mpv-input.rst (10处) 与 docs/证据/mpv-options.rst (1处) 本地归档文档; 均在 P4启动基线 preserved_file_hashes 绑定",
+      "prior_code_semantics": "tools/p3_lib.py:1087-1095: 单窗口原子采样 video-out-params + osd-dimensions + vo-passes fresh/redraw 计数 (P2 VL-F1 教训)",
+      "p4_open_points": "last/avg/peak/samples 单位 ns 的滚动窗口语义、count/samples 与重采/重叠问题须在固定构建 mpv v0.40.0-393-gad59ff1b4 上按计划实测核对; 不得把重采样当独立样本, 不得按数值去重"
+    },
+    "decoder_pts_vf_metadata": "off/ON48/ON60 所需 decode PTS / vf metadata 字段已定义待校准; 具体属性名(dropped/mistimed/delayed/vsync等)须在固定构建实际探测, 计数 reset/累计差值语义待证",
+    "present_time": {
+      "PresentMon": "未安装 (where.exe 无结果; 常见安装路径无)",
+      "etw": "wpr.exe/logman.exe/tracerpt.exe 存在于 System32 但需提权 → 本阶段未用; 不自动安装/提权",
+      "consequence": "真实 present 帧时长无来源 → TIME-01 必须明确『未测』; IPC 轮询间隔/time-pos 差值不得当帧时长; 只能报告 renderer 指标与媒体节奏 proxy 局限"
+    },
+    "gpu_telemetry": "nvidia-smi 只读 query CSV (name/driver/mem/util/temp/pstate/clocks/power) 可用, 无私密路径输出"
+  },
+  "available_media": {
+    "natural_or_anime_footage": "无 (用户未提供, 未扫描私人库)",
+    "repo_synthetic_fixtures": [
+      "tests/fixtures/p3/oracle-sample.ppm (1165 B, 合成)",
+      "tests/fixtures/p2|p3/*.glsl (shader 负例 fixture, 非视频)"
+    ],
+    "conclusion": "客观校准仅 synthetic-only 可行; PIC01 主观/自然视频代表性 = PENDING_USER 素材入口已留, 不自动下载版权样本, 不假提供"
+  },
+  "unknowns": [
+    "model=70 → rife-v4.25-lite_ensembleFalse 的索引映射: 推断成立 (DLL 内含该名字面量, DLL 共76个模型名字符串; 磁盘仅此一个模型目录), 但静态无法证明索引对应, 须在隔离树首次加载时以插件日志/报告的模型名确认",
+    "VS/RIFE 真实初始化是否只写克隆树: 待隔离加载前后树 diff 证明; 不证明则 BLOCKED_ENV",
+    "vo-passes 滚动 count/samples 在本固定构建的精确语义: 文档+P3 代码已审, 实测核对留测量计划阶段",
+    "dropped/mistimed/vsync 等具体属性在固定构建的实际可用性与计数语义: 未探测 (无播放, 按 scope 禁止)",
+    "D:/MPV/rife/test-*.vpy 与活动脚本不同 (无 RIFE 参数行匹配), 内容未读取 (隐私最小化); 若测量期改用测试副本需按 brief 记录算法段哈希+路径重定向差异"
+  ],
+  "blockers": [
+    "真实 present 帧时长采集无现成合法来源 (PresentMon 缺失, ETW 需提权): TIME-01 只能以未测条件交付, 除非后续获得明确许可的采集源",
+    "无自然/动画素材: 主观与自然样本相关项 PENDING_USER"
+  ],
+  "privacy_notes": [
+    "活动 rife.vpy / mpv-RIFE.cmd / mpv.conf 正文未复制入 Git; 仅摘录算法参数行与单个 vf 选项行",
+    "%APPDATA% 绝对路径含用户名, 本文档一律用 %APPDATA% 形式表示",
+    "nvidia-smi/CIM 查询输出均无路径类信息",
+    "未读取 mpv.conf 其余行、input.conf、备份文件、用户脚本与私人日志正文",
+    "私有日志 (D:/MPV/rife/*.log) 仅记录存在, 正文未入 Git"
+  ],
+  "evidence_files": [
+    "docs/验证/开发/p4-001/environment/query-commands.md",
+    "docs/验证/开发/p4-001/environment/safe-outputs.md",
+    "docs/验证/开发/p4-001/environment/environment-report-index.md"
+  ],
+  "boundary_statement": "本文件仅环境勘察记录: 不签 benchmark 结果, 不签 P4 readiness/PASS; 旧 5715 文件未触碰; docs/验证/开发/p4-001/ 为本阶段新建 create-only 证据树"
+}

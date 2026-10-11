@@ -1,0 +1,160 @@
+{
+  "schema": "p3-evidence-tools-contract/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "role": "evidence-tools writer handoff → case-harness writer (tools/p3_verify.py, 35-ID matrix)",
+  "produced_by": "serial evidence-tools writer (verifier-build, GLM flash xhigh)",
+  "scope_note": "本契约只约束证据机器结构（EVI-01 门）；不写产品 controller/shaders、不改旧证据/plan/guard/flow、不运行全 35 GPU。",
+  "source_of_truth": {
+    "checker": "tools/p3_check_evidence.py",
+    "checker_unit_tests": "tests/test_p3_evidence.py",
+    "producer_helpers": {
+      "manifest": "tools/p1_lib.py build_evidence_manifest / verify_evidence_manifest / safe_manifest_relpath",
+      "create_only_evidence": "tools/p1_lib.py Evidence(_write_create_only) + ensure_fresh_evidence_dir",
+      "same_moment_record": "tools/p3_lib.py same_moment_sample（记录形状的权威生产者）",
+      "png_true_bitdepth_decoder": "tools/p3_lib.py decode_png",
+      "required_ids": "taskflows/p3_guard.py REQUIRED == tools/p1_check_evidence.py P3_REQUIRED_IDS（35 项）"
+    },
+    "cli_selftest": [
+      "docs/验证/开发/p3-001/verifier-build/cli-selftest-pass (exit 0, --require-tests)",
+      "docs/验证/开发/p3-001/verifier-build/cli-selftest-fail (exit 1, 字节篡改被检出; --write-gate FAIL create-only 保留; 二次 --write-gate create-only 拒绝)"
+    ],
+    "selftest_log": "docs/验证/开发/p3-001/verifier-build/new-unit-tests.log"
+  },
+  "p3_required_ids": [
+    "CTL-01", "CTL-02", "CTL-03", "CTL-04", "CTL-05", "CTL-06", "CTL-07", "CTL-08", "CTL-09",
+    "SHD-01", "SHD-02", "SHD-03", "SHD-04", "SHD-05", "SHD-06", "SHD-07", "SHD-08", "SHD-09",
+    "SHD-10", "SHD-11", "SHD-12", "SHD-13",
+    "GEO-01", "GEO-02", "GEO-03", "GEO-04", "GEO-05", "GEO-06", "GEO-07",
+    "WINDOW-01", "PIC-05", "UNIT-P2-01", "UNIT-P3-01", "PER-04-COMPUTE", "EVI-01"
+  ],
+
+  "manifest_path_semantics": {
+    "critical": "lib.Evidence 清单键是【仓库相对】POSIX 规范路径（docs/验证/开发/<session>/…），不是证据目录相对路径。用 build_evidence_manifest 生成；绝不要手写 evidence-relative 键（会被全目录覆盖检查拒绝，或造成哈希/存在性全部漏检）。",
+    "key_shape": "docs/验证/开发/p3-001/<subdir>/<run>/<file>",
+    "built_with": "p1_lib.build_evidence_manifest(session, paths, repo_root) —— 在全部产物落盘【之后】调用",
+    "path_rules": "canonical / in-session / 无 symlink·reparse / 私有目录(.git,.pi,.local,backups)拒绝 / 越仓库拒绝 / 大小写冲突拒绝",
+    "full_tree_rule": "证据目录内每一个文件都必须绑定进清单；绑定证据目录之外路径 = FAIL（全目录覆盖无法诚实成立）"
+  },
+
+  "closed_exclusion_class": {
+    "members": ["evidence-manifest.json", "manifest-verify.json", "evidence-gate.json", "runner.console.txt"],
+    "closed": "仅此 4 个根级文件名豁免绑定；其余任何磁盘文件未绑定 = 漏项 FAIL。被豁免 ≠ 未检查：成员全部由哈希链机器校验。",
+    "forbidden": "这 4 个名字不得出现在 manifest.files（循环自指）。"
+  },
+
+  "chain": {
+    "write_order": [
+      "1. 各 case 产物（triplet/PNG/报告…，逐产物 create-only，mpv 启动前 ensure_fresh_evidence_dir + 逐产物拒绝复用）",
+      "2. objective-results.json（case 全部写完后收集；FAIL case 原样保留，不得删除/洗白）",
+      "3. runner.console.txt 定稿（运行控制台全程留痕，非空）",
+      "4. evidence-manifest.json（绑定 1+2 的全部文件；排除类 4 名不绑）",
+      "5. manifest-verify.json：{schema:'p3-manifest-verify/v1', session, evidence_manifest_sha256, runner_console_sha256}",
+      "6.（门禁层）evidence-gate.json：由 p3_check_evidence --write-gate create-only 写入，钉 manifest-verify 字节；FAIL 原样保留，复跑必须换全新证据目录"
+    ],
+    "why": "runner.console 与 manifest 自身若进清单即循环自指；改为被 manifest-verify.json 独立钉扎，manifest-verify 又被 evidence-gate.json 钉扎 —— 排除类仍有完整、无环、可校验的链。"
+  },
+
+  "objective_results_schema": {
+    "file": "<run>/objective-results.json",
+    "required_fields": {
+      "stage": "P3",
+      "session": "p3-001",
+      "required_unmeasured": "[]（必须为空）",
+      "live_configuration_written": false,
+      "cases": "数组，覆盖 35 个 REQUIRED id，唯一 id；status 'PASS'|'FAIL'（FAIL 保留并如实记录）",
+      "png_captures": "每个清单内 PNG 一条 {path(仓库相对), w, h, sha256}；w/h 必须等于真实解码尺寸；路径经 safe_manifest_relpath 校验且必须在本证据目录内",
+      "non_corroborative_png": "同 SHA-256 重复内容组必须在此诚实标注 {files:[...], reason}；引用未登记 PNG = FAIL"
+    },
+    "case_fields": {
+      "id": "REQUIRED id",
+      "status": "PASS | FAIL",
+      "sessions": "真实 mpv 会话 stem 数组（≥1，唯一，匹配 ^[A-Za-z0-9][A-Za-z0-9._-]*$）；每 stem 必须有非空 <stem>.console.txt + <stem>.mpv.log + <stem>.mpv.transcript.jsonl 且全部进清单；磁盘上每个根级 <stem>.console.txt 必须被某 case 声明（孤儿会话=漏项）",
+      "files": "该 case 的证据文件仓库相对路径（须进清单且存在）",
+      "variants": "结构化事实对象数组（见各 id 类要求）",
+      "facts": "case 级结构化事实（EVI-01/PER-04 用）"
+    }
+  },
+
+  "per_id_classes": {
+    "NO_MPV_CASES": {
+      "ids": ["UNIT-P2-01", "UNIT-P3-01", "EVI-01"],
+      "rule": "无 sessions/triplet 要求；EVI-01 另有 negatives_detected/positive_control_clean"
+    },
+    "LEGACY_DESC_REQUIRED": {
+      "ids": {"SHD-01": "desc_keyword_pass_hits: int>0", "SHD-02": "desc_keyword_pass_hits: int>0", "SHD-04": "required_desc_hits: dict 任一 true"},
+      "rule": "P2 形状保持；0==0 计数拒绝"
+    },
+    "P3_DESC_CASES": {
+      "ids": ["SHD-05", "SHD-06", "SHD-07"],
+      "rule": "PASS 必须有 desc_evidence={count:int>=1, sample_hits:{关键词:[逐字日志行,…]}}；每条样本行必须逐字出现在该 case 某 session 的 console.txt/mpv.log 字节中（伪造样本=FAIL）；count>=样本行数；无 desc_evidence 或空 hits=FAIL；'user shader' 子串计数不生效",
+      "restart_rule": "建议 ≥2 个 session（重启链覆盖 P2R-F2）；至少 1 个且 triplet 完整"
+    },
+    "SAME_MOMENT_CASES": {
+      "ids": ["SHD-05", "SHD-06", "SHD-07", "GEO-02", "GEO-03", "GEO-04", "GEO-05", "GEO-06", "WINDOW-01", "PER-04-COMPUTE"],
+      "record_shape": "p3_lib.same_moment_sample 产出：{pixelformat:str非空, w,h,dw,dh,osd_w,osd_h:正整数, vo_passes_frame_counts:{fresh:int>=0, redraw:int>=0}, same_window:true} —— 解码参数与几何同窗采样（VL-F1 闭环）；文字声明不算数",
+      "rule": "PASS 至少 1 条合法记录；存在非法记录即 FAIL"
+    },
+    "RENDER_FRESH_CASES": {
+      "ids": "与 SAME_MOMENT_CASES 相同",
+      "freshness_shape": "{render_fresh:true, method:'vo-passes-fresh-increase'|'forced-redraw'|'new-output-pixels', chain_epoch:int, fresh_before:int, fresh_after:int}",
+      "rules": [
+        "method 必须是三种真实渲染新帧证据之一；任何仅解码活性（decoder-*）不能兜底 active 断言（core run-004 教训）",
+        "fresh_before < fresh_after 必须 0<=before<after（0==0 拒绝）",
+        "freshness.chain_epoch 必须等于该 variant 的 chain_epoch（陈旧 epoch 配对=FAIL）",
+        "PASS 至少一个 variant 携带合法 freshness；非法块存在即 FAIL"
+      ]
+    },
+    "INTEGER_NATIVE_BOOL_CASES": {
+      "ids": ["GEO-02", "GEO-03", "GEO-04", "GEO-05", "GEO-06"],
+      "rule": "PASS 至少一个 variant 携带 native_unscaled={native_type:'bool', value:true|false}——mpv 原生 video-unscaled 读回类型断言，非 'yes'/'no' 字符串（CORE-R1）；存在非 bool 记录即 FAIL"
+    },
+    "SHD-09": {
+      "rule": "PASS 必须 8bit 与 10bit 都有真实 same_moment 解码身份（10bit 需 pixelformat 含 '10'，如 yuv420p10le；8bit 不得含 '10'/'16'），或该 bitdepth 明确 {refused:true, reason:非空}（有理由拒用，不得无测称支持）；声明 10bit 而解码身份是 8bit = FAIL"
+    },
+    "PER-04-COMPUTE": {
+      "rule": "PASS 必须 facts.perf_samples_ns = ≥2 个正整数原始 fresh-redraw ns 样本 + facts.samples_note 非空说明；本阶段非性能收益评估，不得宣称收益"
+    },
+    "EVI-01": {
+      "rule": "PASS 必须 facts.negatives_detected 覆盖且全部 === true：以下 10 个规范负例类；且 facts.positive_control_clean === true。负例在临时沙箱真实植入对本 checker 实测，报告落盘；不得在证据目录内植入越名文件",
+      "canonical_negative_keys": [
+        "path_traversal", "manifest_omission", "wrong_hash", "replaced_png",
+        "fake_desc_samples", "zero_zero_counting", "decoder_fake_freshness",
+        "stale_epoch", "native_bool_violation", "restart_missing"
+      ]
+    }
+  },
+
+  "checker_cli": {
+    "command": "python -X utf8 tools/p3_check_evidence.py --evidence-dir docs/验证/开发/p3-001/<subdir>/<run> --session p3-001 [--require-tests] [--write-gate]",
+    "exit_codes": {"0": "全部检查通过", "1": "存在真实问题（problems 以 JSON 打印）", "2": "参数错误（证据目录越界会话树等）"},
+    "flags": {
+      "--require-tests": "35 个 REQUIRED id 全部存在且 PASS；required_unmeasured 为空",
+      "--required-ids": "仅 checker 自测用覆盖",
+      "--write-gate": "create-only 写 evidence-gate.json（钉 manifest-verify）；FAIL 原样保留；已存在则 create-only 拒绝"
+    }
+  },
+
+  "executable_proofs": {
+    "unit_tests": "tests/test_p3_evidence.py：56 项（阳性对照全绿 + 每个负例类真实植入被检出），全部通过；见 new-unit-tests.log [1]",
+    "negative_matrix": {
+      "path_traversal": "case.files / png_captures 带 .. → 非法证据引用/路径非法",
+      "manifest_omission": "磁盘文件未绑定 → 全目录覆盖漏项；孤儿 <stem>.console.txt → 无 case 声明",
+      "wrong_hash": "绑定文件字节改动 → SHA-256 不符",
+      "replaced_png": "换字节+陈旧 captures sha → 疑似替换 PNG；谎报尺寸 → 与真实解码不符",
+      "fake_desc_samples": "样本行不在任何会话日志 → 伪造样本",
+      "zero_zero_counting": "count==0 / desc_keyword_pass_hits==0 / fresh_before==fresh_after → 拒绝",
+      "decoder_fake_freshness": "method=decoder-* → 解码活性不能兜底",
+      "stale_epoch": "freshness.chain_epoch≠variant.chain_epoch → 陈旧 epoch 配对",
+      "native_bool_violation": "native_type=str/yes → 非原生 bool",
+      "restart_missing": "声明 session 的 triplet 缺件 → 漏收"
+    }
+  },
+
+  "boundaries": {
+    "gate_checks_structure_only": "哈希/尺寸/同SHA诚实标注/epoch配对/同窗结构由本门负责；像素级 oracle（xBR CPU replica、NIS 存储索引、letterbox/块分布）由各 case 的 CPU 对照与真实截图分析承担",
+    "no_product_feature": "本工具不实现产品功能、不伪造 PASS；有真实 FAIL 必须退出非 0",
+    "safety": "不写活动 APPDATA/mpv、D:/MPV、备份 payload；临时 config/HOME/缓存、无凭据 env、只停自启 PID；不部署/不提交",
+    "not_provided": "非 OS 沙箱/非跨进程事务（与 p1_check_evidence 同纪律）"
+  }
+}

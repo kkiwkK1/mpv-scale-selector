@@ -1,0 +1,19 @@
+{
+  "note": "本轮 harness 实际引用的产品/工具源 SHA-256（只读留痕）",
+  "pins": {
+    "scripts/scale-selector.lua": "85f13b4945377010df2ba6e19fa08c363f9312530aaafac07a2cd3dccb3bacf6",
+    "script-opts/scale-selector-gears.conf": "62e1bb838eb2e5768b2992d38b025ca5cd869316945a14f1824f76b11d7c19a3",
+    "shaders/p3-NIS.glsl": "046693c49bad8ca9f125694793ae8da32f7c0a5b6aaeb42c60334e1ece8bc358",
+    "shaders/p3-xBR-lv2.glsl": "ce31e8c26b1aace9cbe2b8d1de2ba52ac8fbd453374a80a720720916379fe2b5",
+    "shaders/p3-Sharp-Bilinear-AUTO.glsl": "e2aac70b32026dcc4cf97b367fb8bcd3ad704a7ee46dc6670f1fa312738319ff",
+    "shaders/p3-Sharp-Bilinear-2x.glsl": "877ec2aecde40cdf03e6c5d0404aaa9189aa4a04c3498bc8cbe2ac55c04d021e",
+    "shaders/p3-resource-manifest.json": "d9a41f3ab8b49139a8e19f657ed60c9afed3cad5cbcbe44a96e2349b9a5dc5c5",
+    "tools/p1_lib.py": "36448e8e635ad9410ee6c7825e90b0e2cd0baf6fdd445b5b3560a4de4195b698",
+    "tools/p2_lib.py": "69abc64c711ba51c537185a02b5e496229070085bb7a40e2ecb962b333c5427d",
+    "tools/p3_lib.py": "a266d32da16818f3805d96acdd254aec9b94abff58b558dc9bca7a4d3f3d0eb6",
+    "tools/p1_verify.py": "aa48b78d7f41269dfe8ed9a7137a6c99c8497b070ccd22fe33bf6d04a3c88c8f",
+    "tools/p2_verify.py": "a599e04023ffb11c8cbdec5e399becda154eb545704eeee4575fc2ce0397f8a4",
+    "tools/p3_verify.py": "2cceb8513c2ad54a62ac7684b0d188b38ea3398358f4963285e47a0e9e087952",
+    "tools/p3_check_evidence.py": "848f155e5e3e696de2b4bb67a1577db3d3c13e98409c0199e4ceda4154007b31"
+  }
+}

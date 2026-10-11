@@ -1,0 +1,119 @@
+{
+  "status": "READY_FOR_AUTHOR",
+  "stage": "P3",
+  "session": "p3-001",
+  "role": "bounded serial finish-harness writer (brief-v3 scope: five root causes only)",
+  "generated_at": "2025-12-27",
+  "authority": {
+    "plan_sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d",
+    "plan_path": "docs/P3实施计划.json",
+    "brief_v3_path": "docs/P3/P3验证器限域收敛brief-v3.json",
+    "brief_v3_sha256": "8bcb93ac5c59033d46b857e24069f9f15408fecd4f96589fef23b4b60a6d1d94",
+    "semantics_authority": [
+      "docs/P3/P3执行约束与验收brief.md",
+      "docs/P3实施计划.json (required_test_notes)",
+      "docs/P3/P3核心限域修正brief-v2.json",
+      "docs/P3/P3验证器限域收敛brief-v3.json"
+    ],
+    "work_permit": "docs/验证/开发/p3-001/work-permit.json (PASS, isolated-P3-work-only, unchanged)"
+  },
+  "unit_tests": {
+    "command": "python -X utf8 -m unittest discover -s tests -p \"test_*.py\" -v",
+    "log": "docs/验证/开发/p3-001/finish-v3/unit-tests.txt",
+    "result": "265 tests, OK, skipped=1",
+    "delta_vs_baseline": "original 259 kept (0 deleted, 0 skipped additionally, 0 assertions loosened) + 6 new",
+    "platform_skip_disclosure": "tests/test_p3_evidence.py::test_symlink_inside_evidence_dir_rejected skipped — 'symlink creation not available on this platform' (Windows symlink privilege; pre-existing skip, retained and disclosed per constraints)",
+    "new_tests": [
+      "tests/test_p3_support.py::TestP3VerifyHarnessSupport.test_quantization_space_half_lsb_and_rejection_bounds (V3-Q1)",
+      "tests/test_p3_support.py::TestP3Y4mTenBitByteOracle.test_header_frame_markers_and_exact_sizes (V3-M2)",
+      "tests/test_p3_support.py::TestP3Y4mTenBitByteOracle.test_planes_are_real_le16_tens (V3-M2)",
+      "tests/test_p3_support.py::TestP3Y4mTenBitByteOracle.test_all_y_words_within_10bit_range_and_word_width_pinned (V3-M2)",
+      "tests/test_p3_support.py::TestP3Y4mTenBitByteOracle.test_sar_header_variant (V3-M2)",
+      "tests/test_p3_support.py::TestP3Y4mTenBitByteOracle.test_p3context_make_y4m_delegates_to_pure_writer (V3-M2)"
+    ]
+  },
+  "smoke": {
+    "scope": "bounded small smoke: SHD-06, SHD-07, SHD-09, SHD-10, SHD-11 (the 4 FAIL ids under harness-r8 + the new real SHD-09); NOT the full 35 (next author role)",
+    "evidence_dir": "docs/验证/开发/p3-001/finish-v3/smoke-r8 (create-only fresh dir)",
+    "command": "python -X utf8 tools/p3_verify.py --only SHD-06,SHD-07,SHD-09,SHD-10,SHD-11 --session p3-001 --evidence-dir docs/验证/开发/p3-001/finish-v3/smoke-r8",
+    "exit_code": 0,
+    "results": "5/5 PASS",
+    "manifest_sha256": "bdfd88a5a3f437afba44d24366a92222f9af098fd082742b6a80a061df6e4e8d",
+    "structure_check": "tools/p3_check_evidence.py (read-only, no --require-tests, no --write-gate): problems=[]",
+    "required_unmeasured": 30,
+    "non_corroborative_disclosure": "SHD-07 b/c window PNGs byte-identical (sha 2604ab0a…): AUTO floor(320/160+0.01)=2 and manual 2x are the same pinned mapping, so identical pixels are formula-consistent; flagged honestly by the harness, counted once, and neither variant verdict rests on the PNG bytes (each compares decoded pixels against its own CPU golden)."
+  },
+  "five_root_causes_closed": {
+    "V3-Q1": {
+      "fix": "tests/test_p3_support.py fixture moved to ONE documented 8-bit quantization space: replica truth = exact byte fractions b/255, captured bytes = same bytes → true byte-equality ZERO (round(178.5)==178 banker's trap documented); companion test pins 0.0/0.5(half-LSB)/1.0(LSB) on compare_to_golden and proves a wrong replica stays rejected with UNCHANGED gates. Zero assertion NOT relaxed; oracle tolerances NOT touched.",
+      "evidence": "unit-tests.txt: test_edge_discriminator_prefers_exact_replica ok, mean_diff_to_xbr_replica == 0.0"
+    },
+    "V3-C1": {
+      "fix": "tools/p3_verify.py case_shd06 variant-a and _shd07_variant: close_menu + wait_osd_gone(blip=True) (real >3s notification expiry from final activation + pause-blip genuine repaint of the still) BEFORE the raw window capture; exact PNG dimension gate BEFORE any sampling (hard clear failure, no clamp/resample/crop); new full_frame_out_of_bound() dense-grid OSD-free witness vs CPU replica. mean/max oracle thresholds UNCHANGED.",
+      "evidence": {
+        "SHD-06.a": "288x162 exact; flat mean 0.08 / max 1.0 (was 0.95/220 with OSD text); edge 0.15 vs bilinear 4.51; OSD-free scan 0 out-of-bound of 11664 px, worst 1.0",
+        "SHD-07.a/b/c/d": "dims exact 512x288/320x180/320x180/240x135; golden mean 0.07-0.08 / max 1.0; OSD-free 0 out-of-bound (36864/14400/14400/8160 px)",
+        "raw_pixel_pngs": [
+          "docs/验证/开发/p3-001/finish-v3/smoke-r8/SHD-06.a-window.png",
+          "docs/验证/开发/p3-001/finish-v3/smoke-r8/SHD-07.a-auto-degenerate-floor1-window.png",
+          "docs/验证/开发/p3-001/finish-v3/smoke-r8/SHD-07.b-auto-real-2x-window.png",
+          "docs/验证/开发/p3-001/finish-v3/smoke-r8/SHD-07.c-manual-2x-window.png",
+          "docs/验证/开发/p3-001/finish-v3/smoke-r8/SHD-07.d-auto-scale0-clamp-window.png"
+        ],
+        "sha_note": "true decoded dims + sha256 for every capture are pinned in smoke-r8/objective-results.json png_captures"
+      }
+    },
+    "V3-M1": {
+      "fix": "tools/p3_verify.py: new wait_video_out_params() (real non-empty pixelformat + source w/h; gamma pq/hlg where required) waited BEFORE same_moment sampling in case_shd10/case_shd11/_shd09_variant; new force_present_still() + wait_desc_pass_samples() — after each still-image shader switch the NEW gear's DESC must appear in a vo-pass with non-empty GPU samples at a stable chain_epoch (no prior-pass sampling). STATE-based refusal witnesses and P2 guard semantics kept untouched.",
+      "evidence": {
+        "SHD-10": "pixfmt rgb24 (was empty), video_out_params_ready=true, xbr/sharpbilinear/sharpbilinear2x all desc hits with samples + epoch stable",
+        "SHD-11": "gamma pq (was None), video_out_params_ready=true; guard matrix PASS (P2 luma RGB-reject + P3 independent HDR wording intact)",
+        "SHD-09": "params_ready=true on all 12 variants"
+      }
+    },
+    "V3-M2": {
+      "fix": "tools/p3_verify.py: new pure write_y4m() — ten_bit=True now emits REAL little-endian 16-bit words (10-bit samples 0..1023: luma bands 120/920 ^0x141 detail, chroma u=513/v=608 like the frozen P2 writer) for ALL Y/U/V planes with exact 2x lengths, valid C420p10 header and per-frame markers; 8-bit C420jpeg layout byte-unchanged; SAR preserved. P3Context.make_y4m delegates. Byte-oracle unit tests reject any relabelled-8bit file by construction (frame size/offsets/word width/range). Old fake-8bit-body SHD-09 PASS voided and re-run: 5 P3 gears x 8/10bit + fsr1 wrapper (P2 original SHD-09 10-bit fsr1 semantics preserved inside the P3 wrapper, not dropped).",
+      "evidence": {
+        "SHD-09": "12/12 variants PASS: 8bit → yuv420p, 10bit → yuv420p10 real decode; media_sha256 recorded per variant; desc EASU+RCAS/fsr1, xBR, Sharp AUTO/2x with samples + epoch stable; integer gears native_unscaled path intact",
+        "unit_oracle": "TestP3Y4mTenBitByteOracle 5/5 ok (sizes, FRAME markers, LE words 120/920/513/608, all words ≤1023, >255 words exist, delegation)"
+      }
+    },
+    "V3-E1": {
+      "fix": "tools/p3_verify.py summary semantics_authority corrected to actual existing paths (docs/P3/P3执行约束与验收brief.md + docs/P3实施计划.json [sha==frozen plan] + docs/P3/P3核心限域修正brief-v2.json + docs/P3/P3验证器限域收敛brief-v3.json); this build-handoff.json added with ACTUAL computed file SHAs (no hand-copied guesses). Frozen plan/old notes untouched — failures stay recorded where they happened.",
+      "evidence": "smoke-r8/objective-results.json carries the corrected string; freshness method unchanged (timing sample counts, pixel-method decodes pixels, no decoder fallback)"
+    }
+  },
+  "source_sha256": {
+    "tools/p3_verify.py": "96cfde09133be81e343183322d329813db8e05909c51712e74eabfca02997336",
+    "tests/test_p3_support.py": "752f3c6908a3f79ee8e505534783991ff6e1fad907bf6535245b8c6d4ad31150",
+    "tools/p3_lib.py": "a266d32da16818f3805d96acdd254aec9b94abff58b558dc9bca7a4d3f3d0eb6",
+    "tools/p2_lib.py": "69abc64c711ba51c537185a02b5e496229070085bb7a40e2ecb962b333c5427d",
+    "tools/p1_verify.py": "aa48b78d7f41269dfe8ed9a7137a6c99c8497b070ccd22fe33bf6d04a3c88c8f",
+    "tools/p2_verify.py": "d3cb2b490581a9958262b726b7443bddb861c9ec0cb71bfe4c4d73cfaa626c7d",
+    "tools/p3_check_evidence.py": "848f155e5e3e696de2b4bb67a1577db3d3c13e98409c0199e4ceda4154007b31"
+  },
+  "edited_paths": [
+    "tools/p3_verify.py",
+    "tests/test_p3_support.py",
+    "docs/验证/开发/p3-001/finish-v3/ (new create-only evidence)",
+    "docs/验证/开发/p3-001/verifier-build/build-handoff.json (this file)"
+  ],
+  "untouched_read_only": [
+    "scripts/scale-selector.lua, script-opts/scale-selector-gears.conf, shaders/*, p3-resource-manifest.json (controller/shaders/manifest algorithms untouched)",
+    "docs/验证/开发/p3-001/implementer/smoke-r1..r7, leader-diagnostic/harness-r8, partial-harness-run1/* (all prior evidence read-only, retained)",
+    "docs/P3 frozen plan/briefs/work-permit, verifier-build/evidence-tools-contract.json + prior EVI logs"
+  ],
+  "isolation_compliance": {
+    "backend": "direct mpv.exe, vo=gpu-next, gpu-api=vulkan",
+    "isolation": "synthetic media, temp cfg/HOME/APPDATA/TEMP/cache, credential-free child env, own-PID-only kills",
+    "no": "deployment / live config writes / DPI changes / global kill / git commit / user-acceptance forgery"
+  },
+  "next_author_instructions": {
+    "role": "source-READ-ONLY author run of the full 35-id matrix into a fresh create-only dir (e.g. finish-v3/full35-r1); independent integration freeze of the SAME candidate (source_sha256 above); read-only dual tech/safety reviews must not be omitted",
+    "commands": [
+      "python -X utf8 tools/p3_verify.py --all --session p3-001 --evidence-dir docs/验证/开发/p3-001/finish-v3/full35-r1",
+      "python -X utf8 tools/p3_check_evidence.py --evidence-dir docs/验证/开发/p3-001/finish-v3/full35-r1 --session p3-001 --require-tests"
+    ],
+    "rework_trigger": "any real FAIL (esp. pixel oracle beyond fixed thresholds) is REWORK — never weaken golden/tolerances or gate on captured pixels"
+  }
+}

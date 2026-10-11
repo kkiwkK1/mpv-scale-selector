@@ -1,0 +1,27 @@
+{
+  "stage": "P4",
+  "session": "p4-001",
+  "baseline": "docs/验证/开发/p4-001/plan-v1-blocked/snapshot.json",
+  "retained_review": "docs/验证/开发/p4-001/plan-v1-blocked/plan-adversarial-review.json",
+  "original_plan_sha256": "3012110a21cb5477a913b31b4b618374525f283a8eccc6c59b0d1ef5b5110cab",
+  "scope": "只修未批准的P4计划与测量方法两文件；旧失败plan/method/review/guard已原byte归档；禁止源码实施/真实GPU/修改旧5715文件。领导者另修P4新guard自绑定并加测试，不弱化任何门。",
+  "write_paths": ["docs/P4实施计划.json", "docs/P4/P4测量方法.md"],
+  "required_changes": [
+    {"id":"F-01","severity":"major","decision":"为G2b补确定性的1280x720运动媒体参数/fps/时长/seed/hash/体积绑定，或预注册明确取消并记未测；不临测时临造。"},
+    {"id":"F-02","severity":"major","decision":"vo-passes对RIFE-on混合S/M无法分别归因；OFF源帧run与ON混合帧run分别统计并配对比较，禁止将OFF代称ON的S帧实际GPU开销或用CPU日志/帧序推造GPU余量。无真正end-to-end/present时间只能『共存运行状态、drop与渲染pass快照』，数值总余量ms未测，不能反推RIFE时延。"},
+    {"id":"F-03","severity":"minor","decision":"逐组列计时与截图trial清单并核对预算，包含真实RIFE鉴别样本；n必须整数、不用3/5歧义阈值；预算缩减标预定未测/不足不得改写目标n。"},
+    {"id":"F-04","severity":"minor","decision":"WDDM逐进程memory可能N/A，明定可得的全GPU基线memory.used/util门和mpv进程冲突查；不要把全GPUutil叫其他进程util，缺观察源不能空真。稳态nvidia-smi采样开销也要纳入CAL。"},
+    {"id":"F-05+LF-03","severity":"major","decision":"公平主比较须所有arms从同一profile=high-quality和所有非算法控制相同的isolatedbase起步，仅所选主链及其必需owned属性不同。实读完整影响渲染属性diff/chain，不是baselineHQ用HQ其它用defaults后靠免责声明。算法必需的scale/cscale/geometry差异明确列，非必需deband/dither/colorspace等不同直接无效，不得将整profile差当算法效果。"},
+    {"id":"F-06","severity":"minor","decision":"领导者已修改taskflows/p4_guard.py permit绑自身与testsha，permit-check拒变；writer不得改guard/基线。后续candidate还须明确所有P4环境与源码依赖。"},
+    {"id":"F-07","severity":"minor","decision":"写死媒体seed常数和clipID派生hash算法(禁止Python进程随机hash)，生成器版本/参数作为必需依赖。"},
+    {"id":"LF-01","severity":"major","decision":"当前warmup要求10秒后fresh总count连增与已知rollingcount饱和矛盾。去掉连增硬要求，预注册正确pass/DESC/nonemptytiming+稳定source/epoch/readback+校准同renderedstream的像素新鲜度证据，既不因为饱和误杀、也不以解码活性/PNG元数据冒GPU新鲜。不得每性能trial截图/seek打断稳态后混算：校准controlledstep和性能steadyloop的证据/观察扰动必须分开，真实计时run用可用fresh/renderstate+媒体progress且诚实标局限。"},
+    {"id":"LF-02","severity":"major","decision":"延长预热到15秒却固定测量10..20秒、媒体24秒、22.5秒退出相互冲突。固定明确warmup范围及测量窗相对实际warmup结束的monotonic时刻，media足够长含load延迟、校准4xmax壁钟预算，记录真实PTS防循环/EOF；性能墙钟可定窗口但绝不能说是屏幕present间隔。"},
+    {"id":"LF-04","severity":"major","decision":"--vo=image只允许独立RIFE滤镜输出鉴别，明确非gpu-next shader渲染证据，绝不能供PIC01/02/04算法A/B。PIC必须gpu-next/Vulkan真实window/outputPNG+实际rect/OSDfree、同源S帧身份定位、完整recipe/DESC/nonempty采样。RIFE模型不承诺近似线性插值，不用CPU linear ratio[.15,.75]当神经网络正确性hardgate；用强鉴别noncopy/nonblend负控+模型运行证据，并预先定实际像素条件，模型不满足保留NOT_ESTABLISHED不看结果换样本凑过。fps取真实filter-output而非未必改的container-fps，字段实际校准不可臆造。"},
+    {"id":"LF-05","severity":"major","decision":"FSR参数方向反向(0最锐/2弱)，NIS .25[0,1]，SGSR参数不同机制；当前产品标固定不开放运行时，不能default+documentedstep假三套都可扫。PIC03改为默认参数/范围/方向/机制静态绑定+公平性披露(无可证STEP不造)；可选sweep明确本轮NOT_RUN_FIXED_PRODUCT_PARAMS，不改P3shader/registry或冒产品默认身份。这是测前计划范围修正，非见结果删失败，预算同步删不存在的sweep。"},
+    {"id":"LF-06","severity":"major","decision":"不能只留TEMP原PNG的hash+缩小预览替代可复核全分辨率证据。无私人内容的合成媒体/PNG原件必须持久保留在P4evidence或明确外部持久artifact目录并逐hash绑定；未授权提交不意味着必须删或压缩原件。选择压缩、降低预注册样本数量或调高合理磁盘上限(先查free)而非牺牲原件；全文media_policy/disk/evidence一致。"},
+    {"id":"LF-07","severity":"minor","decision":"n=5加相邻block反转不等于严格ABBA完全平衡；术语应精确，固定per-block permutation与odd n残余顺序不平衡披露，或改成真正平衡偶数n并核预算。drop-affectedrun保留不能仅因效果差剔除，只有先验污染/采集无效才失效。"}
+  ],
+  "acceptance": "两文件一致、plan机器schema通过、每id修订映射完整；新candidate plan SHA独立限域复审，major未清不许可；无实现/production/真人结论。",
+  "model": "zai-coding-cn/glm-5.3-flash",
+  "thinking": "xhigh"
+}

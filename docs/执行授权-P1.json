@@ -1,0 +1,16 @@
+{
+  "schema": "mpv-scaler-chat-authorization/v1",
+  "source": "explicit_user_message",
+  "user_request": "计划写好就开始执行吧，不用等我确认，zai-coding-cn glm-5.3-flash 用这个",
+  "stage": "P1",
+  "session": "p1-001",
+  "allow_isolated_implementation_and_tests": true,
+  "request_start_confirmation_again": false,
+  "model": "zai-coding-cn/glm-5.3-flash",
+  "thinking_request": "xhigh",
+  "allow_live_configuration_write": false,
+  "allow_installation_or_live_restore": false,
+  "human_subjective_acceptance_claimed": false,
+  "scope": "菜单骨架、ownership/Off/external/fallback状态管理、禁用项原因、隔离验证及独立审核；不提前接入P2/P3算法或部署",
+  "notes": "替代本次启动前的交互确认，不伪造(approve)输出。客观检查可以自动推进；真人体验和画质评分没有实际执行时必须保留待检查。"
+}

@@ -1,0 +1,22 @@
+{
+  "stage": "P3",
+  "session": "p3-001",
+  "revision": "r2",
+  "candidate_dir": "docs/验证/开发/p3-001/revision-r2",
+  "created_epoch_ms": 1791250996901,
+  "original_failed_candidate_sha256": "62aa973ab6a68e299bf5b88289abef241f1bd2030e0709101ff34f55b534a53e",
+  "original_failed_tests_sha256": "7dd054222d6d02b32f85f57c1d79d53d8c8bf029cc93466486b4761d9fde9b47",
+  "frozen_plan_sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d",
+  "original_authorization_sha256": "935e7f12ab6b92495c16e878405a950c1686b1a4a86e5b5fb043c17dfc2fb3d8",
+  "revision_brief": "docs/P3/P3独立集成限域修正brief-v5.json",
+  "revision_brief_sha256": "ec051d29fce8557d1b93e70398ccd725a0a899904adb0dfe1776bdcd98e0eed5",
+  "prior_source_archive": "docs/阶段源码快照/p3-001-failed-r1",
+  "allowed_source_writes": [
+    "tools/p3_verify.py",
+    "tests/test_p3_support.py",
+    "docs/P3/P3实现说明.md",
+    "docs/插件/缩放选择器-P3用户说明.md"
+  ],
+  "scope": "continuing same chat-authorized isolated P3; no live writes or subjective acceptance",
+  "historical_integrity": "Old nonacceptance manifest mismatches explicitly retained. These pinned current bytes do not reconstruct old hashes or erase prior VL3-05."
+}

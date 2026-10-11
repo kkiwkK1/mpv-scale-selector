@@ -1,0 +1,37 @@
+{
+  "schema": "mpv-scaler-recovery-brief/v1",
+  "stage": "P2",
+  "session": "p2-001",
+  "source_run": "mpv-scale-p2-continue-v1-mus27ef7-b1a1b6",
+  "model_evidence": "implement模型字段zai-coding-cn/glm-5.3-flash，106工具回合，Subagent was aborted；用户随后纠正误认并明确让继续。没有使用DeepSeek，不切模型。",
+  "task_baseline": "沿用docs/P2中断接续brief-v1.json全部约束，在第二次部分实现上接续。p2_verify.py已存在，原91+新30=121单测本次领导者实测全部通过；没有全阶段通过报告/候选/双路审核。无p2-001测试mpv残留PID（CIM命令行匹配查询为空）。",
+  "authoritative_decisions": "v1中首次接管整property单主链、Off/external整propertyownership、窗口显示矩形而非dw/dh、原671证据只读、明确HDR metadata override/无主观验收均继续生效；冻结计划methods歧义不可覆盖这些决策。不要重跑preflight/规划/copy，不删已过121测试或旧失败证据。",
+  "latest_real_smoke": [
+    {
+      "path": "docs/验证/开发/p2-001/debug-r2-shd01/objective-results.json",
+      "id": "SHD-01",
+      "status": "PASS",
+      "limit": "只是调试子集，不是最终P2 pass；需重新把最终源绑定全矩阵及独立验证。"
+    },
+    {
+      "path": "docs/验证/开发/p2-001/debug-r2-batch2/objective-results.json",
+      "id": "SHD-02",
+      "status": "FAIL",
+      "observed": "放大变体whole recipe为SGSR1，chain_verified=true，但fresh desc_hits(Snapdragon Game Super Resolution)=false，fresh_n=4。可能fresh/redraw切换/旧帧竞态/检测缺陷，必须读实际两类pass与时序再判断，不能单纯降低断言或把陈旧redraw当新算法已生效。窗口2496x1404不是要求的2560x1440主场景，最终必须记录真实4/3输出/纹理目标，不能拿screenshot尺寸当中间纹理尺寸。"
+    },
+    {
+      "path": "docs/验证/开发/p2-001/debug-r2-batch2/objective-results.json",
+      "id": "CTL-09",
+      "status": "PASS"
+    },
+    {
+      "path": "docs/验证/开发/p2-001/debug-r2-smoke2/objective-results.json",
+      "id": "SHD-03",
+      "status": "FAIL",
+      "observed": "Nearest三核已生效且shader list为空；Off恢复scale=bicubic,cscale=bicubic,dscale=hermite，测试草稿off_restores_bicubic假定三核原值全bicubic所以false。必须在激活前采真实baseline并逐属性比较，而不是把所有默认核强改bicubic凑过。最终默认验证用原high-quality/ewa_lanczossharp基线，文档不能把Bicubic自测冒充原配置。"
+    }
+  ],
+  "finish_gate": "完成24必测ID全部正/负例，真实Stocka..f+键位整链对照，SGSR/FSR实际pass/WHEN/目标尺寸/双深度/RGB-HDR/编译PARAM失败/快速切换1秒/退出/窗口clip旧帧/原Anime基线首次替换与Off/external；作者完整自测报告、资源许可、P2新实现与用户说明。然后独立负责人复跑冻结、同候选两审，无必需未测才能客观PASS。",
+  "safe_checks": "以新的p2-001/implementer有效证据目录执行完整回归，调试与失败目录不删除不覆盖；若已用则另选全新子目录并写交接。固定gpu-next/vulkan、合成源、隔离HOME/APPDATA/cache、无凭据env、自有PID，活动源备份零写入，P1旧证据与归档不改。源变化后必须重测受影响项，不能仅沿用smoke PASS。",
+  "limitations": "121 Python单测不替代Lua真实mpv行为/算法pass/画质/性能，P2-UC和系统DPI/跨屏仍pending。只用指定flash，不伪造用户批准，不部署。"
+}

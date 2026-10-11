@@ -1,0 +1,138 @@
+{
+  "schema": "p3-evi01-sandbox-report/v1",
+  "session": "p3-001",
+  "checker": "tools/p3_check_evidence.py run_full_gate (imported, real code)",
+  "sandbox": "system-temp throwaway synthetic repo（证据目录外，零残留）",
+  "positive_control_clean": true,
+  "negatives": {
+    "positive_control_problems": [],
+    "decoder_fake_freshness": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "case GEO-02: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）",
+        "case GEO-03: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）",
+        "case GEO-04: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/objective-results.json",
+        "case GEO-02: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）",
+        "case GEO-03: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）",
+        "case GEO-04: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）",
+        "case GEO-05: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）",
+        "case GEO-06: freshness 证据全部无效: method='decoder-time-pos-advance' 不是真实渲染新帧证据（解码活性不能兜底 GPU 渲染证明）"
+      ]
+    },
+    "fake_desc_samples": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "case SHD-06: PASS 的 desc_evidence 全部无效（反 0==0/伪造样本门）: desc 样本行未在任何会话 console/mpv.log 中出现（伪造样本）: '[vo] fabricated line that exists nowhere in the logs'"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/objective-results.json",
+        "case SHD-06: PASS 的 desc_evidence 全部无效（反 0==0/伪造样本门）: desc 样本行未在任何会话 console/mpv.log 中出现（伪造样本）: '[vo] fabricated line that exists nowhere in the logs'"
+      ]
+    },
+    "manifest_omission": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "全目录覆盖漏项（磁盘存在但清单未绑定）: GEO-03-s1.unbound.txt"
+      ],
+      "all_problems": [
+        "全目录覆盖漏项（磁盘存在但清单未绑定）: GEO-03-s1.unbound.txt"
+      ]
+    },
+    "native_bool_violation": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "case GEO-02: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）",
+        "case GEO-03: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）",
+        "case GEO-04: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/objective-results.json",
+        "case GEO-02: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）",
+        "case GEO-03: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）",
+        "case GEO-04: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）",
+        "case GEO-05: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）",
+        "case GEO-06: 存在非原生 bool 的 video-unscaled 读回记录: native_unscaled 非原生 bool 读回: type='string' value='yes'（CORE-R1：true/false 而非 yes/no）"
+      ]
+    },
+    "path_traversal": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "case CTL-01: 非法证据引用 docs/验证/开发/p3-evi-sandbox/../../evil.txt: 证据路径不允许穿越/空段: 'docs/验证/开发/p3-evi-sandbox/../../evil.txt'"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/objective-results.json",
+        "case CTL-01: 非法证据引用 docs/验证/开发/p3-evi-sandbox/../../evil.txt: 证据路径不允许穿越/空段: 'docs/验证/开发/p3-evi-sandbox/../../evil.txt'"
+      ]
+    },
+    "replaced_png": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "png_captures 哈希与磁盘不符（疑似替换 PNG）: docs/验证/开发/p3-evi-sandbox/implementer/run1/SHD-05-a.window.png"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/SHD-05-a.window.png",
+        "png_captures 哈希与磁盘不符（疑似替换 PNG）: docs/验证/开发/p3-evi-sandbox/implementer/run1/SHD-05-a.window.png"
+      ]
+    },
+    "restart_missing": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "case SHD-05: 会话 SHD-05-s1-r2 缺少 .mpv.transcript.jsonl 产物（restart/console/IPC 漏收）"
+      ],
+      "all_problems": [
+        "清单文件缺失: docs/验证/开发/p3-evi-sandbox/implementer/run1/SHD-05-s1-r2.mpv.transcript.jsonl",
+        "清单条目在证据目录中缺失: SHD-05-s1-r2.mpv.transcript.jsonl",
+        "case SHD-05: 会话 SHD-05-s1-r2 缺少 .mpv.transcript.jsonl 产物（restart/console/IPC 漏收）"
+      ]
+    },
+    "stale_epoch": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "case GEO-02: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）",
+        "case GEO-03: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）",
+        "case GEO-04: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/objective-results.json",
+        "case GEO-02: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）",
+        "case GEO-03: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）",
+        "case GEO-04: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）",
+        "case GEO-05: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）",
+        "case GEO-06: freshness 证据全部无效: freshness.chain_epoch=8 ≠ variant.chain_epoch=3（陈旧 epoch 配对）"
+      ]
+    },
+    "wrong_hash": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/CTL-02-s1.mpv.log"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/CTL-02-s1.mpv.log"
+      ]
+    },
+    "zero_zero_counting": {
+      "planted": true,
+      "detected": true,
+      "matched_problems": [
+        "case SHD-01: PASS 缺少 DESC 结构化命中证据（反 0==0 门）"
+      ],
+      "all_problems": [
+        "文件被改动（SHA-256 不符）: docs/验证/开发/p3-evi-sandbox/implementer/run1/objective-results.json",
+        "case SHD-01: PASS 缺少 DESC 结构化命中证据（反 0==0 门）"
+      ]
+    }
+  },
+  "note": "负例全部真实植入沙箱并对本 checker 实测；未在证据目录内植入越名文件"
+}

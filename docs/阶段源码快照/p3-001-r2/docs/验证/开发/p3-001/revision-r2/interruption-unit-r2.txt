@@ -1,0 +1,310 @@
+test_apply_requires_explicit_confirmation (test_mpv_config_backup.BackupTests) ... ok
+test_apply_restores_bytes_and_preserves_previous_state (test_mpv_config_backup.BackupTests) ... ok
+test_apply_to_absent_target (test_mpv_config_backup.BackupTests) ... ok
+test_archive_extra_entry_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_archive_tamper_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_case_colliding_paths_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_changed_source_detected_only_on_request (test_mpv_config_backup.BackupTests) ... ok
+test_closed_live_player_guard_returns_checked_status (test_mpv_config_backup.BackupTests) ... ok
+test_copy_failure_leaves_original_untouched (test_mpv_config_backup.BackupTests) ... ok
+test_dry_run_does_not_change_target (test_mpv_config_backup.BackupTests) ... ok
+test_duplicate_root_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_empty_directory_preserved_and_verified (test_mpv_config_backup.BackupTests) ... ok
+test_extra_payload_file_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_link_guard_rejects_before_mutation (test_mpv_config_backup.BackupTests) ... ok
+test_manifest_path_traversal_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_manifest_tamper_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_missing_payload_file_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_missing_target_parent_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_non_appdata_restore_warns_about_process_check (test_mpv_config_backup.BackupTests) ... ok
+test_payload_escape_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_payload_tamper_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_player_installation_is_not_valid_configuration_target (test_mpv_config_backup.BackupTests) ... ok
+test_post_install_failure_rolls_back_and_preserves_diagnostics (test_mpv_config_backup.BackupTests) ... ok
+test_rehearsal_is_not_live_restore (test_mpv_config_backup.BackupTests) ... ok
+test_running_live_player_guard_rejects_without_mutation (test_mpv_config_backup.BackupTests) ... ok
+test_secondary_rollback_failure_preserves_state_and_diagnostics (test_mpv_config_backup.BackupTests) ... ok
+test_stage_rename_failure_rolls_back_previous_directory (test_mpv_config_backup.BackupTests) ... ok
+test_target_inside_backup_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_target_inside_project_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_tasklist_failure_refuses_restore_without_mutation (test_mpv_config_backup.BackupTests) ... ok
+test_verify_and_source_comparison (test_mpv_config_backup.BackupTests) ... ok
+test_wrong_target_name_rejected (test_mpv_config_backup.BackupTests) ... ok
+test_candidate_illegal_source_path_detected (test_p1_evidence.CheckerFixtures) ... ok
+test_candidate_modified_source_detected (test_p1_evidence.CheckerFixtures) ... ok
+test_candidate_tests_sha_mismatch (test_p1_evidence.CheckerFixtures) ... ok
+test_clean_fixture_passes_with_tests_and_candidate (test_p1_evidence.CheckerFixtures) ... ok
+test_clean_fixture_passes_without_tests (test_p1_evidence.CheckerFixtures) ... ok
+test_crlf_json_rejected (test_p1_evidence.CheckerFixtures) ... ok
+test_dangling_reference_detected (test_p1_evidence.CheckerFixtures) ... ok
+test_illegal_reference_paths_detected (test_p1_evidence.CheckerFixtures) ... ok
+test_manifest_entry_missing_for_referenced_file (test_p1_evidence.CheckerFixtures) ... ok
+test_manifest_swap_detected_via_binding (test_p1_evidence.CheckerFixtures) ... ok
+test_missing_manifest_file_detected (test_p1_evidence.CheckerFixtures) ... ok
+test_modified_evidence_detected (test_p1_evidence.CheckerFixtures) ... ok
+test_require_tests_missing_id (test_p1_evidence.CheckerFixtures) ... ok
+test_copy_file_create_only (test_p1_evidence.CreateOnlyEvidence) ... ok
+test_pipe_and_temp_roots_use_session (test_p1_evidence.CreateOnlyEvidence) ... ok
+test_save_transcript_create_only (test_p1_evidence.CreateOnlyEvidence) ... ok
+test_screenshot_target_precheck (test_p1_evidence.CreateOnlyEvidence) ... ok
+test_session_targets_create_only_no_process (test_p1_evidence.CreateOnlyEvidence) ... ok
+test_write_json_create_only_and_lf (test_p1_evidence.CreateOnlyEvidence) ... ok
+test_fresh_dir_passes (test_p1_evidence.FreshDirGuard) ... ok
+test_frozen_marker_alone_refuses (test_p1_evidence.FreshDirGuard) ... ok
+test_used_dir_refused_without_force (test_p1_evidence.FreshDirGuard) ... ok
+test_used_dir_with_force_allowed_but_frozen_never (test_p1_evidence.FreshDirGuard) ... ok
+test_build_and_verify_roundtrip (test_p1_evidence.ManifestRoundtrip) ... ok
+test_rejects_out_of_repo_paths (test_p1_evidence.ManifestRoundtrip) ... ok
+test_verify_detects_forged_hash_and_bad_path (test_p1_evidence.ManifestRoundtrip) ... ok
+test_verify_detects_missing_file (test_p1_evidence.ManifestRoundtrip) ... ok
+test_verify_detects_modified_file (test_p1_evidence.ManifestRoundtrip) ... ok
+test_verify_detects_wrong_session_and_schema (test_p1_evidence.ManifestRoundtrip) ... ok
+test_rejects_absolute_backslash_drive (test_p1_evidence.SafeManifestPaths) ... ok
+test_rejects_missing_file (test_p1_evidence.SafeManifestPaths) ... ok
+test_rejects_out_of_session_tree (test_p1_evidence.SafeManifestPaths) ... ok
+test_rejects_symlink (test_p1_evidence.SafeManifestPaths) ... ok
+test_rejects_traversal (test_p1_evidence.SafeManifestPaths) ... ok
+test_valid_path (test_p1_evidence.SafeManifestPaths) ... ok
+test_bool_not_1 (test_p1_support.TestCloseEnough) ... ok
+test_floats (test_p1_support.TestCloseEnough) ... ok
+test_lists (test_p1_support.TestCloseEnough) ... ok
+test_scalars (test_p1_support.TestCloseEnough) ... ok
+test_json_utf8_lf (test_p1_support.TestEvidenceWriter) ... ok
+test_transcript_jsonl (test_p1_support.TestEvidenceWriter) ... ok
+test_write_text_lf_normalizes (test_p1_support.TestEvidenceWriter) ... ok
+test_env_and_pipe_session_param (test_p1_support.TestIsolatedEnv)
+限域修正：显式 session 参数使命名空间（临时根/IPC 管道）随会话变化。 ... ok
+test_env_isolation (test_p1_support.TestIsolatedEnv) ... ok
+test_input_conf_has_no_f8_and_has_external_paths (test_p1_support.TestIsolatedEnv) ... ok
+test_stub_gear_guard (test_p1_support.TestIsolatedEnv) ... ok
+test_stub_gears_are_named_and_rendered (test_p1_support.TestIsolatedEnv) ... ok
+test_write_mpv_conf_pins_backend (test_p1_support.TestIsolatedEnv) ... ok
+test_expected_gear_list (test_p1_support.TestOracles) ... ok
+test_external_clr_not_overridden (test_p1_support.TestOracles) ... ok
+test_external_list_element_level (test_p1_support.TestOracles) ... ok
+test_external_scalar_kept (test_p1_support.TestOracles) ... ok
+test_never_written_prop_ignored (test_p1_support.TestOracles) ... ok
+test_untouched_restores_baseline (test_p1_support.TestOracles) ... ok
+test_gears_conf_audit (test_p1_support.TestStaticPolicyAudits) ... ok
+test_pipe_namespace (test_p1_support.TestStaticPolicyAudits) ... ok
+test_plugin_source_audit (test_p1_support.TestStaticPolicyAudits) ... ok
+test_deterministic_and_wellformed (test_p1_support.TestY4mGenerator) ... ok
+test_parameters_change_hash (test_p1_support.TestY4mGenerator) ... ok
+test_fsr_when_and_skip_notes (test_p2_support.TestGuardOracles) ... ok
+test_hdr_detection (test_p2_support.TestGuardOracles) ... ok
+test_luma_guard_reason (test_p2_support.TestGuardOracles) ... ok
+test_rgb_detection (test_p2_support.TestGuardOracles) ... ok
+test_upscale_ratio_uses_window_pixels (test_p2_support.TestGuardOracles) ... ok
+test_broken_fixture_is_actually_broken (test_p2_support.TestIsolatedP2Env)
+缺分号 = 真实编译错误（此前探针证明 ;;;; 空语句会编译通过）。 ... ok
+test_fixtures_outside_release_dir (test_p2_support.TestIsolatedP2Env) ... ok
+test_input_conf_stock_block_and_no_f8 (test_p2_support.TestIsolatedP2Env) ... ok
+test_install_p2_resources_copies_and_can_break (test_p2_support.TestIsolatedP2Env) ... ok
+test_builtin_chains_shape (test_p2_support.TestMainChainPolicy) ... ok
+test_luma_gear_sets_match_lua (test_p2_support.TestMainChainPolicy)
+Python/Lua mirror consistency for the LUMA guard set. ... ok
+test_nearest_explicit_policy_in_lua_source (test_p2_support.TestMainChainPolicy)
+nearest 内建三值显式（scale/cscale/dscale 全 nearest），非隐式。 ... ok
+test_off_whole_chain_restore_and_external_preserve (test_p2_support.TestMainChainPolicy)
+关 oracle (registered whole chain): unmodified → restore the complete ... ok
+test_switch_replaces_whole_property (test_p2_support.TestMainChainPolicy)
+registered P2 gears are whole-property replacements (brief 纠正): the ... ok
+test_ppm_p6_wellformed (test_p2_support.TestP2Media) ... ok
+test_y4m_10bit_wellformed_and_deterministic (test_p2_support.TestP2Media) ... ok
+test_y4m_8bit_still_p1_compatible (test_p2_support.TestP2Media) ... ok
+test_external_switch_refusal_wording (test_p2_support.TestP2StaticAudits)
+external 状态下拒绝直接换档（提示先 Off），不静默接管。 ... ok
+test_guard_and_skip_wording (test_p2_support.TestP2StaticAudits) ... ok
+test_missing_vs_not_regular_file_wording (test_p2_support.TestP2StaticAudits)
+REV-02 同域修复：资源预检文案区分文件缺失 vs 非常规文件。 ... ok
+test_no_extra_key_bindings (test_p2_support.TestP2StaticAudits)
+CTRL+1..6/F7 等外部键不得被插件占用；仅 F8 菜单键。 ... ok
+test_off_label_is_const_in_lua (test_p2_support.TestP2StaticAudits)
+V2-01 修复在源码层：off 显示名为常量「关」，conf 值被忽略并告警。 ... ok
+test_p1_audits_still_hold (test_p2_support.TestP2StaticAudits) ... ok
+test_p2_gears_conf_audit (test_p2_support.TestP2StaticAudits) ... ok
+test_stage_export_follows_stage_registry (test_p2_support.TestP2StaticAudits) ... ok
+test_adapted_ports_are_distinct_from_base (test_p2_support.TestStockResources)
+FSR/SGSR adapted ports: own hash/version, base evidence intact, ... ok
+test_chains_match_live_input_conf (test_p2_support.TestStockResources)
+The built-in chain table equals the real CTRL+1..6 stock chains ... ok
+test_required_keywords_exist_in_stock_files (test_p2_support.TestStockResources)
+Every required verification keyword is a real //!DESC substring of ... ok
+test_resource_manifest_audits_clean (test_p2_support.TestStockResources) ... ok
+test_stock_copy_byte_identical (test_p2_support.TestStockResources) ... ok
+test_both_fallback_paths_route_through_registry (test_p2_support.TestV4FallbackDefaultRegistry) ... ok
+test_selftest_covers_missing_and_empty_fallback_negatives (test_p2_support.TestV4FallbackDefaultRegistry) ... ok
+test_single_default_registry_matches_shipped_conf (test_p2_support.TestV4FallbackDefaultRegistry) ... ok
+test_delayed_new_pass_is_waited_for_and_counted (test_p2_support.TestV4PassRaceNewChainProof) ... ok
+test_zero_zero_is_rejected (test_p2_support.TestV4PassRaceNewChainProof) ... ok
+test_fail_gate_preserved_verbatim (test_p3_evidence.TestGateArtifact) ... ok
+test_write_gate_is_create_only_and_chained (test_p3_evidence.TestGateArtifact) ... ok
+test_desc_count_must_cover_samples (test_p3_evidence.TestHelperUnits) ... ok
+test_desc_sample_crosscheck_against_logs (test_p3_evidence.TestHelperUnits) ... ok
+test_freshness_epoch_helpers (test_p3_evidence.TestHelperUnits) ... ok
+test_required_ids_match_p3_guard (test_p3_evidence.TestHelperUnits) ... ok
+test_same_moment_record_validation (test_p3_evidence.TestHelperUnits) ... ok
+test_decoder_fake_freshness_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_duplicate_case_id_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_empty_runner_console_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_empty_session_artifact_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_evi01_negative_class_missing_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_evi01_negative_not_fired_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_evi01_positive_control_dirty_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_excluded_class_file_inside_manifest_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_fabricated_desc_samples_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_live_configuration_written_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_manifest_key_outside_evidence_dir_detected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_manifest_omission_detected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_manifest_png_not_registered_in_captures (test_p3_evidence.TestPlantedNegatives) ... ok
+test_missing_desc_evidence_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_missing_freshness_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_missing_manifest_verify_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_missing_native_bool_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_missing_runner_console_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_mpv_case_without_sessions_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_native_bool_violation_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_orphan_console_stem_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_path_traversal_in_case_files (test_p3_evidence.TestPlantedNegatives) ... ok
+test_path_traversal_in_png_captures (test_p3_evidence.TestPlantedNegatives) ... ok
+test_per04_missing_samples_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_png_dimensions_lie_detected_by_true_decode (test_p3_evidence.TestPlantedNegatives) ... ok
+test_replaced_png_with_stale_captures_sha (test_p3_evidence.TestPlantedNegatives) ... ok
+test_required_case_not_pass_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_required_id_missing_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_required_unmeasured_nonempty_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_restart_session_triplet_missing_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_same_moment_missing_same_window_flag_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_same_moment_prose_only_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_shd09_fake_10bit_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_shd09_honest_refusal_accepted (test_p3_evidence.TestPlantedNegatives) ... ok
+test_shd09_missing_10bit_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_stale_epoch_pairing_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_symlink_inside_evidence_dir_rejected (test_p3_evidence.TestPlantedNegatives) ... skipped 'symlink creation not available on this platform'
+test_tampered_gate_pin_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_tampered_runner_console_breaks_chain (test_p3_evidence.TestPlantedNegatives) ... ok
+test_unmarked_duplicate_png_detected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_wrong_hash_detected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_wrong_session_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_zero_zero_desc_counting_rejected_legacy_shape (test_p3_evidence.TestPlantedNegatives) ... ok
+test_zero_zero_desc_counting_rejected_p3_shape (test_p3_evidence.TestPlantedNegatives) ... ok
+test_zero_zero_freshness_counter_rejected (test_p3_evidence.TestPlantedNegatives) ... ok
+test_case_without_required_ids_override_still_clean (test_p3_evidence.TestPositiveControl) ... ok
+test_full_gate_passes_all_35_required_ids (test_p3_evidence.TestPositiveControl) ... ok
+test_pngs_decode_with_true_dimensions (test_p3_evidence.TestPositiveControl) ... ok
+test_repo_relative_manifest_projection_is_the_real_shape (test_p3_evidence.TestPositiveControl)
+Regression pin: lib manifest keys are REPO-relative; the coverage ... ok
+test_block_uniformity_flags_gradient (test_p3_geometry.TestCaptureAnalysis) ... ok
+test_block_uniformity_nearest_vs_bilinear (test_p3_geometry.TestCaptureAnalysis)
+A strict 2x nearest replication has 0 intra-block spread; a linear ... ok
+test_letterbox_bars_measured (test_p3_geometry.TestCaptureAnalysis) ... ok
+test_hdr_guard_independent_of_luma_guard (test_p3_geometry.TestGuardMirrors) ... ok
+test_nis_luma_guard_uses_p2_semantics (test_p3_geometry.TestGuardMirrors) ... ok
+test_1080p_to_1440p_fullscreen_is_1x_with_bars (test_p3_geometry.TestIntegerGeometry) ... ok
+test_720p_to_1440p_fullscreen_is_2x_no_bars (test_p3_geometry.TestIntegerGeometry) ... ok
+test_anti_feedback_window_source_is_the_raw_window (test_p3_geometry.TestIntegerGeometry)
+R5/GEO-01: the k inputs are the ORIGINAL window pixels; a margin ... ok
+test_integer_skip_notes (test_p3_geometry.TestIntegerGeometry) ... ok
+test_k_below_one_is_honest_downscale_no_crop (test_p3_geometry.TestIntegerGeometry) ... ok
+test_k_is_floor_of_min_axis (test_p3_geometry.TestIntegerGeometry) ... ok
+test_k_uses_dw_dh_not_w_h_sar_aware (test_p3_geometry.TestIntegerGeometry) ... ok
+test_unknown_geometry_is_none_not_zero (test_p3_geometry.TestIntegerGeometry) ... ok
+test_coefficient_audit_rejects_tampered_blob (test_p3_geometry.TestNISBoundsAndCoefficients) ... ok
+test_coefficient_audit_shape_and_evidence_identity (test_p3_geometry.TestNISBoundsAndCoefficients) ... ok
+test_divisible_outputs_have_no_oob (test_p3_geometry.TestNISBoundsAndCoefficients) ... ok
+test_nis_static_audit (test_p3_geometry.TestNISBoundsAndCoefficients) ... ok
+test_nis_static_audit_flags_guard_before_barrier (test_p3_geometry.TestNISBoundsAndCoefficients) ... ok
+test_non_divisible_outputs_have_oob_stores_without_guard (test_p3_geometry.TestNISBoundsAndCoefficients)
+R1 evidence: for outputs not divisible by the 32x24 workgroup tile, ... ok
+test_decode_16bit_rgb_is_not_silently_truncated (test_p3_geometry.TestPNGDecoder) ... ok
+test_decode_8bit_rgb (test_p3_geometry.TestPNGDecoder) ... ok
+test_decode_handles_up_filter (test_p3_geometry.TestPNGDecoder) ... ok
+test_rejects_non_png (test_p3_geometry.TestPNGDecoder) ... ok
+test_expected_chains (test_p3_geometry.TestRegistryAndConfAudit) ... ok
+test_p1_audit_migration (test_p3_geometry.TestRegistryAndConfAudit) ... ok
+test_p3_conf_audit_clean_on_shipped_conf (test_p3_geometry.TestRegistryAndConfAudit) ... ok
+test_p3_conf_audit_rejects_override_key_faking_identity (test_p3_geometry.TestRegistryAndConfAudit) ... ok
+test_comment_discipline (test_p3_geometry.TestResourceManifestAudit) ... ok
+test_comment_discipline_flags_directive_in_comment (test_p3_geometry.TestResourceManifestAudit) ... ok
+test_manifest_clean_and_p2_disjoint (test_p3_geometry.TestResourceManifestAudit) ... ok
+test_auto_floor_formula (test_p3_geometry.TestSharpBilinearOracle) ... ok
+test_degenerate_note_mentions_bilinear (test_p3_geometry.TestSharpBilinearOracle) ... ok
+test_manual_2x_is_fixed_two (test_p3_geometry.TestSharpBilinearOracle) ... ok
+test_scale_one_is_plain_bilinear_passthrough (test_p3_geometry.TestSharpBilinearOracle)
+scale=1 → region_range=0 → f = s → mod_texel == texel exactly: the ... ok
+test_scale_two_nn_pregrid (test_p3_geometry.TestSharpBilinearOracle)
+At the exact 2x output grid the reference maps to texel centers ... ok
+test_scale_two_offgrid_blends_toward_neighbor (test_p3_geometry.TestSharpBilinearOracle)
+Off-grid output positions inside the blend band sample between ... ok
+test_21_reference_sample_points (test_p3_geometry.TestXBRReferenceOracle) ... ok
+test_cpu_replica_deterministic_and_bounded (test_p3_geometry.TestXBRReferenceOracle) ... ok
+test_cpu_replica_flat_regions_are_exact (test_p3_geometry.TestXBRReferenceOracle)
+On a fully-flat image every output pixel must equal the flat colour ... ok
+test_output_is_3x (test_p3_geometry.TestXBRReferenceOracle) ... ok
+test_port_passes_all_reference_checks (test_p3_geometry.TestXBRStaticAudit) ... ok
+test_tampered_scale_flagged (test_p3_geometry.TestXBRStaticAudit) ... ok
+test_negative_fixtures_exist_and_declare_themselves (test_p3_support.TestP3Fixtures) ... ok
+test_no_broken_fixture_in_release_dir (test_p3_support.TestP3Fixtures) ... ok
+test_all_emitted_methods_stay_in_checker_contract (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_case_geo03_pins_controlled_leg (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_counter_growth_witness_unchanged_without_controlled (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_dimension_or_bitdepth_mismatch_is_never_new_pixels (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_forced_redraw_witness_unchanged_without_controlled (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_frozen_counters_controlled_step_proves_new_pixels (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_metadata_only_png_byte_change_is_not_new_pixels (test_p3_support.TestP3FreshnessR2ControlledLeg)
+负例：PNG 字节不同（插入 tEXt 元数据块）但解码像素完全相同—— ... ok
+test_no_artifact_when_screenshots_fail (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_pause_restored_even_when_frame_step_pipe_dies (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_pre_existing_artifacts_kept_not_overwritten (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_real_decoded_pixel_change_is_detected (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_stale_epoch_rejects_pixel_proof (test_p3_support.TestP3FreshnessR2ControlledLeg) ... ok
+test_p2r_f1_take_screenshot_binds_state (test_p3_support.TestP3HarnessFixPins) ... ok
+test_p2r_f2_all_sessions_collected (test_p3_support.TestP3HarnessFixPins) ... ok
+test_p2s01_user_shader_count_desc_samples (test_p3_support.TestP3HarnessFixPins)
+The shared counter counts DESC keyword hits with non-empty samples ... ok
+test_p2s04_env_files_still_enforced_by_p3_guard (test_p3_support.TestP3HarnessFixPins) ... ok
+test_same_moment_sampling_helper_exists (test_p3_support.TestP3HarnessFixPins) ... ok
+test_max_abs_diff (test_p3_support.TestP3MediaHelpers) ... ok
+test_ppm_pattern_deterministic_with_rows (test_p3_support.TestP3MediaHelpers) ... ok
+test_oracle_sample_exists_and_matches_helper (test_p3_support.TestP3OracleSampleFixture) ... ok
+test_no_extra_key_bindings (test_p3_support.TestP3PluginSourceAudits) ... ok
+test_no_glsl_shaders_clr (test_p3_support.TestP3PluginSourceAudits) ... ok
+test_no_nvsharpen_anywhere_in_plugin (test_p3_support.TestP3PluginSourceAudits) ... ok
+test_p1_static_audits_still_hold (test_p3_support.TestP3PluginSourceAudits) ... ok
+test_default_gears_text_new_target_state (test_p3_support.TestP3RegistryMirror) ... ok
+test_desc_keywords_mirror (test_p3_support.TestP3RegistryMirror) ... ok
+test_expected_chains_match_lua (test_p3_support.TestP3RegistryMirror) ... ok
+test_flags (test_p3_support.TestP3RegistryMirror) ... ok
+test_guard_props_include_osd (test_p3_support.TestP3RegistryMirror) ... ok
+test_hdr_guard_is_independent_function (test_p3_support.TestP3RegistryMirror) ... ok
+test_integer_dynamic_geometry_wiring (test_p3_support.TestP3RegistryMirror) ... ok
+test_lua_registry_contains_five_new_builtins (test_p3_support.TestP3RegistryMirror) ... ok
+test_luma_gear_set_extended_with_nis (test_p3_support.TestP3RegistryMirror) ... ok
+test_placeholder_registry_is_exactly_ls1_bcas (test_p3_support.TestP3RegistryMirror) ... ok
+test_stage_export_is_p3 (test_p3_support.TestP3RegistryMirror) ... ok
+test_selftest_case_count_increased (test_p3_support.TestP3SelftestCoverage) ... ok
+test_selftest_has_p3_cases (test_p3_support.TestP3SelftestCoverage) ... ok
+test_bars_fallback_scan_finds_synthetic_bars (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_case_registry_covers_all_35 (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_compare_to_golden_accepts_exact_and_rejects_wrong (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_edge_discriminator_prefers_exact_replica (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_evi_detectors_cover_all_canonical_classes (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_evi_make_png_decodes_with_true_dims (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_finalize_epoch_pairs_and_flags_stability (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_golden_bilinear_known_values (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_golden_sharp_scale1_is_plain_bilinear (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_golden_sharp_scale2_pulls_toward_texel_centre (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_id_partition_equals_frozen_required_35 (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_osd_tl_bright_px_counts_only_bright_corner (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_quantization_space_half_lsb_and_rejection_bounds (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_session_reuse_patch_targets_p3 (test_p3_support.TestP3VerifyHarnessSupport) ... ok
+test_all_y_words_within_10bit_range_and_word_width_pinned (test_p3_support.TestP3Y4mTenBitByteOracle) ... ok
+test_header_frame_markers_and_exact_sizes (test_p3_support.TestP3Y4mTenBitByteOracle) ... ok
+test_p3context_make_y4m_delegates_to_pure_writer (test_p3_support.TestP3Y4mTenBitByteOracle) ... ok
+test_planes_are_real_le16_tens (test_p3_support.TestP3Y4mTenBitByteOracle) ... ok
+test_sar_header_variant (test_p3_support.TestP3Y4mTenBitByteOracle) ... ok
+
+----------------------------------------------------------------------
+Ran 282 tests in 117.345s
+
+OK (skipped=1)

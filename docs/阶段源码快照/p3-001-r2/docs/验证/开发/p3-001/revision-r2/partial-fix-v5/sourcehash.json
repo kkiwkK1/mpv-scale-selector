@@ -1,0 +1,10 @@
+{
+  "files": {
+    "tools/p3_verify.py": "7f34df43670d8c09e2766a3825ed8a8a0ea870f2464db873fdb1598b9573df7f",
+    "tests/test_p3_support.py": "109132230d1f80a26ba1fe19e72ee72feb56af8a7a26feb4cb361bb77465b836",
+    "docs/P3/P3实现说明.md": "b0c9f9637f0cbf4a1acce628400590646240c4d929b8bcc1e92cc5f048c1b364",
+    "docs/插件/缩放选择器-P3用户说明.md": "13dcda73bb36a0f235b8f929a4f722983d21c0a90543ae5f1fcb7f670969a71d"
+  },
+  "source_run": "mpv-scale-p3-revision-r2-muw0t7cs-5bb5d5",
+  "status": "UNVERIFIED_PARTIAL_AFTER_CONNECTION_ERROR_63TURNS"
+}

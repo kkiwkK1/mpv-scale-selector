@@ -1,0 +1,44 @@
+{
+  "schema": "mpv-scaler-rework-brief/v1",
+  "stage": "P1",
+  "new_session": "p1-002",
+  "prior_candidate_sha256": "d17d5f01b7946373f476ce9b27be4848156cc7bbc3a539513becc8e10b32e317",
+  "prior_review_record": "docs/验证/开发/p1-001/technical-status.json",
+  "prior_source_snapshot": "docs/验证/开发/p1-001/source-snapshot/",
+  "authorization": "用户已明确要求计划就绪自动执行并指定zai-coding-cn/glm-5.3-flash；本次是同一P1的限域修正，不请求第二次启动确认，未授权活动配置写入/安装/真人评分。",
+  "baseline": "HEAD=8f6b14e，原准备/研究文件不变；P1六个源文件与两个新增实现/用户说明文档属于本阶段可修正文件。既有Taskflow/guard.py、旧计划、授权记录、备份工具和p1-001的所有证据/候选/审查/归档禁止修改。",
+  "roots": [
+    {
+      "root": "A: 配置解析器保留条目的身份与fail-closed不变式",
+      "retained_findings": ["technical:R1(major)", "safety:F-03(minor)"],
+      "required": "LS1/BCAS不受本地conf省略_mode、显式active、_set、_label/_reason等绕过；强制不可用且使用真实固定标签/原因，不能把任意链冒名。相邻配置入口一起检查：P1其他未注册真实实现的产品算法id也不可因缺失字段变为active；任意active自定义id不应使用保留算法名标签冒名。Off始终存在、在首项且可用，不能被conf删除/禁用；重复id不得产生重复项，重复键的处理与告警文字一致。测试桩p1-test-*通过明确active启用，仅临时配置可用，不是产品算法。扩展Lua selftest与真实CTL-06/SHD-12/PIC-05变体覆盖缺失_mode/active+set/别名/损坏与缺Off/重复id等同入口邻近情况，不提前接入P2算法。"
+    },
+    {
+      "root": "B: 截图失败的证据真实性",
+      "retained_findings": ["integration:F-01", "technical:R2", "safety:F-01"],
+      "required": "只把命令成功且文件存在的截图加入files；空闲无视频失败记录状态/原因/未生成，不伪造菜单截图。可选择window截图模式探测OSD，必须实证或仍如实标不包含菜单/未证实；不能把user-data导出等同于视觉显示已验证。汇总中所有引用必须存在，截图失败非该case必测时显式记录，不偷改FAIL为PASS。"
+    },
+    {
+      "root": "C: 冻结证据的create-only与指纹绑定",
+      "retained_findings": ["technical:R3", "safety:F-02"],
+      "required": "p1_verify对已用证据目标fail-closed，要求新的证据目录（无force覆盖已审目录），在启动mpv/打开日志前检查；Evidence写JSON/transcript/copy均create-only，mpv console/log与截图预检拒绝已有文件。支持--session/--evidence-dir生成准确的新会话与复现命令。新增tools/p1_check_evidence.py与临时合成单测检查tests.json里所有evidence_files的规范项目相对路径与SHA-256清单，候选tests_sha256把该清单钉住；真实测试最终所有case引用齐全且各项hash可查。支持自有session树内日志（即使Git当前忽略.log仍绑定），拒绝穿越/链接/reparse/私有或仓库外路径，拒绝清单缺项/伪造校验值/被改文件；不是OS沙箱或事务。不要修改已有taskflows/guard.py或旧16项测试，用新工具作为额外集成机器门。"
+    }
+  ],
+  "allowed_source_edits": [
+    "scripts/scale-selector.lua",
+    "script-opts/scale-selector.conf",
+    "script-opts/scale-selector-gears.conf",
+    "tools/p1_lib.py",
+    "tools/p1_verify.py",
+    "tests/test_p1_support.py",
+    "tools/p1_check_evidence.py (new)",
+    "tests/test_p1_evidence.py (new)",
+    "docs/P1/P1实现说明.md",
+    "docs/插件/缩放选择器-P1用户说明.md"
+  ],
+  "allowed_new_reports": "docs/验证/开发/p1-002/，源码作者自测须其implementer/子目录；集成负责人再用新独立目录verify-lead/。旧p1-001和冻结计划一字不改。",
+  "required_tests": ["CTL-01", "CTL-02", "CTL-03", "CTL-04", "CTL-05", "CTL-06", "CTL-07", "CTL-08", "GEO-01", "GEO-07", "SHD-12", "PIC-05"],
+  "checks": "修正者执行全部新/旧单测及真实mpv十二项回归（固定gpu-next/vulkan、合成输入、隔离HOME/APPDATA/缓存，不传凭据，只清理自有PID）。集成负责人独立复跑本阶段十二项（其中三根因的邻近变体必须实测）、记录原始日志/单测输出与SHA、创建新的tests.json/candidate.json。额外机器证据门通过再进行同一新候选的两路限域复审；复审只针对A/B/C及变更附近，保留旧不受影响证据但本次源码变化应重做相关检查。",
+  "human_checks": "P1-UC-1..4继续PENDING_USER，不伪造交互满意度；只记录客观技术结论，不生成假(approve)或user_approved=true。",
+  "limitations": "不进行性能/画质收益宣称，不写活动配置、不安装插件。没有审批字符串签名、OS沙箱或跨进程事务保证。"
+}

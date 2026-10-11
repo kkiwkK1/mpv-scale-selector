@@ -1,0 +1,9 @@
+{
+  "status": "fixture_corrected_before_preflight",
+  "issue": "Guard mock fixture shared the same mutable list between planned write_paths and allowlist; appending an unauthorized path also expanded mock allowlist. Production guard unaffected.",
+  "old_test_sha256": "9cde723ffd38098371aa470be47da8c6ca23d1f078a022c5677326b498920419",
+  "new_test_sha256": "e095d244cd11bf067b4e8991ec8dec8fcb5ec62ac1bba2cff95d4df4e00010fc",
+  "retained_baseline": "docs/P3/启动基线-v1.fixture-aliasfail.json",
+  "source_writer_started": false,
+  "required_action": "Update only protected test hash before initial workflow preflight, rerun 11 isolated tests."
+}

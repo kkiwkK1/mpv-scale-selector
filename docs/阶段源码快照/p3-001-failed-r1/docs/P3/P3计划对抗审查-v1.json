@@ -1,0 +1,60 @@
+{
+  "verdict": "block",
+  "plan_sha256": "fc1bac4cbdc52482e8eb32b7ca86b9c9ffcaa3ddbddad4d234d67f4b6d2363a4",
+  "findings": [
+    {
+      "id": "P3A-01",
+      "severity": "major",
+      "file": "docs/P3实施计划.json (write_path_notes b / M3) vs scripts/scale-selector.lua:427-441, tools/p1_lib.py:865-895",
+      "issue": "conf 迁移自相矛盾：计划要求 nis/xbr/sharpbilinear/integer 条目在 conf '由 disabled 占位改 active 并更新原因文案'，同时声称保持 P2 解析器规则'内建档位 _mode/_set/_label/_reason 一律无效并告警'。解析器实证：四档一旦转内建，conf 保留 _label/_reason 每档每次加载告警 2 行（≥10 行警告噪音），写 _mode=active 静默无效，与'此规则保持'冲突；且 p1_lib.audit_gears_conf 硬编码 still_disabled 六元组含这四档（all_product_gears_disabled 将必然失败），计划只逐条列了 p2_lib 镜像迁移，未逐条列 p1_lib 侧注册表迁移与 lua 内嵌 DEFAULT_GEARS_TEXT（lua:710-739，自测 12 校验与随附 conf 一致防漂移）的同步迁移。",
+      "fix": "实现前补一段唯一目标态：四档迁为 BUILTIN 后 conf 只保留 gears 列表成员与注释行，删除其 _mode/_label/_reason 键（文案移入 lua 内建定义与头部说明），ls1/bcas 条目原样；逐条列明 p1_lib.audit_gears_conf（all_product_gears_disabled→仅 ls1/bcas、新增 p3_builtins_active 含 sharpbilinear2x）、p2_lib 镜像、DEFAULT_GEARS_TEXT 三处同步迁移及注释理由。"
+    },
+    {
+      "id": "P3A-02",
+      "severity": "minor",
+      "file": "docs/P3实施计划.json (required_test_notes SHD-06/R3) vs docs/证据/xbr-lv2.glsl:244-264",
+      "issue": "'19 邻域'与固定取证基文件不符：参考实际为 21 个 tex2D 采样点（A1,B1,C1,A,B,C,D,E,F,G,H,I,G5,H5,I5,A0,D0,G0,C4,F4,I4），plan 与下游 flow 审核提示均写 19。",
+      "fix": "SHD-06 口径改为按取证文件逐点对照 21 个采样坐标与 delta/delta_l 数学，不写死 19。"
+    },
+    {
+      "id": "P3A-03",
+      "severity": "minor",
+      "file": "docs/P3实施计划.json (scope/write_path_notes)",
+      "issue": "计数措辞失准：'五个占位档位（nis/xbr/sharpbilinear/integer）'实为 4 个命名占位（注册表另有 ls1/bcas 保持 disabled）；summary 写 'write_paths 29 条'而数组实为 30 条。",
+      "fix": "改为'四个占位转内建+新增 sharpbilinear2x，ls1/bcas 保持占位 disabled'与 '30 条'。"
+    },
+    {
+      "id": "P3A-04",
+      "severity": "minor",
+      "file": "docs/P3实施计划.json (required_test_notes SHD-05) vs docs/证据/port-NVScaler.glsl:36",
+      "issue": "SHD-05 '放大·等尺寸·缩小'未说明固定取证 port 自带 //!WHEN 仅放大生效：等尺寸/缩小用例应断言合法跳过+回退链完好，而非期待 NIS 激活；不写明可能诱导实现者删 WHEN 以'凑激活'，偏离参考。",
+      "fix": "补一句：保留原 //!WHEN（仅 >1× 激活）；等尺寸/缩小变体验证诚实跳过文案+链回退，不修改 WHEN 语义。"
+    },
+    {
+      "id": "P3A-05",
+      "severity": "minor",
+      "file": "docs/P3实施计划.json (required_test_notes GEO-02/GEO-04)",
+      "issue": "Integer 换片/暂停后 k 陈旧风险未列入必测口径（下游 flow 对抗任务明确要查'暂停换片再算'，但 35 项矩阵未点名该 case；GEO-02 两源尺寸若各起独立会话则不覆盖会话内换片）。",
+      "fix": "在 GEO-02/GEO-04 变体内并入一条会话内换片（如 1080p→720p）+暂停后 k/几何重算断言，不新增 ID、保持 35 不变。"
+    }
+  ],
+  "checks": [
+    "plan_sha256 本机实算=fc1bac4c…363a4，与机器绑定一致",
+    "required_tests 35 项唯一，集合==taskflows/p3_guard.REQUIRED（CTL9+SHD13+GEO7+misc6）",
+    "P2 24 必测⊆P3 35（docs/P2实施计划.json 对照）",
+    "write_paths 30 条全部⊆docs/P3启动基线.json allowed_write_paths(32)，未用 2 条已在 notes 声明",
+    "preserved_file_hashes 2128 项、prior_files 35 项（p2-001 快照）与'零改动'清单一致",
+    "四取证 shader sha256 逐一实算匹配（bac778ec/3d51ac2a/9cf5b08c/9b9afa91）",
+    "port-NVScaler 实文核验：COMPUTE 32 24 256 1、两处 groupMemoryBarrier+barrier、唯一 imageStore 无 bounds guard、//!WHEN 仅放大、双 2×64 rgba32f —— R1/R2 陈述与原件一致",
+    "xbr-lv2：#version 130、XBR_SCALE 3.0、无 //!HOOK、21 个 tex2D 采样点（计划写 19→P3A-02）",
+    "sharp-bilinear：AUTO floor(outsize.y/InputSize.y+0.01) 与计划一致，linear 依赖已列实测",
+    "P2 七项根因/限制（P2R-F1/F2、P2S-01 0==0 'user shader' p1_verify.py:146、P2S-02 console、P2S-04 环境 hash、P2S-05 回退语义、VL-F1）均在 p2-001/technical-status.json 有据，非虚构",
+    "Integer 机制有研究证据（video-unscaled+zoom log2 k，mpv issue #10097；k<1 回退语义与 downscale-big 建议一致）",
+    "p1_check_evidence 已有 --stage 参数，P3 REQUIRED 最小扩展可行且不动 DEFAULT_REQUIRED_P1",
+    "121=24+35+32+30 实数核对；test_p1_support.py（不在写域）断言为审计字典泛化循环，注册表迁移不需改它即不弱化；test_p1_evidence 无 user_shader 计数断言",
+    "audit_gears_conf(p1_lib:865)/audit_gears_conf_p2(p2_lib:275) 硬编码注册表——两文件均在写域但迁移仅逐条列了 p2 侧（并入 P3A-01）",
+    "D:/MPV/mpv.exe 存在，backend pin 可执行；p3_guard.permit 与 flow 审核要点覆盖用户列出的全部对抗面"
+  ],
+  "reason": "计划总体证据扎实、35 项客观必测可真实执行且无伪造通道（CPU 像素 oracle、真窗口捕获、DESC+samples 计数替代 0==0、ns 原始样本、RIFE 如实留 P4、真人项全部 pending），旧 121 断言无被逼弱化的结构性冲突；但存在一处实现前必须修正的自相矛盾：conf 迁移指令（四占位改 active+更新文案）与同计划明文保持的'内建档 conf 覆盖无效并告警'解析器规则直接冲突，且 p1_lib 审计硬编码注册表迁移未逐条列明——按此实现将产生每次加载 ≥10 行告警、审计必然失败或被临时改语义。修正该段并按 P3A-02..05 校准口径后即可放行。",
+  "source_run": "mpv-scale-p3-auto-muttaj5c-70be75"
+}
