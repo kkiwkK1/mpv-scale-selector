@@ -118,8 +118,8 @@
       "source_sha256": "9141668ced0b26512253e6396e805820716f35b57c92950d9da489f8b96a7ba4",
       "live_reference_sha256": "9141668ced0b26512253e6396e805820716f35b57c92950d9da489f8b96a7ba4",
       "sha256": "9141668ced0b26512253e6396e805820716f35b57c92950d9da489f8b96a7ba4",
-      "license": "MIT（Anime4K，bloc97/Anime4K v4.1）",
-      "license_evidence": "docs/证据/anime4k-readme.md",
+      "license": "Unlicense（公共领域，文件头原文保留）",
+      "license_evidence": "shaders/anime4k/Anime4K_AutoDownscalePre_x2.glsl 文件头（Unlicense 公共领域声明，unlicense.org 原文）",
       "modified": false
     },
     {
@@ -131,8 +131,8 @@
       "source_sha256": "dadb7b713cfa1d810c55b5deff616072f3390e546fed1e6a54f80ea555f7b95d",
       "live_reference_sha256": "dadb7b713cfa1d810c55b5deff616072f3390e546fed1e6a54f80ea555f7b95d",
       "sha256": "dadb7b713cfa1d810c55b5deff616072f3390e546fed1e6a54f80ea555f7b95d",
-      "license": "MIT（Anime4K，bloc97/Anime4K v4.1）",
-      "license_evidence": "docs/证据/anime4k-readme.md",
+      "license": "Unlicense（公共领域，文件头原文保留）",
+      "license_evidence": "shaders/anime4k/Anime4K_AutoDownscalePre_x4.glsl 文件头（Unlicense 公共领域声明，unlicense.org 原文）",
       "modified": false
     },
     {

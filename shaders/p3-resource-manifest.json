@@ -12,6 +12,7 @@
       "base_sha256": "bac778ec0108d272e4dad97794a3c257e65bbebd52aa762f95bce930cbd6b73c",
       "adaptation": "全部 groupMemoryBarrier/barrier 之后的逐像素输出边界 guard（nis_bounds_guard；无 barrier 前 return）+ p3-adapt-v1 溯源注释块；COMPUTE 32 24 256 1、双 2×64 rgba32f 系数纹理、//!WHEN 仅放大生效、算法体与系数字节零改动；绝不叠加 NVSharpen",
       "adaptation_version": "p3-adapt-v1",
+      "sha256": "046693c49bad8ca9f125694793ae8da32f7c0a5b6aaeb42c60334e1ece8bc358",
       "license": "MIT（NVIDIA CORPORATION & AFFILIATES 2022；mpv 移植 by agyild；原头保留）",
       "license_evidence": "licenses/NIS-LICENSE-NOTES.md"
     },
@@ -23,6 +24,7 @@
       "base_sha256": "9cf5b08c7378305b558204354e898f6837c481fd5b4371dfbe6b5092cffe5062",
       "adaptation": "libretro VERTEX 预计算偏移改为片元内按同一 21 点坐标表（A1,B1,C1,A,B,C,D,E,F,G,H,I,G5,H5,I5,A0,D0,G0,C4,F4,I4）重 derive；//!HOOK MAIN + SAVE + WIDTH/HEIGHT 3× 为声明的 mpv 适配；delta/delta_l/eq/wd/CORNER_C/SMOOTH_TIPS 数学与参考默认参数零改动；p3-adapt-v1 溯源注释块",
       "adaptation_version": "p3-adapt-v1",
+      "sha256": "ce31e8c26b1aace9cbe2b8d1de2ba52ac8fbd453374a80a720720916379fe2b5",
       "license": "MIT（Copyright (C) 2011-2016 Hyllian；原头保留）",
       "license_evidence": "licenses/XBR-LICENSE-NOTES.md"
     },
@@ -34,6 +36,7 @@
       "base_sha256": "9b9afa91fe12bcbd49398179bf2072ce5a38b531c39a4fd381e92602c6dc114b",
       "adaptation": "AUTO_PRESCALE>0.5 自动分支固定；outsize.y/InputSize.y 以 gl_FragCoord.y/(HOOKED_pos.y*HOOKED_size.y) 在像素中心等价还原（本构建无 output_size uniform，探针实证）；scale=max(...,1.0) 防护为版本化新增；单 pass 输出分辨率渲染；p3-adapt-v1 溯源注释块",
       "adaptation_version": "p3-adapt-v1",
+      "sha256": "e2aac70b32026dcc4cf97b367fb8bcd3ad704a7ee46dc6670f1fa312738319ff",
       "license": "Public domain（Themaister；原头保留）",
       "license_evidence": "licenses/SHARP-BILINEAR-LICENSE-NOTES.md"
     },
@@ -45,6 +48,7 @@
       "base_sha256": "9b9afa91fe12bcbd49398179bf2072ce5a38b531c39a4fd381e92602c6dc114b",
       "adaptation": "SHARP_BILINEAR_PRE_SCALE 固定 2.0（参考默认 4.0；按档位名取 2 的显式常量）；其余坐标采样数学与参考逐行一致；单 pass 输出分辨率渲染；p3-adapt-v1 溯源注释块",
       "adaptation_version": "p3-adapt-v1",
+      "sha256": "877ec2aecde40cdf03e6c5d0404aaa9189aa4a04c3498bc8cbe2ac55c04d021e",
       "license": "Public domain（Themaister；原头保留）",
       "license_evidence": "licenses/SHARP-BILINEAR-LICENSE-NOTES.md"
     },

@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "tools"))
@@ -33,7 +35,12 @@ class TestStockResources(unittest.TestCase):
     """Byte-level audit: repo anime4k copies == frozen backup == live config."""
 
     def test_stock_copy_byte_identical(self):
-        result = p2.verify_stock_copy(cross_check_live=True)
+        """M-8: deterministic contract only — repo copies == frozen backup.
+        用户活动 mpv 配置（%APPDATA%）随用户增删自己的文件而变化，不得作
+        为单测的通过条件；live 交叉核对已移入真实验证阶段
+        （tools/p2_verify.py main() 的 live_config_cross_check，只读）。
+        cross_check_live=False 下也不得出现 live_sha256（未读活动配置）。"""
+        result = p2.verify_stock_copy(cross_check_live=False)
         self.assertEqual(result["problems"], [],
                          f"stock copy audit failed: {result['problems']}")
         self.assertTrue(result["ok"])
@@ -41,9 +48,32 @@ class TestStockResources(unittest.TestCase):
         for name, entry in result["files"].items():
             self.assertEqual(entry["repo_sha256"], entry["backup_sha256"],
                              f"{name} differs from frozen backup")
-            if "live_sha256" in entry:
-                self.assertEqual(entry["repo_sha256"], entry["live_sha256"],
-                                 f"{name} differs from live config")
+            self.assertNotIn("live_sha256", entry,
+                             f"{name}: live config must not be read here")
+
+    def test_live_cross_check_branch_against_temp_fixture(self):
+        """M-8: live 分支语义仍被钉住——但经 unittest.mock 把
+        p2_lib.LIVE_SHADER_DIR 指向临时 fixture，绝不读真实 %APPDATA%：
+        一致 → 记录 live_sha256 且 ok；缺文件 → 逐文件显式问题且 ok=False。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            live = Path(tmp) / "shaders"
+            live.mkdir()
+            for name in p2.ANIME4K_CHAIN_FILES:
+                shutil.copyfile(p2.REPO_ANIME4K_DIR / name, live / name)
+            with mock.patch.object(p2, "LIVE_SHADER_DIR", live):
+                result = p2.verify_stock_copy(cross_check_live=True)
+            self.assertTrue(result["ok"],
+                            f"fixture live audit failed: {result['problems']}")
+            for name, entry in result["files"].items():
+                self.assertEqual(entry["live_sha256"], entry["repo_sha256"],
+                                 f"{name}: fixture live copy must match repo")
+        # 负例：live 目录存在但为空 → 每个文件一条显式缺文件问题（不静默通过）
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(p2, "LIVE_SHADER_DIR", Path(tmp)):
+                result = p2.verify_stock_copy(cross_check_live=True)
+            self.assertFalse(result["ok"])
+            self.assertEqual(len(result["problems"]),
+                             len(p2.ANIME4K_CHAIN_FILES))
 
     def test_resource_manifest_audits_clean(self):
         result = p2.verify_resource_manifest()
@@ -54,9 +84,16 @@ class TestStockResources(unittest.TestCase):
             self.assertIn(rel, paths)
         stock = [r for r in result["resources"] if r["kind"] == "stock-copy"]
         self.assertEqual(len(stock), len(p2.ANIME4K_CHAIN_FILES))
+        # M-11: 许可以文件内嵌头为准——8 个文件头为 MIT（bloc97），
+        # 两个 AutoDownscalePre 文件头为 Unlicense（公共领域，unlicense.org）
+        unlicense_files = {"Anime4K_AutoDownscalePre_x2.glsl",
+                           "Anime4K_AutoDownscalePre_x4.glsl"}
         for r in stock:
             self.assertFalse(r["modified"], "stock copies must be unmodified")
-            self.assertIn("MIT", r["license"])
+            expected = ("Unlicense"
+                        if Path(r["path"]).name in unlicense_files else "MIT")
+            self.assertIn(expected, r["license"],
+                          f"{r['path']}: license must match embedded header")
 
     def test_adapted_ports_are_distinct_from_base(self):
         """FSR/SGSR adapted ports: own hash/version, base evidence intact,
