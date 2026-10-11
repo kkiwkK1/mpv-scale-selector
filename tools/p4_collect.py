@@ -127,9 +127,9 @@ STAGE = lib.STAGE
 SESSION = lib.SESSION
 PLAN_SHA256 = lib.PLAN_SHA256
 COLLECT_REL = "tools/p4_collect.py"
-B1_CANDIDATE_REL = "docs/验证/开发/p4-001/build-b1-r3/candidate.json"
+B1_CANDIDATE_REL = "docs/验证/开发/p4-001/build-b1-r4/candidate.json"
 B1_CANDIDATE_SHA256 = (
-    "ff7407377ee55232d2e788ab4fd436d3fe80fdcff3203288e2351c9398a51f9d")
+    "b07d31f105b557bf9b3755b07f0ff8f790083c82380c09903124b3b7b0993d8a")
 EVIDENCE_TREE_REL = "docs/验证/开发/p4-001"
 SANDBOX_PARENT_DEFAULT = Path(tempfile.gettempdir()) / "p4-001"
 
