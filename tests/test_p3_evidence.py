@@ -94,6 +94,36 @@ def write_json(path: Path, obj) -> None:
         (json.dumps(obj, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
 
 
+def make_dir_link(target: Path, link: Path) -> bool:
+    """Create `link` as a directory junction on Windows (no admin rights
+    needed, see test_p4_lib precedent) or a directory symlink elsewhere;
+    False = the platform allows neither form (M-9)."""
+    if os.name == "nt":
+        try:
+            import _winapi  # stdlib on CPython-Windows; junction needs no admin
+            _winapi.CreateJunction(str(target), str(link))
+            return True
+        except (ImportError, OSError):
+            pass  # fall back to the privileged symlink form below
+    try:
+        os.symlink(str(target), str(link), target_is_directory=True)
+        return True
+    except (OSError, NotImplementedError):
+        return False
+
+
+def remove_link_only(link: Path) -> None:
+    """Delete the link entry itself, never its target (M-9 cleanup rule).
+    Idempotent: a TemporaryDirectory teardown may already have removed it."""
+    try:
+        if os.name == "nt":
+            os.rmdir(link)   # a junction is a directory reparse point
+        else:
+            os.unlink(link)  # a dir symlink is removed via unlink, not rmdir
+    except FileNotFoundError:
+        pass
+
+
 # ---------------------------------------------------------------------------
 # positive-control builder
 # ---------------------------------------------------------------------------
@@ -562,12 +592,29 @@ class TestPlantedNegatives(GateFixture):
         write_json(self.pc.run_dir / "objective-results.json", self.pc.results)
         self.assert_problem(self._resealed_problems(), "same_window")
 
-    def test_symlink_inside_evidence_dir_rejected(self):
-        if os.name == "nt":  # symlink creation needs privileges on Windows
-            self.skipTest("symlink creation not available on this platform")
+    def test_junction_inside_evidence_dir_rejected(self):
+        """M-9: a directory junction (reachable on Windows without admin)
+        planted inside the evidence dir must be flagged as a link/reparse
+        point — the hard-coded Windows skip this replaces never let the
+        rejection path run on the primary dev platform."""
+        target = self.pc.repo / "junction-target"
+        target.mkdir()
+        link = self.pc.run_dir / "linkdir"
+        if not make_dir_link(target, link):
+            self.skipTest("neither junction nor symlink available on this host")
+        self.addCleanup(remove_link_only, link)
+        self.pc.seal()
+        self.assert_problem(self.pc.problems(), "链接/reparse点")
+
+    def test_file_symlink_inside_evidence_dir_rejected(self):
+        """Supplementary coverage: the original file-symlink form (needs
+        privilege on Windows, runs everywhere else)."""
         target = self.pc.run_dir / "shot-c.png"
         link = self.pc.run_dir / "shot-link.png"
-        os.symlink(target, link)
+        try:
+            os.symlink(target, link)
+        except (OSError, NotImplementedError):
+            self.skipTest("symlink creation not available on this platform")
         self.pc.seal()
         self.assert_problem(self.pc.problems(), "链接/reparse点")
 

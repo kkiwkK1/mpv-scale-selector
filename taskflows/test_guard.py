@@ -2,6 +2,7 @@
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -10,6 +11,36 @@ from unittest import mock
 SPEC = importlib.util.spec_from_file_location("flow_guard", Path(__file__).with_name("guard.py"))
 guard = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(guard)
+
+
+def make_dir_link(target, link):
+    """Create `link` as a directory junction on Windows (no admin rights
+    needed, see test_p4_lib precedent) or a directory symlink elsewhere;
+    False = the platform allows neither form."""
+    if os.name == "nt":
+        try:
+            import _winapi  # stdlib on CPython-Windows; junction needs no admin
+            _winapi.CreateJunction(str(target), str(link))
+            return True
+        except (ImportError, OSError):
+            pass  # fall back to the privileged symlink form below
+    try:
+        os.symlink(str(target), str(link), target_is_directory=True)
+        return True
+    except (OSError, NotImplementedError):
+        return False
+
+
+def remove_link_only(link):
+    """Delete the link entry itself, never its target. Idempotent: a
+    TemporaryDirectory teardown may already have removed it."""
+    try:
+        if os.name == "nt":
+            os.rmdir(link)   # a junction is a directory reparse point
+        else:
+            os.unlink(link)  # a dir symlink is removed via unlink, not rmdir
+    except FileNotFoundError:
+        pass
 
 
 class GuardTests(unittest.TestCase):
@@ -54,6 +85,36 @@ class GuardTests(unittest.TestCase):
         for value in ["", "(reject)", "edit this", "approved", "(approve)\nextra"]:
             with self.assertRaises(ValueError):
                 guard.approve(value)
+
+    def test_approve_accepts_whitespace_wrapped_token(self):
+        # U-2 残余现状钉子：approve 按 strip 后比较，" (approve) " 目前会
+        # 通过。该行为是否符合『精确 (approve)』待项目决策——本测试只钉住
+        # 现状，不修改 guard.py（它在 p3_guard 的 ENV_FILES 哈希保护名单内，
+        # 行为变更须走修订流程重新封链）。
+        guard.approve(" (approve) ")
+        guard.approve("\t\n(approve)\n ")
+        # strip 之外的边界保持收紧：strip 后内容仍不精确即拒绝
+        with self.assertRaises(ValueError):
+            guard.approve(" (approve)x ")
+
+    def test_folder_rejects_junction_session_dir(self):
+        # U-2 残余：folder 的链接/reparse 拒绝分支此前没有真实触发过的负例
+        #（junction 在 Windows 免管理员即可构造，见 test_p4_lib 先例）。
+        target = self.root / "elsewhere"
+        target.mkdir()
+        link = self.root / "docs/验证/开发/s2"
+        if not make_dir_link(target, link):
+            self.skipTest("neither junction nor symlink available on this host")
+        self.addCleanup(remove_link_only, link)
+        with self.assertRaises(ValueError):
+            guard.folder("s2")
+
+    def test_source_path_rejects_absolute_posix_and_backslash(self):
+        # U-2 残余：反斜杠与绝对 POSIX 路径分支补钉（驱动器号形态
+        # "D:/secret" 已由既有负例覆盖，两者走的是同一前置检查）。
+        for name in ["/etc/passwd", "a\\b"]:
+            with self.assertRaises(ValueError):
+                guard.source_path(name)
 
     def test_invalid_session_names(self):
         for value in ["../escape", "X", "with space", "a/b", "", "x" * 65]:

@@ -441,19 +441,19 @@ class TestResourceManifestAudit(unittest.TestCase):
             self.assertTrue(d["ok"], f"{rel}: {d['violations'][:3]}")
 
     def test_comment_discipline_flags_directive_in_comment(self):
-        d = p3.shader_comment_discipline_audit(
-            REPO_ROOT / "tests/fixtures/p3/_probe_dir_optional.glsl") \
-            if (REPO_ROOT / "tests/fixtures/p3/_probe_dir_optional.glsl").exists() \
-            else None
-        # synthetic negative: craft text through the same rule
-        bad = "// see the line //!TEXTURE coef for details\n//!TEXTURE x\n"
-        import re
-        violations = []
-        for i, ln in enumerate(bad.splitlines(), 1):
-            s = ln.strip()
-            if s.startswith("//") and not s.startswith("//!") and "//!" in s:
-                violations.append(i)
-        self.assertEqual(violations, [1])
+        """Negative control for the R12 comment discipline: a prose comment
+        embedding a directive-like prefix must be flagged by the REAL
+        p3.shader_comment_discipline_audit (same tamper-then-feed paradigm
+        as test_nis_static_audit_flags_guard_before_barrier)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "bad-comment.glsl"
+            path.write_bytes(
+                "// see the line //!TEXTURE coef for details\n"
+                "//!TEXTURE x\n".encode("utf-8"))
+            d = p3.shader_comment_discipline_audit(path)
+        self.assertFalse(d["ok"], d)
+        self.assertEqual([v["line"] for v in d["violations"]], [1])
+        self.assertIn("//!TEXTURE", d["violations"][0]["text"])
 
 
 class TestGuardMirrors(unittest.TestCase):

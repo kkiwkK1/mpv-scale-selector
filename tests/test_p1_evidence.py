@@ -18,6 +18,7 @@ These tests never touch the real evidence trees and never spawn mpv.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -30,6 +31,36 @@ import p1_lib as lib  # noqa: E402
 import p1_check_evidence as checker  # noqa: E402
 
 TEST_SESSION = "p1-test-ev"
+
+
+def make_dir_link(target: Path, link: Path) -> bool:
+    """Create `link` as a directory junction on Windows (no admin rights
+    needed, see test_p4_lib precedent) or a directory symlink elsewhere;
+    False = the platform allows neither form."""
+    if os.name == "nt":
+        try:
+            import _winapi  # stdlib on CPython-Windows; junction needs no admin
+            _winapi.CreateJunction(str(target), str(link))
+            return True
+        except (ImportError, OSError):
+            pass  # fall back to the privileged symlink form below
+    try:
+        os.symlink(str(target), str(link), target_is_directory=True)
+        return True
+    except (OSError, NotImplementedError):
+        return False
+
+
+def remove_link_only(link: Path) -> None:
+    """Delete the link entry itself, never its target (M-9 cleanup rule).
+    Idempotent: a TemporaryDirectory teardown may already have removed it."""
+    try:
+        if os.name == "nt":
+            os.rmdir(link)   # a junction is a directory reparse point
+        else:
+            os.unlink(link)  # a dir symlink is removed via unlink, not rmdir
+    except FileNotFoundError:
+        pass
 
 
 class FreshDirGuard(unittest.TestCase):
@@ -177,7 +208,25 @@ class SafeManifestPaths(unittest.TestCase):
             lib.safe_manifest_relpath(
                 f"docs/验证/开发/{TEST_SESSION}/nope.bin", TEST_SESSION, self.repo)
 
-    def test_rejects_symlink(self):
+    def test_rejects_junction_component(self):
+        """M-9: the link check must fire on a DIRECTORY junction inside the
+        session tree (reachable on Windows without admin) even though the
+        requested file really exists behind the junction."""
+        outside = self.repo / "outside"
+        outside.mkdir()
+        (outside / "x.log").write_bytes(b"escaped")
+        link = self.ev / "linkdir"
+        if not make_dir_link(outside, link):
+            self.skipTest("neither junction nor symlink available on this host")
+        self.addCleanup(remove_link_only, link)
+        with self.assertRaises(ValueError):
+            lib.safe_manifest_relpath(
+                f"docs/验证/开发/{TEST_SESSION}/linkdir/x.log",
+                TEST_SESSION, self.repo)
+
+    def test_rejects_file_symlink(self):
+        """Supplementary coverage: the original plain file-symlink form
+        (needs privilege on Windows, runs everywhere else)."""
         target = self.ev / "a.log"
         link = self.ev / "a-link.log"
         try:
