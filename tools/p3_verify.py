@@ -145,6 +145,15 @@ SESSION = "p3-001"
 STAGE = "P3"
 P3_REQUIRED_IDS = list(gate.P3_REQUIRED_IDS)
 
+
+def resolve_session(session) -> str:
+    """Resolve the session id at CALL time (review M-6): an explicit
+    argument wins, None falls back to THIS module's global that main()
+    sets from --session.  This module never rewrites p1_verify's or
+    p2_verify's globals — the reused P2/P1 cases receive the P3 session
+    id explicitly through their case-function signatures."""
+    return session if session is not None else SESSION
+
 # P2-frozen ids reused READ-ONLY from the frozen p2_verify/p1_verify harness
 # (window/SHD-09/SHD-10/SHD-11 get P3-shaped supersets below because the P3
 # checker demands structured same-moment / bitdepth / P3-guard evidence that
@@ -325,10 +334,12 @@ class P3Context:
     Modeled on the proven core-checks run-004 start_case() plumbing, bound to
     the create-only evidence directory."""
 
-    def __init__(self, ev: lib.Evidence, label: str):
+    def __init__(self, ev: lib.Evidence, label: str, session: str = None):
+        session = resolve_session(session)
         self.evidence = ev
         self.label = label
-        self.env = lib.make_env(label, session=SESSION)
+        self.session_id = session
+        self.env = lib.make_env(label, session=session)
         env = self.env
         env.write_mpv_conf(scale_baseline="bicubic")
         env.write_input_conf()
@@ -395,7 +406,7 @@ class P3Context:
               fullscreen: bool = False, extra_args: list | None = None,
               media_path: Path | None = None):
         name = f"{self.label}-{variant}"
-        pipe = f"{lib.PIPE_NAMESPACE}{SESSION}-{name}-ipc"
+        pipe = f"{lib.PIPE_NAMESPACE}{self.session_id}-{name}-ipc"
         try:
             probe = open(pipe, "r+b")
             probe.close()
@@ -409,7 +420,7 @@ class P3Context:
                 f"陈旧 IPC 管道已存在（疑似此前中断遗留的 mpv 孤儿）: {pipe}; "
                 "请先清理孤儿进程并改用全新证据目录")
         self.session = lib.MpvSession(self.env, name, self.evidence.dir,
-                                      session=SESSION)
+                                      session=self.session_id)
         _ALL_SESSIONS.append(self.session)
         args = ["--no-border", "--osd-duration=800", "--osc=no",
                 "--loop-file=inf"]
@@ -1351,7 +1362,8 @@ def log_clean(ev: lib.Evidence, stems: list) -> bool:
 # SHD-05 — NIS compute port (32x24/256, coef textures, bounds guard, WHEN)
 # ---------------------------------------------------------------------------
 
-def case_shd05(ev: lib.Evidence) -> dict:
+def case_shd05(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "SHD-05"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     audits = shader_static_audits()
@@ -1382,7 +1394,7 @@ def case_shd05(ev: lib.Evidence) -> dict:
 
     # -- variant a: real upscale pass at a non-block-divisible target -------
     stems_a = []
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     try:
         ctx.make_y4m("shd05-up.y4m", 640, 360, frames=24)
         s = ctx.start("a-upscale-1366x768", window=(1366, 768))
@@ -1438,7 +1450,7 @@ def _nis_when_skip_variant(result: dict, ev: lib.Evidence, variant_name: str,
                            media_w: int, media_h: int, window: tuple) -> bool:
     case = "SHD-05"
     stems = []
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     ok = False
     try:
         ctx.make_y4m(f"shd05-{variant_name}.y4m", media_w, media_h, frames=24)
@@ -1488,7 +1500,8 @@ def _nis_when_skip_variant(result: dict, ev: lib.Evidence, variant_name: str,
 # SHD-06 — xBR-lv2 MAIN RGB (21 taps, 3x prescale mode, never xBRZ)
 # ---------------------------------------------------------------------------
 
-def case_shd06(ev: lib.Evidence) -> dict:
+def case_shd06(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "SHD-06"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     audits = shader_static_audits()
@@ -1512,7 +1525,7 @@ def case_shd06(ev: lib.Evidence) -> dict:
     # (a still renders ONCE: presence/liveness proof lives in the motion
     #  variants below; this variant proves the PIXEL-LEVEL effect)
     stems_a = []
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     try:
         w_in, h_in = 96, 54
         out_w, out_h = p3.xbr_output_size(w_in, h_in)
@@ -1595,7 +1608,7 @@ def _shd06_presence_variant(result: dict, ev: lib.Evidence, name: str,
                             yuv: bool, window: tuple = (288, 162)) -> bool:
     case = "SHD-06"
     stems = []
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     ok = False
     try:
         # presence variants must use MOTION media (a still renders once, so
@@ -1631,7 +1644,8 @@ def _shd06_presence_variant(result: dict, ev: lib.Evidence, name: str,
     return ok
 
 
-def case_shd07(ev: lib.Evidence) -> dict:
+def case_shd07(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "SHD-07"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     audits = shader_static_audits()
@@ -1673,7 +1687,7 @@ def _shd07_variant(result: dict, ev: lib.Evidence, name: str, iw: int, ih: int,
                    note_kw: str | None) -> tuple:
     case = "SHD-07"
     stems = []
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     ok = False
     try:
         ctx.make_ppm(f"shd07-{name}.ppm", iw, ih)
@@ -1738,7 +1752,7 @@ def _shd07_presence_variant(result: dict, ev: lib.Evidence) -> bool:
     for the AUTO gear — the case-level presence/liveness evidence."""
     case = "SHD-07"
     stems = []
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     ok = False
     try:
         ctx.make_y4m("shd07-e-motion.y4m", 160, 90, frames=24)
@@ -1773,7 +1787,8 @@ def _shd07_presence_variant(result: dict, ev: lib.Evidence) -> bool:
     return ok
 
 
-def case_shd09(ev: lib.Evidence) -> dict:
+def case_shd09(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "SHD-09"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     # The five P3 gear identities x 8/10bit real decode.  fsr1 preserves the
@@ -1805,7 +1820,7 @@ def case_shd09(ev: lib.Evidence) -> dict:
 
 def _shd09_variant(ev: lib.Evidence, gear: str, ten_bit: bool) -> tuple:
     name = f"SHD-09-{gear}-{'10bit' if ten_bit else '8bit'}"
-    ctx = P3Context(ev, name)
+    ctx = P3Context(ev, name, session=session)
     stems = []
     ok = False
     try:
@@ -1883,14 +1898,15 @@ def _shd09_variant(ev: lib.Evidence, gear: str, ten_bit: bool) -> tuple:
 # SHD-10 — RGB guard matrix including the P3 gears
 # ---------------------------------------------------------------------------
 
-def case_shd10(ev: lib.Evidence) -> dict:
+def case_shd10(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "SHD-10"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     result["facts"]["scope_note"] = (
         "P2 语义保留（fsr1/sgsr1/anime4k LUMA 档 RGB 拒用 + nearest 不受影响），"
         "并逐档覆盖 P3 档：nis 为 LUMA 档 RGB 拒用；xbr/sharpbilinear/"
         "sharpbilinear2x 为 MAIN RGB 档，RGB 下必须真实激活生效")
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -1991,7 +2007,8 @@ def case_shd10(ev: lib.Evidence) -> dict:
 # SHD-11 — HDR guard matrix (metadata override synthetic; P3 gears)
 # ---------------------------------------------------------------------------
 
-def case_shd11(ev: lib.Evidence) -> dict:
+def case_shd11(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "SHD-11"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     result["facts"]["metadata_override_note"] = METADATA_OVERRIDE_NOTE
@@ -1999,7 +2016,7 @@ def case_shd11(ev: lib.Evidence) -> dict:
         "HDR 守卫独立于 LUMA 守卫：nis 走 LUMA 档拒绝；xbr/sharpbilinear/"
         "sharpbilinear2x 的 HDR 拒绝理由必须独立成立（与 LUMA 拒绝文案不同源），"
         "仅守卫测试不冒编码 HDR，不做 HDR 画质评价")
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -2098,7 +2115,8 @@ def case_shd11(ev: lib.Evidence) -> dict:
 # GEO-02 — Integer letterbox / k matrix / same-process loadfile
 # ---------------------------------------------------------------------------
 
-def case_geo02(ev: lib.Evidence) -> dict:
+def case_geo02(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "GEO-02"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     ok_all = True
@@ -2107,7 +2125,7 @@ def case_geo02(ev: lib.Evidence) -> dict:
     ok_all &= _geo02_bars_variant(result, ev)
 
     # -- v2: fullscreen 720p -> k=2, no bars ---------------------------------
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     try:
         ctx.make_y4m("geo02-720.y4m", 1280, 720, frames=24)
@@ -2162,7 +2180,7 @@ def case_geo02(ev: lib.Evidence) -> dict:
     result["sessions"] += stems
 
     # -- v3: k<1 normal downscale, no crop, honest note ----------------------
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     try:
         ctx.make_y4m("geo02-720b.y4m", 1280, 720, frames=24)
@@ -2223,7 +2241,7 @@ def _clear_osd_blip(s):
 
 def _geo02_bars_variant(result: dict, ev: lib.Evidence) -> bool:
     case = "GEO-02"
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -2322,7 +2340,7 @@ def _geo02_bars_variant(result: dict, ev: lib.Evidence) -> bool:
 
 def _geo02_loadfile_variant(result: dict, ev: lib.Evidence) -> bool:
     case = "GEO-02"
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -2436,7 +2454,8 @@ def capture_uniform_frame(s, ev: lib.Evidence, case: str, tag: str,
     return last, False
 
 
-def case_geo03(ev: lib.Evidence) -> dict:
+def case_geo03(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "GEO-03"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     result["facts"]["dither_note"] = (
@@ -2448,7 +2467,7 @@ def case_geo03(ev: lib.Evidence) -> dict:
         "驱散；若仍不洁，则如实标记并在右下象限（构造上无 OSD）做严格块均匀度")
     ok_all = True
     control_stats = None
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     try:
         ctx.make_y4m("geo03-720.y4m", 1280, 720, frames=24)
@@ -2546,7 +2565,8 @@ def case_geo03(ev: lib.Evidence) -> dict:
 # GEO-04 — window resize/DPI machine part + external priority + transfer
 # ---------------------------------------------------------------------------
 
-def case_geo04(ev: lib.Evidence) -> dict:
+def case_geo04(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "GEO-04"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
     result["facts"]["dpi_note"] = (
@@ -2557,7 +2577,7 @@ def case_geo04(ev: lib.Evidence) -> dict:
     # -- v1: windowed resize recompute (resize applies while PLAYING; the
     #     paused-state consistency is then verified — a paused window-scale
     #     write provably does not resize the window, smoke-r2 evidence) -----
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     try:
         ctx.make_y4m("geo04-720.y4m", 1280, 720, frames=24)
@@ -2657,7 +2677,7 @@ def case_geo04(ev: lib.Evidence) -> dict:
     result["sessions"] += stems
 
     # -- v2: external zoom/GLSL priority -> transfer -> Off zero residue -----
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     try:
         ctx.make_y4m("geo04-720b.y4m", 1280, 720, frames=24)
@@ -2775,10 +2795,11 @@ def case_geo04(ev: lib.Evidence) -> dict:
 # GEO-05 — rotate/crop effective display geometry (observed-vop oracle)
 # ---------------------------------------------------------------------------
 
-def case_geo05(ev: lib.Evidence) -> dict:
+def case_geo05(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "GEO-05"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -2879,10 +2900,11 @@ def case_geo05(ev: lib.Evidence) -> dict:
 # GEO-06 — SAR non-square display (k from dw/dh; aspect preserved)
 # ---------------------------------------------------------------------------
 
-def case_geo06(ev: lib.Evidence) -> dict:
+def case_geo06(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "GEO-06"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -2963,10 +2985,11 @@ def case_geo06(ev: lib.Evidence) -> dict:
 # WINDOW-01 — resize/pause/aspect/loadfile/restart with P3 structured records
 # ---------------------------------------------------------------------------
 
-def case_window01(ev: lib.Evidence) -> dict:
+def case_window01(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "WINDOW-01"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -3042,7 +3065,7 @@ def case_window01(ev: lib.Evidence) -> dict:
     result["sessions"] += stems
 
     # restart-clean session (P2 semantics preserved)
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems_b = []
     s2 = None
     try:
@@ -3053,7 +3076,7 @@ def case_window01(ev: lib.Evidence) -> dict:
         quit_ok = activate(s, "fsr1")["chain_verified"]
         s.quit()
         exit_code = s.wait_exit(20.0)
-        s2 = lib.MpvSession(ctx.env, f"{case}-restart", ev.dir, session=SESSION)
+        s2 = lib.MpvSession(ctx.env, f"{case}-restart", ev.dir, session=session)
         stems_b.append(s2.case_name)
         s2.start(media=ctx.media, extra_args=["--loop-file=inf"])
         restarted_off = s2.wait_state("off", 8.0)
@@ -3093,10 +3116,11 @@ def case_window01(ev: lib.Evidence) -> dict:
 # PER-04-COMPUTE — raw ns samples only, never a performance-gain claim
 # ---------------------------------------------------------------------------
 
-def case_per04(ev: lib.Evidence) -> dict:
+def case_per04(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     case = "PER-04-COMPUTE"
     result = {"id": case, "variants": [], "files": [], "facts": {}, "sessions": []}
-    ctx = P3Context(ev, case)
+    ctx = P3Context(ev, case, session=session)
     stems = []
     ok = False
     try:
@@ -3165,7 +3189,9 @@ def case_per04(ev: lib.Evidence) -> dict:
 P3_UNIT_MODULES = ["test_p3_geometry", "test_p3_support", "test_p3_evidence"]
 
 
-def case_unit_p3_01(ev: lib.Evidence) -> dict:
+def case_unit_p3_01(ev: lib.Evidence, session: str = None) -> dict:
+    # session accepted for the uniform CASES calling convention; this case
+    # runs the unit suites in a subprocess and spawns no mpv session.
     result = {"id": "UNIT-P3-01", "variants": [], "files": [], "facts": {},
               "sessions": []}
     ok_all = True
@@ -3380,7 +3406,10 @@ def _evi_clone(src: Path, dst: Path) -> None:
     shutil.copytree(src, dst)
 
 
-def case_evi01(ev: lib.Evidence) -> dict:
+def case_evi01(ev: lib.Evidence, session: str = None) -> dict:
+    # session accepted for the uniform CASES calling convention; this case
+    # never touches the live session — it exercises the checker inside a
+    # synthetic sandbox repo that carries its own "p3-evi-sandbox" session id.
     result = {"id": "EVI-01", "variants": [], "files": [], "facts": {},
               "sessions": []}
     sandbox_root = Path(tempfile.mkdtemp(prefix="p3-evi01-"))
@@ -3545,11 +3574,9 @@ def _register_cases() -> None:
 
 
 _register_cases()
-
-# Session-correct reuse: the frozen p2/p1 harnesses parameterize their
-# contexts from these module globals at CALL time.
-p2v.SESSION = SESSION
-p1v.SESSION = SESSION
+# Review M-6: NO import-time rewriting of p2v.SESSION / p1v.SESSION.  The
+# reused P2/P1 case functions take the session id as an explicit argument
+# and main() passes THIS module's session through CASES[cid](ev, session=...).
 
 
 def main() -> int:
@@ -3580,8 +3607,6 @@ def main() -> int:
                                             args.session):
         parser.error("--session is required (e.g. p3-001)")
     SESSION = args.session
-    p2v.SESSION = SESSION
-    p1v.SESSION = SESSION
 
     selected = sorted(CASES) if args.all else []
     if args.only:
@@ -3638,7 +3663,7 @@ def main() -> int:
                 before = {p for p in ev_abs.rglob("*") if p.is_file()}
                 started = time.time()
                 try:
-                    case_result = CASES[cid](evidence)
+                    case_result = CASES[cid](evidence, session=SESSION)
                 except Exception as error:  # noqa: BLE001 — record, never hide
                     case_result = {"id": cid, "status": "FAIL",
                                    "error": repr(error)}

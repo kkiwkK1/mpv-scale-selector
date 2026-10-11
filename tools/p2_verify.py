@@ -95,28 +95,16 @@ METADATA_OVERRIDE_NOTE = ("metadata-override-synthetic：SDR 合成源经 vf=for
 
 
 # ---------------------------------------------------------------------------
-# Session-correct case context
+# session resolution (review M-6): the session id is passed EXPLICITLY
+# through the case-function signatures; importing this module has NO
+# side effect on p1_verify's globals.
 # ---------------------------------------------------------------------------
 
-class CaseContext(p1v.CaseContext):
-    """p1_verify's context with the session fixed to p2-001.
-
-    The parent class resets ``self.session`` to None after env setup (a P1
-    quirk that produced ``None``-prefixed IPC pipes); P2 restores the session
-    name so pipes/roots are honestly p2-001-bound. Reused P1 case functions
-    are pointed at this class via the module-global patch below.
-    """
-
-    def __init__(self, evidence, label, stubs=True, playing=True, session=None):
-        super().__init__(evidence, label, stubs=stubs, playing=playing,
-                         session=SESSION)
-        self.session = SESSION  # undo the parent's reset-to-None quirk
-
-
-# Reused p1 cases must construct the session-correct context and read the
-# p2 session at call time (CTL-05 restart MpvSession reads the global).
-p1v.CaseContext = CaseContext
-p1v.SESSION = SESSION
+def resolve_session(session) -> str:
+    """Resolve the session id at CALL time — an explicit argument wins,
+    None falls back to THIS module's global that main() sets from
+    --session.  Never rewrite an imported module's globals."""
+    return session if session is not None else SESSION
 
 
 class P2Context:
@@ -126,10 +114,13 @@ class P2Context:
     def __init__(self, ev: lib.Evidence, label: str, anime4k_mode: str = "a",
                  media: str = "y4m8", width: int = 320, height: int = 240,
                  frames: int = 48, broken: dict | None = None,
-                 drop_resources: tuple = (), extra_args: list | None = None):
+                 drop_resources: tuple = (), extra_args: list | None = None,
+                 session: str = None):
+        session = resolve_session(session)
         self.evidence = ev
         self.label = label
-        self.env = lib.make_env(label, session=SESSION)
+        self.session_id = session
+        self.env = lib.make_env(label, session=session)
         env = self.env
         env.write_mpv_conf(scale_baseline="bicubic")
         env.add_generated_input("input.conf", p2.p2_input_conf_text())
@@ -171,7 +162,7 @@ class P2Context:
     def start(self, variant: str, extra_args: list | None = None):
         name = f"{self.label}-{variant}"
         self.session = lib.MpvSession(self.env, name, self.evidence.dir,
-                                      session=SESSION)
+                                      session=self.session_id)
         args = self.extra_args + (extra_args or []) + ["--loop-file=inf"]
         self.session.start(media=self.media, extra_args=args)
         return self.session
@@ -182,7 +173,7 @@ class P2Context:
     def start_idle(self, variant: str, extra_args: list | None = None):
         name = f"{self.label}-{variant}"
         self.session = lib.MpvSession(self.env, name, self.evidence.dir,
-                                      session=SESSION)
+                                      session=self.session_id)
         args = self.extra_args + (extra_args or []) + ["--idle=once"]
         self.session.start(media=None, extra_args=args)
         return self.session
@@ -424,7 +415,8 @@ case_shd12 = p1v.case_shd12         # LS1/BCAS disabled identity
 # CTL-01 — P2 menu facts: builtins selectable, placeholders disabled
 # ---------------------------------------------------------------------------
 
-def case_ctl01(ev: lib.Evidence) -> dict:
+def case_ctl01(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-01", "variants": [], "files": [], "facts": {}}
     static = lib.audit_plugin_source()
     result["facts"]["plugin_source_audit"] = static
@@ -436,7 +428,7 @@ def case_ctl01(ev: lib.Evidence) -> dict:
         return result
 
     # variant a: idle, product conf only — P2 builtin/placeholder policy
-    ctx = P2Context(ev, "CTL-01", media=None)
+    ctx = P2Context(ev, "CTL-01", media=None, session=session)
     try:
         s = ctx.start_idle("a-idle")
         st = p1v.run_selftest(s)
@@ -483,7 +475,7 @@ def case_ctl01(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant b: playing with a compat stub gear (P1 element-level semantics)
-    ctx = CaseContext(ev, "CTL-01", stubs=True, playing=True, session=SESSION)
+    ctx = p1v.CaseContext(ev, "CTL-01", stubs=True, playing=True, session=session)
     try:
         s = ctx.start_playing("b-playing")
         ok = ok and s.wait_until(
@@ -520,7 +512,8 @@ def case_ctl01(ev: lib.Evidence) -> dict:
 # CTL-06 — corrupt/invalid config under the P2 registry
 # ---------------------------------------------------------------------------
 
-def case_ctl06(ev: lib.Evidence) -> dict:
+def case_ctl06(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-06", "variants": [], "files": [], "facts": {}}
     ok = True
     stub_shader = ("p1_test_shader_label=p1-test-shader（测试桩非产品档位）\n"
@@ -546,7 +539,7 @@ def case_ctl06(ev: lib.Evidence) -> dict:
         "h-missing-off": "gears=ls1,p1-test-shader\n" + stub_shader,
     }
     for name, conf_text in variants.items():
-        ctx = P2Context(ev, "CTL-06", media=None)
+        ctx = P2Context(ev, "CTL-06", media=None, session=session)
         ctx.env.write_raw_gears_conf(conf_text)
         try:
             s = ctx.start_idle(name)
@@ -625,12 +618,13 @@ def case_ctl06(ev: lib.Evidence) -> dict:
 # CTL-09 — RGB/HDR LUMA guard at activation, at runtime, and unknown/idle
 # ---------------------------------------------------------------------------
 
-def case_ctl09(ev: lib.Evidence) -> dict:
+def case_ctl09(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-09", "variants": [], "files": [], "facts": {}}
     ok = True
 
     # variant a: RGB (PPM) — LUMA gears refused at activation, nearest works
-    ctx = P2Context(ev, "CTL-09", media="ppm", width=320, height=240)
+    ctx = P2Context(ev, "CTL-09", media="ppm", width=320, height=240, session=session)
     try:
         s = ctx.start_playing("a-rgb-ppm")
         vok = s.wait_until(lambda: (s.get("video-out-params") or {}).get("pixelformat"),
@@ -678,7 +672,7 @@ def case_ctl09(ev: lib.Evidence) -> dict:
 
     # variant b: HDR via vf metadata override (synthetic, annotated)
     ctx = P2Context(ev, "CTL-09", media="y4m8", width=320, height=240,
-                    extra_args=["--vf=format:gamma=pq:primaries=bt.2020"])
+                    extra_args=["--vf=format:gamma=pq:primaries=bt.2020"], session=session)
     try:
         s = ctx.start_playing("b-hdr-metadata-override")
         vok = s.wait_until(lambda: (s.get("video-out-params") or {}).get("gamma"),
@@ -719,7 +713,7 @@ def case_ctl09(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant c: runtime switch to HDR while fsr1 active → guard release
-    ctx = P2Context(ev, "CTL-09", media="y4m8", width=320, height=240)
+    ctx = P2Context(ev, "CTL-09", media="y4m8", width=320, height=240, session=session)
     try:
         s = ctx.start_playing("c-runtime-guard-release")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -757,7 +751,7 @@ def case_ctl09(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant d: idle/unknown vo — honest "no-video", never pseudo-active effect
-    ctx = P2Context(ev, "CTL-09", media=None)
+    ctx = P2Context(ev, "CTL-09", media=None, session=session)
     try:
         s = ctx.start_idle("d-idle-honesty")
         vok = s.get("video-out-params") is None
@@ -795,7 +789,8 @@ def case_ctl09(ev: lib.Evidence) -> dict:
 # SHD-01 — FSR1: real passes, WHEN via window pixels, ≤2× clamp
 # ---------------------------------------------------------------------------
 
-def case_shd01(ev: lib.Evidence) -> dict:
+def case_shd01(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-01", "variants": [], "files": [], "facts": {}}
     result["facts"]["desc_keywords"] = p2.FSR_DESC_KEYWORDS
     ok = True
@@ -804,7 +799,7 @@ def case_shd01(ev: lib.Evidence) -> dict:
     # target: fullscreen render rect 2560x1440 (not dw/dh, not a clamped
     # window; the old 1.5× window was WM-clamped to 2496x1404 and is hereby
     # replaced). Passes verified with a frame-freshness proof.
-    ctx = P2Context(ev, "SHD-01", media="y4m8", width=1920, height=1080, frames=16)
+    ctx = P2Context(ev, "SHD-01", media="y4m8", width=1920, height=1080, frames=16, session=session)
     try:
         s = ctx.start_playing("a-upscale")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -860,7 +855,7 @@ def case_shd01(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant b: 1× — honest //!WHEN skip, zero FSR passes, no pseudo-active
-    ctx = P2Context(ev, "SHD-01", media="y4m8", width=640, height=360, frames=24)
+    ctx = P2Context(ev, "SHD-01", media="y4m8", width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("b-same-size-when-skip")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -901,7 +896,7 @@ def case_shd01(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant c: per-axis >2× — clamp note, passes still run, mpv takes over
-    ctx = P2Context(ev, "SHD-01", media="y4m8", width=640, height=360, frames=24)
+    ctx = P2Context(ev, "SHD-01", media="y4m8", width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("c-over-2x-clamp")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -949,14 +944,15 @@ def case_shd01(ev: lib.Evidence) -> dict:
 # SHD-02 — SGSR1: single LUMA pass, WHEN honesty
 # ---------------------------------------------------------------------------
 
-def case_shd02(ev: lib.Evidence) -> dict:
+def case_shd02(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-02", "variants": [], "files": [], "facts": {}}
     result["facts"]["desc_keywords"] = p2.SGSR_DESC_KEYWORDS
     ok = True
     # variant a: real upscale — 1080p→1440p main scenario at the TRUE output
     # target 2560x1440 fullscreen (the old 1.5× window was WM-clamped to
     # 2496x1404). Single SGSR1 LUMA pass verified with a frame-freshness proof.
-    ctx = P2Context(ev, "SHD-02", media="y4m8", width=1920, height=1080, frames=16)
+    ctx = P2Context(ev, "SHD-02", media="y4m8", width=1920, height=1080, frames=16, session=session)
     try:
         s = ctx.start_playing("a-upscale")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -1007,7 +1003,7 @@ def case_shd02(ev: lib.Evidence) -> dict:
     finally:
         ctx.cleanup()
 
-    ctx = P2Context(ev, "SHD-02", media="y4m8", width=640, height=360, frames=24)
+    ctx = P2Context(ev, "SHD-02", media="y4m8", width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("b-same-size-when-skip")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -1043,10 +1039,11 @@ def case_shd02(ev: lib.Evidence) -> dict:
 # SHD-03 — nearest: explicit scale/cscale/dscale triple, no shaders, no guard
 # ---------------------------------------------------------------------------
 
-def case_shd03(ev: lib.Evidence) -> dict:
+def case_shd03(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-03", "variants": [], "files": [], "facts": {}}
     ok = True
-    ctx = P2Context(ev, "SHD-03", media="y4m8", width=640, height=360, frames=24)
+    ctx = P2Context(ev, "SHD-03", media="y4m8", width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("a-yuv-nearest")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1105,7 +1102,7 @@ def case_shd03(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant b: RGB input — nearest has NO LUMA guard and works
-    ctx = P2Context(ev, "SHD-03", media="ppm", width=320, height=240)
+    ctx = P2Context(ev, "SHD-03", media="ppm", width=320, height=240, session=session)
     try:
         s = ctx.start_playing("b-rgb-no-guard")
         vok = s.wait_until(lambda: (s.get("video-out-params") or {}).get("pixelformat"),
@@ -1138,7 +1135,8 @@ def case_shd03(ev: lib.Evidence) -> dict:
 # SHD-04 — stock six modes equivalence + single-main-chain ownership (real)
 # ---------------------------------------------------------------------------
 
-def case_shd04(ev: lib.Evidence) -> dict:
+def case_shd04(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-04", "variants": [], "files": [], "facts": {}}
     result["facts"]["note"] = ("对照仅比对 glsl-shaders 列表、pass 数与 //!DESC "
                                "在场；不比画质。stock 链为隔离环境内零改动副本。")
@@ -1147,7 +1145,7 @@ def case_shd04(ev: lib.Evidence) -> dict:
     # six modes: direct CTRL+n stock chain vs registered anime4k gear
     for idx, mode in enumerate(("a", "b", "c", "d", "e", "f"), start=1):
         ctx = P2Context(ev, "SHD-04", anime4k_mode=mode, media="y4m8",
-                        width=640, height=360, frames=24)
+                        width=640, height=360, frames=24, session=session)
         try:
             s = ctx.start_playing(f"mode-{mode}")
             vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -1219,7 +1217,7 @@ def case_shd04(ev: lib.Evidence) -> dict:
     # first takeover over an existing Anime4K baseline → whole-property
     # replacement, then Off restores the COMPLETE baseline chain
     ctx = P2Context(ev, "SHD-04", anime4k_mode="a", media="y4m8",
-                    width=640, height=360, frames=24)
+                    width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("first-takeover-anime-baseline")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -1263,7 +1261,7 @@ def case_shd04(ev: lib.Evidence) -> dict:
 
     # nearest on an Anime4K baseline: recipe = EMPTY shader list; Off restores
     ctx = P2Context(ev, "SHD-04", anime4k_mode="a", media="y4m8",
-                    width=640, height=360, frames=24)
+                    width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("nearest-on-baseline")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1298,7 +1296,7 @@ def case_shd04(ev: lib.Evidence) -> dict:
     # external whole-property modification after activation → Off keeps the
     # user's COMPLETE external list (same-name entry survives)
     ctx = P2Context(ev, "SHD-04", anime4k_mode="a", media="y4m8",
-                    width=640, height=360, frames=24)
+                    width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("external-preserve-complete-list")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1336,7 +1334,7 @@ def case_shd04(ev: lib.Evidence) -> dict:
     # glsl-shaders property with exactly its own recipe (no append mixing,
     # no half-replaced chains), epochs non-decreasing, ends clean off.
     ctx = P2Context(ev, "SHD-04", anime4k_mode="a", media="y4m8",
-                    width=640, height=360, frames=24)
+                    width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("fast-switch-1s")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -1411,11 +1409,12 @@ def case_shd04(ev: lib.Evidence) -> dict:
 # SHD-08 — honest display: WHEN skip, no-video, resize re-verification
 # ---------------------------------------------------------------------------
 
-def case_shd08(ev: lib.Evidence) -> dict:
+def case_shd08(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-08", "variants": [], "files": [], "facts": {}}
     ok = True
     # variant a: skip-when honesty in state export + menu
-    ctx = P2Context(ev, "SHD-08", media="y4m8", width=640, height=360, frames=24)
+    ctx = P2Context(ev, "SHD-08", media="y4m8", width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("a-skip-when-note")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1449,7 +1448,7 @@ def case_shd08(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant b: resize out of the skip band → re-verification (no stale state)
-    ctx = P2Context(ev, "SHD-08", media="y4m8", width=640, height=360, frames=24)
+    ctx = P2Context(ev, "SHD-08", media="y4m8", width=640, height=360, frames=24, session=session)
     try:
         s = ctx.start_playing("b-resize-reverify")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1490,10 +1489,11 @@ def case_shd08(ev: lib.Evidence) -> dict:
 # SHD-09 — 10-bit source: real pixelformat recorded by mpv + fsr1 runs
 # ---------------------------------------------------------------------------
 
-def case_shd09(ev: lib.Evidence) -> dict:
+def case_shd09(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-09", "variants": [], "files": [], "facts": {}}
     ok = True
-    ctx = P2Context(ev, "SHD-09", media="y4m10", width=1280, height=720, frames=16)
+    ctx = P2Context(ev, "SHD-09", media="y4m10", width=1280, height=720, frames=16, session=session)
     try:
         s = ctx.start_playing("a-10bit-fsr1")
         vok = s.wait_until(lambda: (s.get("video-out-params") or {}).get("pixelformat"),
@@ -1538,10 +1538,11 @@ def case_shd09(ev: lib.Evidence) -> dict:
 # SHD-10 — RGB input: LUMA gears disabled with reasons; nearest unaffected
 # ---------------------------------------------------------------------------
 
-def case_shd10(ev: lib.Evidence) -> dict:
+def case_shd10(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-10", "variants": [], "files": [], "facts": {}}
     ok = True
-    ctx = P2Context(ev, "SHD-10", media="ppm", width=640, height=360)
+    ctx = P2Context(ev, "SHD-10", media="ppm", width=640, height=360, session=session)
     try:
         s = ctx.start_playing("a-rgb-guard")
         vok = s.wait_until(lambda: (s.get("video-out-params") or {}).get("pixelformat"),
@@ -1593,12 +1594,13 @@ def case_shd10(ev: lib.Evidence) -> dict:
 # SHD-11 — HDR guard via vf metadata override (synthetic; annotated)
 # ---------------------------------------------------------------------------
 
-def case_shd11(ev: lib.Evidence) -> dict:
+def case_shd11(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-11", "variants": [], "files": [], "facts": {}}
     result["facts"]["metadata_override_note"] = METADATA_OVERRIDE_NOTE
     ok = True
     ctx = P2Context(ev, "SHD-11", media="y4m8", width=640, height=360, frames=24,
-                    extra_args=["--vf=format:gamma=pq:primaries=bt.2020"])
+                    extra_args=["--vf=format:gamma=pq:primaries=bt.2020"], session=session)
     try:
         s = ctx.start_playing("a-hdr-metadata-override")
         vok = s.wait_until(lambda: (s.get("video-out-params") or {}).get("gamma"),
@@ -1655,7 +1657,8 @@ def _fixture(name: str) -> str:
     return p.read_text(encoding="utf-8")
 
 
-def case_shd13(ev: lib.Evidence) -> dict:
+def case_shd13(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "SHD-13", "variants": [], "files": [], "facts": {}}
     ok = True
 
@@ -1672,7 +1675,7 @@ def case_shd13(ev: lib.Evidence) -> dict:
     # broken shader would never reach its failure — the negative case must
     # create the real failure conditions, not a legal skip)
     ctx = P2Context(ev, "SHD-13", media="y4m8", width=640, height=360, frames=24,
-                    broken={"fsr1": _fixture("broken-syntax.glsl")})
+                    broken={"fsr1": _fixture("broken-syntax.glsl")}, session=session)
     try:
         s = ctx.start_playing("a-broken-syntax-rollback")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -1728,7 +1731,7 @@ def case_shd13(ev: lib.Evidence) -> dict:
     # variant b: bad PARAM (sgsr1) as first gear → release to fallback
     # (same >1× precondition so the broken shader is really exercised)
     ctx = P2Context(ev, "SHD-13", media="y4m8", width=640, height=360, frames=24,
-                    broken={"sgsr1": _fixture("bad-param.glsl")})
+                    broken={"sgsr1": _fixture("bad-param.glsl")}, session=session)
     try:
         s = ctx.start_playing("b-bad-param-release")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -1764,7 +1767,7 @@ def case_shd13(ev: lib.Evidence) -> dict:
 
     # variant c: resource file missing → immediate fallback with precise reason
     ctx = P2Context(ev, "SHD-13", media="y4m8", width=640, height=360, frames=24,
-                    drop_resources=("shaders/p2-SGSR1.glsl",))
+                    drop_resources=("shaders/p2-SGSR1.glsl",), session=session)
     try:
         s = ctx.start_playing("c-missing-resource")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1798,11 +1801,12 @@ def case_shd13(ev: lib.Evidence) -> dict:
 # WINDOW-01 — resize/pause/aspect/clip-change: re-evaluation, no stale passes
 # ---------------------------------------------------------------------------
 
-def case_window01(ev: lib.Evidence) -> dict:
+def case_window01(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "WINDOW-01", "variants": [], "files": [], "facts": {}}
     ok = True
     media2_src = None
-    ctx = P2Context(ev, "WINDOW-01", media="y4m8", width=640, height=360, frames=24)
+    ctx = P2Context(ev, "WINDOW-01", media="y4m8", width=640, height=360, frames=24, session=session)
     try:
         # second synthetic clip for the loadfile step
         media2_src = ctx.env.root / "media2.y4m"
@@ -1904,14 +1908,14 @@ def case_window01(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant b: quit after the run → next launch starts clean off (no residue)
-    ctx = P2Context(ev, "WINDOW-01", media="y4m8", width=320, height=240, frames=12)
+    ctx = P2Context(ev, "WINDOW-01", media="y4m8", width=320, height=240, frames=12, session=session)
     try:
         s = ctx.start_playing("quit-restart-clean")
         vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
         vok = vok and activate_via_menu(s, "fsr1") and s.wait_state("active", 8.0)
         quit_ok = s.quit()
         exit_code = s.wait_exit(20.0)
-        s2 = lib.MpvSession(ctx.env, "WINDOW-01-restart", ev.dir, session=SESSION)
+        s2 = lib.MpvSession(ctx.env, "WINDOW-01-restart", ev.dir, session=session)
         s2.start(media=ctx.media, extra_args=["--loop-file=inf"])
         try:
             restarted_off = s2.wait_state("off", 8.0)
@@ -1948,7 +1952,8 @@ def case_window01(ev: lib.Evidence) -> dict:
 # PIC-05 — P2 menu wording (objective part; subjective stays user-check)
 # ---------------------------------------------------------------------------
 
-def case_pic05(ev: lib.Evidence) -> dict:
+def case_pic05(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "PIC-05", "variants": [], "files": [], "facts": {}}
     conf_audit = lib.audit_gears_conf()
     conf_audit_p2 = p2.audit_gears_conf_p2()
@@ -1978,9 +1983,10 @@ def case_pic05(ev: lib.Evidence) -> dict:
                 ls1_reason_ok, bcas_reason_ok, builtin_labels_ok)
 
     for name, stubs in (("main-product-conf", False),):
-        ctx = P2Context(ev, "PIC-05", media="y4m8", width=320, height=240) \
-            if not stubs else CaseContext(ev, "PIC-05", stubs=True, playing=True,
-                                          session=SESSION)
+        ctx = P2Context(ev, "PIC-05", media="y4m8", width=320, height=240,
+                        session=session) \
+            if not stubs else p1v.CaseContext(ev, "PIC-05", stubs=True,
+                                              playing=True, session=session)
         try:
             s = ctx.start_playing(name)
             vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -2021,7 +2027,9 @@ def case_pic05(ev: lib.Evidence) -> dict:
 # UNIT-P2-01 — full unit suite (real subprocess run, recorded)
 # ---------------------------------------------------------------------------
 
-def case_unit_p2_01(ev: lib.Evidence) -> dict:
+def case_unit_p2_01(ev: lib.Evidence, session: str = None) -> dict:
+    # session accepted for the uniform CASES calling convention; this case
+    # runs the unit suite in a subprocess and spawns no mpv session.
     result = {"id": "UNIT-P2-01", "variants": [], "files": [], "facts": {}}
     cmd = [sys.executable, "-B", "-X", "utf8", "-m", "unittest", "discover",
            "-s", "tests"]
@@ -2274,7 +2282,6 @@ def main() -> int:
     if not args.session or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", args.session):
         parser.error("--session is required (e.g. p2-001)")
     SESSION = args.session
-    p1v.SESSION = SESSION
     selected = sorted(CASES) if args.all else (args.case or [])
     if not selected and not args.probe:
         parser.error("choose --all, --probe or at least one --case")
@@ -2374,18 +2381,38 @@ def main() -> int:
             "为 vf=format 元数据覆盖合成（metadata-override-synthetic 明示），"
             "非 HDR 编码片源，不做画质评价。",
             "P1 兼容回归（CTL-02..05/07/08、GEO-01/07、SHD-12）经只读导入复用 "
-            "p1_verify 用例，上下文会话修正为 p2-001；桩档位元素级语义为明确兼容模式。",
+            "p1_verify 用例，会话 id 经 case 函数参数显式贯穿为 p2 会话"
+            "（M-6：不再改写被导入模块的全局符号）；桩档位元素级语义为明确兼容模式。",
             "证据 create-only；清单含全部产物 SHA-256（含 .gitignore 的 .log）。",
             "IPC 自动化只证功能与状态真实性，不替代真人交互感受；不做画质/性能收益宣称。",
         ],
         "cases": [],
     }
+    # M-8: the ACTIVE-config stock cross check belongs to the real
+    # verification stage. The unit test pins only the deterministic
+    # repo==backup contract (cross_check_live=False), so the read-only
+    # reference against the user's live mpv shaders dir is recorded HERE:
+    # the live config is never written, problems are reported verbatim and
+    # do not gate the isolated case matrix (isolated runs use repo copies).
+    live_audit = p2.verify_stock_copy(cross_check_live=True)
+    summary["live_config_cross_check"] = {
+        "read_only": True,
+        "live_shaders_dir": str(p2.LIVE_SHADER_DIR),
+        "files_audited": len(live_audit["files"]),
+        "ok": live_audit["ok"],
+        "problems": live_audit["problems"],
+        "note": "活动配置只读交叉核对（M-8 自单测移入真实验证阶段）：只读引用"
+                "用户活动 mpv 配置，绝不写入；问题如实记录，不影响隔离用例判定。",
+    }
+    if not live_audit["ok"]:
+        print("[live-config] 活动配置只读交叉核对发现问题（如实记录，不拦截）:",
+              live_audit["problems"], flush=True)
     failures = []
     for cid in selected:
         print(f"[{SESSION}] running {cid} ...", flush=True)
         started = time.time()
         try:
-            case_result = CASES[cid](evidence)
+            case_result = CASES[cid](evidence, session=SESSION)
         except Exception as error:  # noqa: BLE001 — record, never hide
             case_result = {"id": cid, "status": "FAIL", "error": repr(error)}
         case_result["elapsed_s"] = round(time.time() - started, 1)

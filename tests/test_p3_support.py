@@ -12,6 +12,8 @@ Fast, stdlib-only, never launches mpv.
 """
 from __future__ import annotations
 
+import inspect
+import json
 import re
 import sys
 import tempfile
@@ -39,9 +41,9 @@ class TestP3RegistryMirror(unittest.TestCase):
         end = LUA_SOURCE.index("local BUILTIN_BY_ID", start)
         block = LUA_SOURCE[start:end]
         for gid in P3_IDS:
-            self.assertRegex(block, rf'\{{ id = "{gid}",'), gid
+            self.assertRegex(block, rf'\{{ id = "{gid}",', msg=gid)
         for gid in ("ls1", "bcas"):
-            self.assertNotRegex(block, rf'\{{ id = "{gid}",'), gid
+            self.assertNotRegex(block, rf'\{{ id = "{gid}",', msg=gid)
 
     def test_placeholder_registry_is_exactly_ls1_bcas(self):
         # 限域接续修正（brief 根因6）：原提取用 index("}", start) 停在第一条
@@ -64,8 +66,8 @@ class TestP3RegistryMirror(unittest.TestCase):
         self.assertRegex(lua_block, r'\{ id = "nis",.*luma = true')
         self.assertNotRegex(lua_block, r'\{ id = "nis",.*hdr = true')
         for gid in ("xbr", "sharpbilinear", "sharpbilinear2x"):
-            self.assertRegex(lua_block, rf'\{{ id = "{gid}",.*hdr = true'), gid
-            self.assertNotRegex(lua_block, rf'\{{ id = "{gid}",.*luma = true'), gid
+            self.assertRegex(lua_block, rf'\{{ id = "{gid}",.*hdr = true', msg=gid)
+            self.assertNotRegex(lua_block, rf'\{{ id = "{gid}",.*luma = true', msg=gid)
         self.assertRegex(lua_block, r'\{ id = "integer",.*whole = true')
         self.assertIn('id = "integer"', lua_block)
         # integer geometry placeholder entries exist for snapshot coverage
@@ -89,7 +91,7 @@ class TestP3RegistryMirror(unittest.TestCase):
             ("sharpbilinear2x", p3.SHARP_2X_DESC_KEYWORDS[0]),
         ]
         for gid, kw in pairs:
-            self.assertIn(f'keywords = {{ "{kw}" }}', LUA_SOURCE), gid
+            self.assertIn(f'keywords = {{ "{kw}" }}', LUA_SOURCE, msg=gid)
             self.assertIn(kw, (REPO_ROOT / dict(
                 nis="shaders/p3-NIS.glsl",
                 xbr="shaders/p3-xBR-lv2.glsl",
@@ -155,8 +157,11 @@ class TestP3PluginSourceAudits(unittest.TestCase):
             self.assertTrue(ok, f"plugin source audit failed: {key}")
 
     def test_no_extra_key_bindings(self):
+        # M-10③ 对齐：两份同名测试取并集——本拷贝此前已漂移（缺
+        # CTRL+3/CTRL+6），现与 tests/test_p2_support.py 的键名单一致。
+        # 刻意不做单点收敛（保留各阶段断言域），对齐本身即并集。
         self.assertEqual(LUA_SOURCE.count("add_key_binding("), 1)
-        for k in ("CTRL+1", "CTRL+2", "F7", "F5"):
+        for k in ("CTRL+1", "CTRL+2", "CTRL+3", "CTRL+6", "F7", "F5"):
             self.assertNotIn(f'add_key_binding("{k}"', LUA_SOURCE)
             self.assertNotIn(f'add_forced_key_binding("{k}"', LUA_SOURCE)
 
@@ -199,7 +204,7 @@ class TestP3SelftestCoverage(unittest.TestCase):
     def test_selftest_has_p3_cases(self):
         for marker in ("p3-builtin:", "p3-pure:", "p3-guard:", "p3-note:",
                        "p3-plan:"):
-            self.assertIn(marker, LUA_SOURCE), marker
+            self.assertIn(marker, LUA_SOURCE, msg=marker)
 
     def test_selftest_case_count_increased(self):
         self.assertGreaterEqual(LUA_SOURCE.count('tc("'), 100)
@@ -228,16 +233,189 @@ class TestP3HarnessFixPins(unittest.TestCase):
         self.assertEqual(p1v.user_shader_pass_count(FakeS(), keywords=["absent"]), 0)
 
     def test_p2r_f1_take_screenshot_binds_state(self):
-        src = Path(p1v.__file__).read_text(encoding="utf-8")
-        self.assertIn("seen_hashes", src)
-        self.assertIn("non_corroborative", src)
-        self.assertIn("before", src)
-        self.assertIn("true_bitdepth_parser", src)
+        # P2R-F1 行为级（M-10②，brief 根因1）：不能以 p1_verify 源码含
+        # seen_hashes/"before"/true_bitdepth_parser 等常见单词的存在性充当
+        # 回归钉（几乎不可能失败）。改走真实 take_screenshot + 记录型 fake
+        # session（截图写出真实 PNG 字节，仿同文件 same_moment 示范）：
+        #   * 截图前后各观察一次观察窗：state/chain_epoch/frame_counts 同入
+        #     一条 entry（frame_counts 为 fresh/redraw count 真实求和）；
+        #   * PNG 尺寸/位深由真实 8/16 位解析器记录（true_bitdepth_parser），
+        #     sha256 为文件真实哈希，返回仓库相对路径（非幻影）；
+        #   * 重复字节 + seen_hashes → 重拍一次仍相同 → 诚实标注
+        #     non_corroborative（相同字节永不冒充独立证据）；
+        #   * 截图失败 → not_generated 且返回 None，不产生幻影路径。
+        import p3_verify as _pv
+        tmp = tempfile.TemporaryDirectory(dir=REPO_ROOT)
+        self.addCleanup(tmp.cleanup)
+        ev = lib.Evidence(Path(tmp.name) / "ev")
+        png_a = _pv._evi_make_png(8, 6, salt=1)
+
+        class FakeShotSession:
+            """记录型 fake：vo-passes 计数序列 + 真实 PNG 截图；create-only
+            预检复用 p1_lib.MpvSession 的真实实现。"""
+
+            ensure_screenshot_target = staticmethod(
+                lib.MpvSession.ensure_screenshot_target)
+
+            def __init__(self, pngs, counts, capture_ok=True):
+                self._pngs = list(pngs)      # 每次截图依次写出的字节
+                self._counts = list(counts)  # 每次观察 vo-passes 的计数序列
+                self._cur = (0, 0)
+                self._ok = capture_ok
+                self.shots = []
+
+            def _obs_key(self, name):
+                assert name in ("vo-passes", "state", "chain_epoch"), name
+
+            def get(self, name):
+                self._obs_key(name)
+                if self._counts:
+                    self._cur = self._counts.pop(0)
+                fresh, redraw = self._cur
+                return {"fresh": [{"desc": "d", "count": fresh,
+                                   "samples": [1.0]}],
+                        "redraw": [{"desc": "r", "count": redraw}]}
+
+            def ud(self, key):
+                self._obs_key(key)
+                return {"state": "active", "chain_epoch": 3}[key]
+
+            def screenshot(self, path, mode="subtitles"):
+                self.ensure_screenshot_target(path)
+                self.shots.append((str(path), mode))
+                if not self._ok:
+                    return False
+                Path(path).write_bytes(
+                    self._pngs.pop(0) if self._pngs else png_a)
+                return True
+
+        # 1) 成功路径：观察窗绑定 + 真实 PNG 解析 + 真实哈希
+        s = FakeShotSession(pngs=[png_a], counts=[(5, 2), (5, 2)])
+        variant = {}
+        got = p1v.take_screenshot(s, ev, "p2r-f1-ok.png", variant)
+        entry = variant["screenshot"]
+        self.assertTrue(got)
+        self.assertTrue((lib.REPO_ROOT / got).is_file())
+        self.assertEqual(entry["before"],
+                         {"state": "active", "chain_epoch": 3,
+                          "frame_counts": {"fresh": 5, "redraw": 2}})
+        self.assertEqual(entry["after"]["frame_counts"],
+                         {"fresh": 5, "redraw": 2})
+        self.assertEqual(entry["before"]["state"], entry["after"]["state"])
+        self.assertTrue(entry["command_ok"] and entry["captured"])
+        self.assertFalse(entry["not_generated"])
+        self.assertEqual((entry["png"]["w"], entry["png"]["h"],
+                          entry["png"]["bitdepth"]), (8, 6, 8))
+        self.assertTrue(entry["png"]["true_bitdepth_parser"])
+        self.assertEqual(entry["sha256"],
+                         lib.sha256_file(lib.REPO_ROOT / got))
+        self.assertEqual(s.shots, [(str(ev.dir / "p2r-f1-ok.png"), "subtitles")])
+
+        # 2) 重复字节 + seen_hashes：重拍一次仍相同 → non_corroborative
+        seen = {}
+        s1 = FakeShotSession(pngs=[png_a], counts=[(5, 2)])
+        got_a = p1v.take_screenshot(s1, ev, "p2r-f1-dup-a.png", {},
+                                    seen_hashes=seen)
+        self.assertTrue(got_a)
+        self.assertIn("p2r-f1-dup-a.png", seen)
+        # 计数在重拍等待循环前前进（第 3 次观察 6/2 ≠ before 5/2）→ 立即重拍
+        s2 = FakeShotSession(pngs=[png_a, png_a], counts=[(5, 2), (5, 2), (6, 2)])
+        var_b = {}
+        got_b = p1v.take_screenshot(s2, ev, "p2r-f1-dup-b.png", var_b,
+                                    seen_hashes=seen)
+        entry_b = var_b["screenshot"]
+        self.assertEqual(entry_b["duplicate_of"], "p2r-f1-dup-a.png")
+        self.assertTrue(entry_b["non_corroborative"])
+        self.assertFalse(entry_b.get("resolved_by_retake", False))
+        self.assertEqual(len(s2.shots), 2)  # 主拍 + 重拍各一次
+        self.assertTrue((ev.dir / "p2r-f1-dup-b-retake.png").is_file())
+        # 返回的仍是原拍路径（重拍未被采信，原文件不冒充新证据也不隐藏）
+        self.assertTrue(got_b)
+        self.assertFalse(got_b.endswith("-retake.png"))
+
+        # 3) 截图失败：not_generated，返回 None，无幻影路径
+        s3 = FakeShotSession(pngs=[], counts=[(5, 2), (5, 2)], capture_ok=False)
+        var_c = {}
+        got_c = p1v.take_screenshot(s3, ev, "p2r-f1-failed.png", var_c)
+        self.assertIsNone(got_c)
+        entry_c = var_c["screenshot"]
+        self.assertFalse(entry_c["captured"])
+        self.assertTrue(entry_c["not_generated"])
+        self.assertIn("reason", entry_c)
+        self.assertFalse((ev.dir / "p2r-f1-failed.png").exists())
 
     def test_p2r_f2_all_sessions_collected(self):
-        src = Path(p1v.__file__).read_text(encoding="utf-8")
-        self.assertIn("all_sessions", src)
-        self.assertIn("for s in sessions", src)
+        # P2R-F2 行为级（M-10②）：不能以源码含 all_sessions/"for s in
+        # sessions" 充当回归钉。用最小 fake ctx/session 走真实
+        # save_session_artifacts：
+        #   * all_sessions 中每个 session 的 log/console/transcript 都被收集
+        #     （含非当前 session；transcript 同名自动 -2 唯一命名）；
+        #   * 当前 session 重复出现在 all_sessions 中不重复收集；
+        #   * inputs 清单（桩/合成输入 sha + 媒体 sha）真实写入并列入返回；
+        #   * 返回的每个路径都真实存在（无幻影）。
+        tmp = tempfile.TemporaryDirectory(dir=REPO_ROOT)
+        self.addCleanup(tmp.cleanup)
+        ev = lib.Evidence(Path(tmp.name) / "ev")
+
+        class FakeIpc:
+            def __init__(self, transcript):
+                self.transcript = transcript
+
+        class FakeSession:
+            def __init__(self, case_name, console_text=None, transcript=None):
+                self.case_name = case_name
+                self.log_path = Path(tmp.name) / f"{case_name}.mpv.log"
+                self.log_path.write_bytes(f"log:{case_name}\n".encode("utf-8"))
+                self.console_path = None
+                if console_text is not None:
+                    self.console_path = Path(tmp.name) / f"{case_name}.out"
+                    self.console_path.write_bytes(
+                        console_text.encode("utf-8"))
+                self.ipc = None if transcript is None else FakeIpc(transcript)
+
+        class FakeEnv:
+            inputs = {"input.conf": "sha-input",
+                      "script-opts/scale-selector.conf": "sha-opts"}
+
+        class FakeCtx:
+            def __init__(self, label, all_sessions, current):
+                self.label = label
+                self.all_sessions = all_sessions
+                self.mpv_session = current   # M-5 后 p1 侧对象名
+                self.env = FakeEnv()
+                self.media_sha = "sha-media"
+                self.evidence = ev
+
+        s1 = FakeSession("CASE-a", console_text="console-a\n",
+                         transcript=[{"req": ["get_property", "scale"]},
+                                     {"resp": {"error": "success"}}])
+        s2 = FakeSession("CASE-b", transcript=[{"req": ["x"]}])
+        s3 = FakeSession("CASE-c")           # 无 console 无 transcript
+        ctx = FakeCtx("P2R-F2", [s1, s2, s3], current=s1)
+
+        files = p1v.save_session_artifacts(ctx, [])
+        names = {Path(f).name for f in files}
+        self.assertEqual(len(files), len(names),
+                         "重复 current session 不得被收集两次")
+        for name in ("CASE-a.mpv.log", "CASE-b.mpv.log", "CASE-c.mpv.log",
+                     "CASE-a.out"):
+            self.assertIn(name, names)
+        # 两个 transcript 各自落盘（同名会自动 -2 唯一命名，此处本就不同名）
+        self.assertIn("CASE-a.mpv.transcript.jsonl", names)
+        self.assertIn("CASE-b.mpv.transcript.jsonl", names)
+        self.assertNotIn("CASE-c.mpv.transcript.jsonl", names)
+        t = ev.dir / "CASE-a.mpv.transcript.jsonl"
+        self.assertEqual(len(t.read_text(encoding="utf-8").strip()
+                             .splitlines()), 2)
+        # inputs 清单以首个 session 的 case_name 命名并记录真实 sha
+        inputs = json.loads(
+            (ev.dir / "CASE-a.inputs.json").read_text(encoding="utf-8"))
+        self.assertEqual(inputs["config_dir_files_sha256"], FakeEnv.inputs)
+        self.assertEqual(inputs["media_sha256"], "sha-media")
+        self.assertIn("CASE-a.inputs.json", names)
+        # 返回的每个路径真实存在
+        for f in files:
+            self.assertTrue((lib.REPO_ROOT / f).is_file(), f)
 
     def test_same_moment_sampling_helper_exists(self):
         # VL-F1 闭环——行为级断言（brief 根因4）：不能以 docstring 含
@@ -415,12 +593,27 @@ class TestP3VerifyHarnessSupport(unittest.TestCase):
             self.assertIs(fn, self.pv.p2v.CASES[cid],
                           f"{cid} must reuse the frozen p2_verify case")
 
-    def test_session_reuse_patch_targets_p3(self):
-        # p1/p2 harness contexts parameterize their sessions from these
-        # module globals at call time; the P3 runner pins them to p3-001.
-        self.assertEqual(self.pv.p2v.SESSION, "p3-001")
-        self.assertEqual(self.pv.p1v.SESSION, "p3-001")
+    def test_session_reuse_explicit_passing(self):
+        # M-5/M-6: the reused P1/P2 cases receive the session id as an
+        # EXPLICIT case-function argument; importing p3_verify must leave
+        # the imported modules' globals untouched — the old "SESSION =
+        # p3-001" module patch is gone and the import side effect is no
+        # longer a contract.
         self.assertEqual(self.pv.SESSION, "p3-001")
+        self.assertEqual(self.pv.p2v.SESSION, "p2-001")
+        self.assertEqual(self.pv.p1v.SESSION, "p1-001")
+        # every case in the frozen reuse chain takes the session explicitly
+        for cid in self.pv.REUSED_P2_IDS:
+            fn = self.pv.CASES[cid]
+            self.assertIn("session", inspect.signature(fn).parameters,
+                          f"{cid} must take the session id explicitly")
+        # the frozen def-time default (`session: str = SESSION`) is gone:
+        # CaseContext resolves None against the module global at CALL time
+        # (M-5), so --session can never be bypassed by a stale default.
+        self.assertIsNone(inspect.signature(p1v.CaseContext.__init__)
+                          .parameters["session"].default)
+        self.assertTrue(callable(p1v.resolve_session))
+        self.assertTrue(callable(self.pv.p2v.resolve_session))
 
     # -- CPU goldens -------------------------------------------------------
     def test_golden_bilinear_known_values(self):

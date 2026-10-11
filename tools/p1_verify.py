@@ -39,6 +39,15 @@ import p1_lib as lib  # noqa: E402
 
 SESSION = "p1-001"  # default only; the runner requires --session explicitly
 STAGE = "P1"
+
+
+def resolve_session(session) -> str:
+    """Resolve the session id at CALL time (review M-5): an explicit
+    argument wins, None falls back to THIS module's global that main()
+    sets from --session.  A def-time default parameter (``session: str =
+    SESSION``) freezes the pre-parse value into the function object and
+    must never be used for the session id."""
+    return session if session is not None else SESSION
 REQUIRED_TEST_IDS = ["CTL-01", "CTL-02", "CTL-03", "CTL-04", "CTL-05", "CTL-06",
                      "CTL-07", "CTL-08", "GEO-01", "GEO-07", "SHD-12", "PIC-05"]
 
@@ -71,8 +80,17 @@ MANAGED_PROPS = ["glsl-shaders", "scale", "cscale", "dscale", "video-zoom"]
 
 
 class CaseContext:
+    """Per-case isolated env + live mpv session registry.
+
+    ``self.session`` is the session id (never overwritten); the currently
+    live mpv session object lives in ``self.mpv_session``.  The old code
+    stored both in ``self.session`` and reset it to None after env setup,
+    which named every IPC pipe ``None-<case>-ipc`` (review M-5).
+    """
+
     def __init__(self, evidence: lib.Evidence, label: str, stubs: bool = True,
-                 playing: bool = True, session: str = SESSION):
+                 playing: bool = True, session: str = None):
+        session = resolve_session(session)
         self.evidence = evidence
         self.label = label
         self.session = session
@@ -92,35 +110,37 @@ class CaseContext:
         if playing:
             self.media = self.env.root / "media.y4m"
             self.media_sha = lib.generate_y4m(self.media)
-        self.session = None
+        self.mpv_session = None
         # P3 harness root-cause fix (P2R-F2/P2S-02): full registry of every
         # session spawned by this case (restarts included).
         self.all_sessions = []
 
     def start_playing(self, variant: str):
         name = f"{self.label}-{variant}"
-        self.session = lib.MpvSession(self.env, name, self.evidence.dir,
-                                      session=self.session)
+        s = lib.MpvSession(self.env, name, self.evidence.dir,
+                           session=self.session)
+        self.mpv_session = s
         # P3 harness root-cause fix (P2R-F2/P2S-02): every spawned session is
         # registered so save_session_artifacts can collect its console/mpv.log
         # too — restart sessions (CTL-05/WINDOW-01/GEO-04) no longer leak from
         # the automatic evidence manifest.
-        self.all_sessions.append(self.session)
-        self.session.start(media=self.media, extra_args=["--loop-file=inf"])
-        return self.session
+        self.all_sessions.append(s)
+        s.start(media=self.media, extra_args=["--loop-file=inf"])
+        return s
 
     def start_idle(self, variant: str):
         name = f"{self.label}-{variant}"
-        self.session = lib.MpvSession(self.env, name, self.evidence.dir,
-                                      session=self.session)
-        self.all_sessions.append(self.session)
-        self.session.start(media=None, extra_args=["--idle=once"])
-        return self.session
+        s = lib.MpvSession(self.env, name, self.evidence.dir,
+                           session=self.session)
+        self.mpv_session = s
+        self.all_sessions.append(s)
+        s.start(media=None, extra_args=["--idle=once"])
+        return s
 
     def cleanup(self):
-        if self.session is not None and self.session.proc is not None \
-                and self.session.proc.poll() is None:
-            self.session.kill()
+        s = self.mpv_session
+        if s is not None and s.proc is not None and s.proc.poll() is None:
+            s.kill()
         self.env.cleanup()
 
 
@@ -340,8 +360,12 @@ def save_session_artifacts(ctx: CaseContext, evidence_names: list) -> list:
     # session this case spawned (restart sessions included), not just the
     # last one; per-session transcripts keep unique names.
     sessions = list(getattr(ctx, "all_sessions", []) or [])
-    if ctx.session is not None and ctx.session not in sessions:
-        sessions.append(ctx.session)
+    # M-5: the p1 CaseContext keeps the live object in mpv_session (session
+    # is the id string now); P2Context reused from p2_verify keeps it in
+    # session.  Accept both object homes — never the id string.
+    current = getattr(ctx, "mpv_session", getattr(ctx, "session", None))
+    if current is not None and current not in sessions:
+        sessions.append(current)
     seen_tnames = set()
     for s in sessions:
         if s is None:
@@ -378,7 +402,8 @@ def save_session_artifacts(ctx: CaseContext, evidence_names: list) -> list:
 # CTL-01 — F8 binding, menu open/close, state display vs glsl-shaders/vo-passes
 # ---------------------------------------------------------------------------
 
-def case_ctl01(ev: lib.Evidence) -> dict:
+def case_ctl01(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-01", "variants": [], "files": [], "facts": {}}
     static = lib.audit_plugin_source()
     conf_audit = lib.audit_gears_conf()
@@ -390,7 +415,7 @@ def case_ctl01(ev: lib.Evidence) -> dict:
         return result
 
     # variant a: idle, product gears only
-    ctx = CaseContext(ev, "CTL-01", stubs=False, playing=False, session=SESSION)
+    ctx = CaseContext(ev, "CTL-01", stubs=False, playing=False, session=session)
     try:
         s = ctx.start_idle("a-idle")
         st = run_selftest(s)
@@ -440,7 +465,7 @@ def case_ctl01(ev: lib.Evidence) -> dict:
         return result
 
     # variant b: playing with stub gears; display must match glsl-shaders/vo-passes
-    ctx = CaseContext(ev, "CTL-01", stubs=True, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "CTL-01", stubs=True, playing=True, session=session)
     try:
         s = ctx.start_playing("b-playing")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict)
@@ -496,11 +521,12 @@ def case_ctl01(ev: lib.Evidence) -> dict:
 # CTL-02 — Off restores only managed & unmodified properties; no glsl-shaders-clr
 # ---------------------------------------------------------------------------
 
-def case_ctl02(ev: lib.Evidence) -> dict:
+def case_ctl02(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-02", "variants": [], "files": [], "facts": {}}
     result["facts"]["plugin_source_audit"] = lib.audit_plugin_source()
     ok = True
-    ctx = CaseContext(ev, "CTL-02", stubs=True, playing=True)
+    ctx = CaseContext(ev, "CTL-02", stubs=True, playing=True, session=session)
     try:
         s = ctx.start_playing("main")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -554,7 +580,8 @@ def case_ctl02(ev: lib.Evidence) -> dict:
 # CTL-03 — external chain change → external state, plugin yields, never overwrites
 # ---------------------------------------------------------------------------
 
-def case_ctl03(ev: lib.Evidence) -> dict:
+def case_ctl03(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-03", "variants": [], "files": [], "facts": {}}
     variants = [
         ("a-ctrl1-append", "key_CTRL+1"),
@@ -564,7 +591,7 @@ def case_ctl03(ev: lib.Evidence) -> dict:
     ]
     ok = True
     for variant_name, method in variants:
-        ctx = CaseContext(ev, "CTL-03", stubs=True, playing=True, session=SESSION)
+        ctx = CaseContext(ev, "CTL-03", stubs=True, playing=True, session=session)
         try:
             s = ctx.start_playing(variant_name)
             vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -636,10 +663,11 @@ def case_ctl03(ev: lib.Evidence) -> dict:
 # CTL-04 — rapid switching: no residue, unique final state, no crash
 # ---------------------------------------------------------------------------
 
-def case_ctl04(ev: lib.Evidence) -> dict:
+def case_ctl04(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-04", "variants": [], "files": [], "facts": {}}
     ok = True
-    ctx = CaseContext(ev, "CTL-04", stubs=True, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "CTL-04", stubs=True, playing=True, session=session)
     try:
         s = ctx.start_playing("rapid")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -710,12 +738,13 @@ def case_ctl04(ev: lib.Evidence) -> dict:
 # CTL-05 — quit/restart in each state: no cross-session residue (no persistence)
 # ---------------------------------------------------------------------------
 
-def case_ctl05(ev: lib.Evidence) -> dict:
+def case_ctl05(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-05", "variants": [], "files": [], "facts": {}}
     ok = True
     setups = ["off", "active", "external", "fallback"]
     for state in setups:
-        ctx = CaseContext(ev, "CTL-05", stubs=True, playing=True, session=SESSION)
+        ctx = CaseContext(ev, "CTL-05", stubs=True, playing=True, session=session)
         try:
             s = ctx.start_playing(state)
             sok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -739,7 +768,7 @@ def case_ctl05(ev: lib.Evidence) -> dict:
                 and watch_later_before == watch_later_after
             # relaunch with the same config dir; P1 must come back in off
             s2 = lib.MpvSession(ctx.env, f"CTL-05-{state}-restart", ev.dir,
-                                 session=SESSION)
+                                 session=session)
             s2.start(media=ctx.media, extra_args=["--loop-file=inf"])
             try:
                 restarted_off = s2.wait_state("off", 8.0)
@@ -783,7 +812,7 @@ def case_ctl05(ev: lib.Evidence) -> dict:
 # CTL-06 — corrupt/invalid plugin config: degrade with reasons, never crash
 # ---------------------------------------------------------------------------
 
-def case_ctl06(ev: lib.Evidence) -> dict:
+def case_ctl06(ev: lib.Evidence, session: str = None) -> dict:
     """限域修正 A：损坏/恶意配置邻近变体全簇——
       a 缺 gears 键（回退内建默认）      b 非法 id
       c 坏 _set                          d 重复键/未知键（原 R1 冻结证据变体）
@@ -792,6 +821,7 @@ def case_ctl06(ev: lib.Evidence) -> dict:
       g 重复 id + off 不在首位           （必须合并且 off 提到首项）
       h gears 缺 off                     （必须自动补在首位且可用）
     任意变体下：off 恒在首项且可用；保留 id 恒 disabled；菜单可用；mpv 存活。"""
+    session = resolve_session(session)
     result = {"id": "CTL-06", "variants": [], "files": [], "facts": {}}
     ok = True
     stub_shader = ("p1_test_shader_label=p1-test-shader（测试桩非产品档位）\n"
@@ -821,7 +851,7 @@ def case_ctl06(ev: lib.Evidence) -> dict:
         "h-missing-off": "gears=ls1,p1-test-shader\n" + stub_shader,
     }
     for name, conf_text in variants.items():
-        ctx = CaseContext(ev, "CTL-06", stubs=True, playing=False, session=SESSION)
+        ctx = CaseContext(ev, "CTL-06", stubs=True, playing=False, session=session)
         # overwrite the generated conf with the raw variant
         ctx.env.write_raw_gears_conf(conf_text)
         try:
@@ -916,10 +946,11 @@ def case_ctl06(ev: lib.Evidence) -> dict:
 # CTL-07 — missing resource / invalid value → fallback with true reason, no residue
 # ---------------------------------------------------------------------------
 
-def case_ctl07(ev: lib.Evidence) -> dict:
+def case_ctl07(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-07", "variants": [], "files": [], "facts": {}}
     ok = True
-    ctx = CaseContext(ev, "CTL-07", stubs=True, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "CTL-07", stubs=True, playing=True, session=session)
     try:
         s = ctx.start_playing("fallback")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -990,12 +1021,13 @@ def case_ctl07(ev: lib.Evidence) -> dict:
 # CTL-08 — external then Off: diff-based restore, no stale overwrite
 # ---------------------------------------------------------------------------
 
-def case_ctl08(ev: lib.Evidence) -> dict:
+def case_ctl08(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "CTL-08", "variants": [], "files": [], "facts": {}}
     ok = True
     for variant_name, also_touch_scale in (("a-shader-external", False),
                                            ("b-shader-and-scale-external", True)):
-        ctx = CaseContext(ev, "CTL-08", stubs=True, playing=True, session=SESSION)
+        ctx = CaseContext(ev, "CTL-08", stubs=True, playing=True, session=session)
         try:
             s = ctx.start_playing(variant_name)
             vok = s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1058,12 +1090,13 @@ def case_ctl08(ev: lib.Evidence) -> dict:
 # GEO-01 — geometry target-size source audit (no feedback path)
 # ---------------------------------------------------------------------------
 
-def case_geo01(ev: lib.Evidence) -> dict:
+def case_geo01(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "GEO-01", "variants": [], "files": [], "facts": {}}
     static = lib.audit_plugin_source()
     result["facts"]["plugin_source_audit"] = static
     ok = static["geometry_reads_vop_only"]
-    ctx = CaseContext(ev, "GEO-01", stubs=True, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "GEO-01", stubs=True, playing=True, session=session)
     try:
         s = ctx.start_playing("main")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1108,10 +1141,11 @@ def case_geo01(ev: lib.Evidence) -> dict:
 # GEO-07 — fullscreen/minimize with an active gear: state and geometry hold
 # ---------------------------------------------------------------------------
 
-def case_geo07(ev: lib.Evidence) -> dict:
+def case_geo07(ev: lib.Evidence, session: str = None) -> dict:
+    session = resolve_session(session)
     result = {"id": "GEO-07", "variants": [], "files": [], "facts": {}}
     ok = True
-    ctx = CaseContext(ev, "GEO-07", stubs=True, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "GEO-07", stubs=True, playing=True, session=session)
     try:
         s = ctx.start_playing("main")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1175,10 +1209,11 @@ def case_geo07(ev: lib.Evidence) -> dict:
 # SHD-12 — LS1/BCAS disabled entries with true reasons; never selectable
 # ---------------------------------------------------------------------------
 
-def case_shd12(ev: lib.Evidence) -> dict:
+def case_shd12(ev: lib.Evidence, session: str = None) -> dict:
     """限域修正 A：产品 conf 下 LS1/BCAS 禁用+真实原因+不可选（变体 main），
     以及本地 conf 攻击变体（conf-attack）：显式 active+_set+_label/_reason
     覆盖也必须保持 disabled、固定标签/原因、激活被拒。"""
+    session = resolve_session(session)
     result = {"id": "SHD-12", "variants": [], "files": [], "facts": {}}
     conf_audit = lib.audit_gears_conf()
     result["facts"]["gears_conf_audit"] = conf_audit
@@ -1205,7 +1240,7 @@ def case_shd12(ev: lib.Evidence) -> dict:
         return ls1, bcas, visited, visited_clean, policy_ok, labels_ok
 
     # variant main: shipped product gear table
-    ctx = CaseContext(ev, "SHD-12", stubs=False, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "SHD-12", stubs=False, playing=True, session=session)
     try:
         s = ctx.start_playing("main")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1245,7 +1280,7 @@ def case_shd12(ev: lib.Evidence) -> dict:
         "bcas_mode=active\n"
         "bcas_set=glsl-shaders+=~~/p1-test-stub.glsl\n"
     )
-    ctx = CaseContext(ev, "SHD-12", stubs=False, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "SHD-12", stubs=False, playing=True, session=session)
     ctx.env.write_raw_gears_conf(attack_conf)
     try:
         s = ctx.start_playing("conf-attack")
@@ -1289,11 +1324,12 @@ def case_shd12(ev: lib.Evidence) -> dict:
 # stays with user check P1-UC-2)
 # ---------------------------------------------------------------------------
 
-def case_pic05(ev: lib.Evidence) -> dict:
+def case_pic05(ev: lib.Evidence, session: str = None) -> dict:
     """限域修正 A+B：禁用文案客观核对（主观部分留 P1-UC-2）。
     变体 main：随附产品档位表；变体 no-mode：全部产品 id 仅列于 gears、
     省略一切 *_mode/_label/_reason——缺字段不得使任何产品算法变为可选，
     且必须回退到注册表固定标签/原因。"""
+    session = resolve_session(session)
     result = {"id": "PIC-05", "variants": [], "files": [], "facts": {}}
     conf_audit = lib.audit_gears_conf()
     result["facts"]["gears_conf_audit"] = conf_audit
@@ -1328,7 +1364,7 @@ def case_pic05(ev: lib.Evidence) -> dict:
         return placeholders_ok, off_ok, no_substitute, disabled_labeled, all_reserved_disabled
 
     # variant main: shipped product gear table
-    ctx = CaseContext(ev, "PIC-05", stubs=False, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "PIC-05", stubs=False, playing=True, session=session)
     try:
         s = ctx.start_playing("main")
         ok = ok and s.wait_until(lambda: isinstance(s.get("vo-passes"), dict), 15.0)
@@ -1360,7 +1396,7 @@ def case_pic05(ev: lib.Evidence) -> dict:
         ctx.cleanup()
 
     # variant no-mode: every product id listed, all _mode/_label/_reason omitted
-    ctx = CaseContext(ev, "PIC-05", stubs=False, playing=True, session=SESSION)
+    ctx = CaseContext(ev, "PIC-05", stubs=False, playing=True, session=session)
     ctx.env.write_raw_gears_conf(
         "gears=off,ls1,fsr1,nis,sgsr1,bcas,anime4k,xbr,sharpbilinear,integer,nearest\n")
     try:
@@ -1501,7 +1537,7 @@ def main() -> int:
         print(f"[{SESSION}] running {cid} ...", flush=True)
         started = time.time()
         try:
-            case_result = CASES[cid](evidence)
+            case_result = CASES[cid](evidence, session=SESSION)
         except Exception as error:  # noqa: BLE001 — record, never hide
             case_result = {"id": cid, "status": "FAIL", "error": repr(error)}
         case_result["elapsed_s"] = round(time.time() - started, 1)
