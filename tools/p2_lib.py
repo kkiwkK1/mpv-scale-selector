@@ -54,10 +54,36 @@ REPO_ROOT = lib.REPO_ROOT
 BACKUP_MPV_CONFIG = Path(
     "D:/workspace/小项目/mpv插件/_备份/缩放插件/"
     "mpv-config-20261002-233943/payload/mpv-config")
+# L-6: 冻结绑定的来源说明（机器绝对路径是刻意设计，不是可移植默认值）。
+# 该路径即 docs/备份记录.json 的 backup_directory + payload/mpv-config
+# （tools/mpv_config_backup.py 于 2026-10-02 创建，准备阶段已按其 manifest
+# SHA-256 重钉）；改绑必须走修订流程并重新钉哈希。
+BACKUP_MPV_CONFIG_SOURCE = (
+    "frozen binding = docs/备份记录.json backup_directory + payload/mpv-config "
+    "(created by tools/mpv_config_backup.py 2026-10-02, re-pinned by SHA-256 "
+    "during preparation); deliberate machine-local freeze, not a portable "
+    "default — re-binding requires a revision with re-pinned hashes")
 BACKUP_SHADER_DIR = BACKUP_MPV_CONFIG / "shaders"
 BACKUP_INPUT_CONF = BACKUP_MPV_CONFIG / "input.conf"
-LIVE_SHADER_DIR = Path(os.environ.get("APPDATA", "")) / "mpv" / "shaders"
-LIVE_INPUT_CONF = Path(os.environ.get("APPDATA", "")) / "mpv" / "input.conf"
+
+
+def _require_live_appdata() -> Path:
+    """L-6 fail-closed: the live APPDATA mpv config is the read-only
+    cross-reference for the stock-copy audit. When APPDATA is unset there
+    is no honest way to locate it — refuse instead of building a
+    CWD-relative 'mpv/shaders' path that would audit (or silently skip)
+    the wrong directory."""
+    appdata = os.environ.get("APPDATA", "")
+    if not appdata:
+        raise RuntimeError(
+            "APPDATA 未设置：无法定位用户活动 mpv 配置做只读交叉核对"
+            "（fail-closed；不再构造 CWD 相对路径 mpv/shaders）")
+    return Path(appdata)
+
+
+_LIVE_APPDATA = _require_live_appdata()
+LIVE_SHADER_DIR = _LIVE_APPDATA / "mpv" / "shaders"
+LIVE_INPUT_CONF = _LIVE_APPDATA / "mpv" / "input.conf"
 
 REPO_ANIME4K_DIR = REPO_ROOT / "shaders" / "anime4k"
 REPO_SHADER_DIR = REPO_ROOT / "shaders"

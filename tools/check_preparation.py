@@ -120,13 +120,15 @@ def main() -> int:
                      "model_request": "zai-coding-cn/glm-5.3-flash", "thinking_request": "xhigh",
                      "acceptance_scope": report["scope"]}
         candidate_path = output / f"准备候选-{args.attempt}.json"
-        candidate_path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
+        # L-4: write_bytes(UTF-8/LF) 与 p1_lib.Evidence.write_json 同法，
+        # 避免 Windows write_text 把 \n 翻译成 CRLF（load_json_lf 拒绝含 \r 的 JSON）。
+        candidate_path.write_bytes((json.dumps(candidate, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
         report["candidate"] = candidate["candidate"]
         report["candidate_sha256"] = fingerprint(candidate_path)
         report["candidate_snapshot"] = candidate_path.relative_to(PROJECT).as_posix()
     except Exception as error:
         report["error"] = str(error)
-    (output / f"准备检查-{args.attempt}.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    (output / f"准备检查-{args.attempt}.json").write_bytes((json.dumps(report, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0 if report["status"] == "PASS" else 1
 

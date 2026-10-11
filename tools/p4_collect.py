@@ -2,14 +2,21 @@
 """P4 isolated collector (session p4-001, batch B2, unit W2 collector).
 
 Scope (docs/P4/P4-B2采集器实现与首载brief.md; approved plan sha
-5285d11293373a20523ac199de2868ac2911e550ffd48b47be164311888c822a; B1-r2 fixed
-candidate sha 929079b09d1c1ac10f262ebc05e7d311ca5943d58eeb5731890199d803d17f3b):
+5285d11293373a20523ac199de2868ac2911e550ffd48b47be164311888c822a; B1-r3 fixed
+candidate sha ff7407377ee55232d2e788ab4fd436d3fe80fdcff3203288e2351c9398a51f9d):
+
+(B1-r3 re-pin revision: identical dependency set to the frozen B1-r2
+candidate, with tools/p2_lib.py re-pinned to its post-review-remediation
+sha — the L-6 fail-closed APPDATA binding + M-8 deterministic stock-copy
+contract. The B1-r2 candidate itself stays byte-frozen in its own
+namespace; the re-pin follows the revision procedure: create-only new
+revision namespace, never rewrite frozen evidence.)
 
   * CLI with read-only preflight default; explicit --mode prepare-runtime /
     identity-probe / pilot / capture / prepare-media execute; production is
     refused ALWAYS at this revision (even with a pass-json argument);
   * every entry runs the real preflight chain BEFORE any process spawn:
-    P4 work-permit machine check (p4_verify.check_work_permit), B1-r2
+    P4 work-permit machine check (p4_verify.check_work_permit), B1-r3
     candidate pin re-hash, canonical path checks, disk budget (free >= 2x
     preregistered budget), create-only trial dir (reuse refused before any
     spawn);
@@ -120,9 +127,9 @@ STAGE = lib.STAGE
 SESSION = lib.SESSION
 PLAN_SHA256 = lib.PLAN_SHA256
 COLLECT_REL = "tools/p4_collect.py"
-B1_CANDIDATE_REL = "docs/验证/开发/p4-001/build-b1-r2/candidate.json"
+B1_CANDIDATE_REL = "docs/验证/开发/p4-001/build-b1-r3/candidate.json"
 B1_CANDIDATE_SHA256 = (
-    "929079b09d1c1ac10f262ebc05e7d311ca5943d58eeb5731890199d803d17f3b")
+    "ff7407377ee55232d2e788ab4fd436d3fe80fdcff3203288e2351c9398a51f9d")
 EVIDENCE_TREE_REL = "docs/验证/开发/p4-001"
 SANDBOX_PARENT_DEFAULT = Path(tempfile.gettempdir()) / "p4-001"
 
@@ -138,10 +145,15 @@ SPAWN_MODES = ("identity-probe", "pilot", "capture", "config-smoke")
 # rc 1 = the mode completed but the evidence is NOT_ESTABLISHED (unproven
 # identity, timeout, gate false); rc 2 = refused/blocked (production lock,
 # protected-tree violation, precondition refusal). A script caller can
-# never mistake an unproven run for a pass via rc 0.
+# never mistake an unproven run for a pass via rc 0. rc 3 = fail-closed:
+# an unmodelled exception escaped a mode (disk full, antivirus lock on the
+# prepare-runtime file I/O, ...) — it must stay distinct from rc 1 so a
+# crash is never misread as an honest NOT_ESTABLISHED (M-7; same fallback
+# discipline as p4_verify.main).
 RC_OK = 0
 RC_NOT_ESTABLISHED = 1
 RC_REFUSED = 2
+RC_UNEXPECTED = 3
 
 # F5 honesty: at this revision the pilot deliberately does NOT screenshot
 # (steady-state forbids disturbance), so the four-piece PNG identity stays
@@ -3752,7 +3764,8 @@ ao=null sentinel config-load proof with the fixed mpv.exe — non-GPU,
 non-VS, no media, 10 s own-PID cap; never a RIFE/inference proof.
 exit codes: 0 accepted/proven; 1 completed but NOT_ESTABLISHED (unproven
 identity/timeout/gate-false); 2 refused/blocked (production lock, protected
-tree violation, precondition refusal).
+tree violation, precondition refusal); 3 fail-closed (unmodelled exception,
+structured unexpected_exception JSON — never read as NOT_ESTABLISHED).
 
 production is LOCKED at this revision: --mode production (or any unlock
 flag) is refused; there is no pass-json writing option to refuse.
@@ -3854,6 +3867,21 @@ def main(argv=None):
             "rc": RC_REFUSED,
         }).decode("utf-8"))
         return RC_REFUSED
+    except Exception as exc:  # F4 (M-7): unexpected errors fail closed
+        # A bare OSError crash (prepare-runtime read_bytes / open("xb")
+        # under disk-full or antivirus lock, create_sandbox mkdir races,
+        # ...) must not exit rc 1: rc 1 means "completed but honestly
+        # unproven", a crash is neither. Structured JSON with the
+        # unexpected_exception field + the dedicated rc keep NOT_ESTABLISHED
+        # single-valued (precedent: p4_verify.main fallback; SystemExit and
+        # KeyboardInterrupt are BaseException and still propagate).
+        print(lib.strict_json_bytes({
+            "error": "UNEXPECTED_EXCEPTION",
+            "rc": RC_UNEXPECTED,
+            "unexpected_exception": {"type": type(exc).__name__,
+                                     "detail": str(exc)[:1000]},
+        }).decode("utf-8"))
+        return RC_UNEXPECTED
 
 
 def _run_mode(args):
