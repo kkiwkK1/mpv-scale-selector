@@ -64,12 +64,16 @@ SAFE_ENV_KEYS = [
 #   writes (take/restore via the ownership ledger), and the journal audit must
 #   therefore accept reads of them; the geometry SOURCE remains
 #   video-out-params + the raw window pixels (anti-feedback rule unchanged).
+# 2026-10-12 additive migration (SHD-1): osd-dimensions — its margins give
+#   the real video display rect, which is what a shader's //!WHEN OUTPUT
+#   measures (letterboxed video ≠ window). Read-only, used ONLY for the WHEN
+#   mirror; the Integer k still comes from the raw window pixels.
 # The audit's core rule is unchanged: geometry comes only from
 # video-out-params + window pixels; no decoded/intermediate size reads.
 ALLOWED_JOURNAL_PROPS = {
     "glsl-shaders", "scale", "cscale", "dscale", "video-out-params",
     "osd-width", "osd-height", "video-crop", "current-window-scale",
-    "video-unscaled", "video-zoom",
+    "video-unscaled", "video-zoom", "osd-dimensions",
 }
 
 IDENTITY_GLSL = (

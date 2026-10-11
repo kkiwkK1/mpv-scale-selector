@@ -79,6 +79,20 @@ import p4_collect as col  # noqa: E402
 import p4_lib as lib  # noqa: E402
 import p4_analyze as an  # noqa: E402
 
+# PY-1: docs/验证/开发/ 是本机证据树（.gitignore 排除，fresh clone 下不存在）。
+# 读取真实 work-permit / B1-r3 candidate 的测试在证据缺失时 skip（而非误报
+# 失败）；证据在场时照常运行，行为不变。合成临时 root 的测试不受影响。
+_LOCAL_EVIDENCE_RELS = (lib.WORK_PERMIT_REL, col.B1_CANDIDATE_REL)
+_MISSING_LOCAL_EVIDENCE = [rel for rel in _LOCAL_EVIDENCE_RELS
+                           if not (REPO_ROOT / rel).is_file()]
+HAS_LOCAL_EVIDENCE = not _MISSING_LOCAL_EVIDENCE
+LOCAL_EVIDENCE_SKIP_REASON = (
+    "本机证据树缺失（docs/验证/开发/ 被 .gitignore 排除）/ local evidence "
+    "tree absent (git-ignored, not in a fresh clone): "
+    + ", ".join(_MISSING_LOCAL_EVIDENCE))
+needs_local_evidence = unittest.skipUnless(HAS_LOCAL_EVIDENCE,
+                                           LOCAL_EVIDENCE_SKIP_REASON)
+
 def _tmp(self, prefix="p4col-test-"):
     path = Path(tempfile.mkdtemp(prefix=prefix))
     self.addCleanup(shutil.rmtree, str(path), True)
@@ -238,6 +252,9 @@ class TestPreflight(unittest.TestCase):
         _no_spawn(self)
         with self.assertRaises(col.SpawnRefused):
             col.ensure_fresh_trial_dir(existing)
+        if not HAS_LOCAL_EVIDENCE:
+            # preflight 先过真实 work-permit/B1 gate，才轮到 trial-dir 检查
+            self.skipTest(LOCAL_EVIDENCE_SKIP_REASON)
         with self.assertRaises(col.SpawnRefused):
             col.preflight_collect("pilot", evidence_dir=existing,
                                   sandbox_parent=root)
@@ -261,10 +278,12 @@ class TestPreflight(unittest.TestCase):
             col.check_work_permit_or_raise(root)
         self.assertIn("work_permit", str(ctx.exception))
 
+    @needs_local_evidence
     def test_work_permit_gate_passes_on_real_repo(self):
         result = col.check_work_permit_or_raise(None)
         self.assertTrue(result["ok"])
 
+    @needs_local_evidence
     def test_b1_candidate_pins_pass_on_real_repo(self):
         result = col.check_b1_candidate_pins(None)
         self.assertEqual(result["sha256"], col.B1_CANDIDATE_SHA256)
@@ -1318,6 +1337,7 @@ class TestCli(unittest.TestCase):
                 col.main(["--mode", "capture", "--write-pass", "pass.json"])
         self.assertEqual(ctx.exception.code, 2)
 
+    @needs_local_evidence
     def test_preflight_mode_real_repo(self):
         out = io.StringIO()
         with redirect_stdout(out):
@@ -1344,6 +1364,7 @@ class TestCli(unittest.TestCase):
         self.assertEqual(rc, col.RC_REFUSED)
         self.assertIn("CONFIG_SMOKE_NEEDS_SMOKE_DIR", out.getvalue())
 
+    @needs_local_evidence
     def test_pilot_without_media_manifest_refused_before_spawn(self):
         root = _tmp(self)
         sandbox = root / "sbx"
@@ -1446,6 +1467,7 @@ class TestSandboxTempSafety(unittest.TestCase):
         with self.assertRaises(col.SpawnRefused):   # create-only
             col.create_sandbox(root / "p4-001" / "sbx-a", temp_base=root)
 
+    @needs_local_evidence
     def test_run_entry_refuses_protected_sandbox_before_spawn(self):
         protected_sandbox = lib.workspace_root() / "docs" / "p4col-sbx-r"
         _no_spawn(self)
@@ -1573,6 +1595,7 @@ class _FakeRuntimeMixin:
         return spawn
 
 
+@needs_local_evidence
 class TestIdentityProbeEndToEnd(_FakeRuntimeMixin, unittest.TestCase):
     def setUp(self):
         self._sandboxes = []
@@ -1944,6 +1967,7 @@ class TestSandboxGeneration(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 
+@needs_local_evidence
 class TestConfigSmoke(unittest.TestCase):
     def _fake_mpv(self):
         root = _tmp(self)
@@ -2506,6 +2530,7 @@ class TestCaptureAndRcContract(unittest.TestCase):
         self.assertEqual(col.timed_trial_rc({"gate": {}}),
                          col.RC_NOT_ESTABLISHED)
 
+    @needs_local_evidence
     def test_cli_pilot_missing_media_is_structured_nonzero(self):
         _no_spawn(self)
         base = Path(tempfile.gettempdir()) / "p4-001"

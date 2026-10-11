@@ -198,8 +198,13 @@ def vop_facts(s) -> dict:
         "pixelformat": vop.get("pixelformat"), "gamma": vop.get("gamma"),
         "osd_w": osd.get("w"), "osd_h": osd.get("h"),
     }
+    rect = p2.video_rect(osd)
+    out["vid_w"], out["vid_h"] = rect if rect else (None, None)
+    # SHD-1: the WHEN ratio uses the video display rect (equals the window
+    # pixels when there are no margins); key name kept for evidence continuity
     out["upscale_ratio_window_pixels"] = p2.upscale_ratio(
-        {"w": out["w"], "h": out["h"], "osd_w": out["osd_w"], "osd_h": out["osd_h"]})
+        {"w": out["w"], "h": out["h"], "osd_w": out["osd_w"], "osd_h": out["osd_h"],
+         "vid_w": out["vid_w"], "vid_h": out["vid_h"]})
     out["ratio_from_dw_dh_IS_aspect_only_not_window"] = (
         (out["dw"] * out["dh"]) / float(out["w"] * out["h"])
         if out.get("w") and out.get("h") and out.get("dw") and out.get("dh") else None)
@@ -634,9 +639,13 @@ def case_ctl09(ev: lib.Evidence, session: str = None) -> dict:
         entries = s.menu_entries()
         by_id = {e.get("id"): e for e in entries}
         luma_blocked = {g: by_id.get(g, {}).get("guard_blocked", False)
-                        for g in ("fsr1", "sgsr1", "anime4k")}
+                        for g in p2.LUMA_GEAR_IDS}
         luma_reason_rgb = all("RGB" in (by_id.get(g, {}).get("reason") or "")
-                              for g in ("fsr1", "sgsr1", "anime4k"))
+                              for g in p2.LUMA_GEAR_IDS)
+        # SHD-2: anime4k is a MAIN chain — selectable on RGB (HDR still refused)
+        anime4k_entry = by_id.get("anime4k", {})
+        anime4k_allowed_rgb = bool(anime4k_entry.get("enabled")) \
+            and not anime4k_entry.get("guard_blocked", False)
         nav_fsr = s.navigate_and_activate("fsr1")
         not_activated = (not nav_fsr) and s.ud("state") != "active" \
             and s.ud("gear") != "fsr1"
@@ -652,6 +661,7 @@ def case_ctl09(ev: lib.Evidence, session: str = None) -> dict:
             "menu_open_ok": opened,
             "luma_gears_guard_blocked": luma_blocked,
             "luma_reason_mentions_RGB": luma_reason_rgb,
+            "anime4k_allowed_on_rgb": anime4k_allowed_rgb,
             "fsr1_activation_refused": bool(not_activated),
             "glsl_after_refusal": glsl,
             "nearest_active_on_rgb": bool(near_ok),
@@ -660,7 +670,7 @@ def case_ctl09(ev: lib.Evidence, session: str = None) -> dict:
         shot = p1v.take_screenshot(s, ev, "CTL-09-rgb-guard-menu.png", variant)
         s.close_menu()
         vok = vok and opened and luma_blocked["fsr1"] and luma_blocked["sgsr1"] \
-            and luma_blocked["anime4k"] and luma_reason_rgb and not_activated \
+            and anime4k_allowed_rgb and luma_reason_rgb and not_activated \
             and near_ok and p2.is_rgb_pixfmt(geo["pixelformat"] or "")
         result["variants"].append(variant)
         if shot:

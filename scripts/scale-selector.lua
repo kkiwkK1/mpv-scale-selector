@@ -20,10 +20,12 @@
 --     仍等于 last_written 且仍 owned 时恢复原完整 baseline；external 修改整
 --     property 后保留用户完整列表，不凭路径字符串删除同名条目。P1 测试桩的
 --     历史元素级语义保留为明确兼容模式（p1-test-* 桩），不套用于注册整主链
---   * RGB/HDR 守卫：LUMA 档（fsr1/sgsr1/anime4k/nis）在 pixelformat 为 RGB 系或
+--   * RGB/HDR 守卫：LUMA 档（fsr1/sgsr1/nis）在 pixelformat 为 RGB 系或
 --     gamma∈{pq,hlg} 时拒用并在菜单/OSD 显示真实原因；P3 新增独立的 HDR 守卫
 --     （xbr/sharpbilinear/sharpbilinear2x 为 MAIN RGB 档：支持 RGB，但 HDR 输入
---     拒用——HDR 守卫独立于 LUMA 守卫）；播放中变为 RGB/HDR 时释放自有链并如实回退
+--     拒用——HDR 守卫独立于 LUMA 守卫）；播放中变为 RGB/HDR 时释放自有链并如实回退。
+--     2026-10-12 修正（SHD-2）：anime4k 全部 hook 在 MAIN/PREKERNEL（无 LUMA
+--     hook），由 LUMA 档改归 MAIN HDR 档——RGB 可用，HDR 仍拒用
 --   * P3 新增五个内建档位（链定义内建于本脚本，不受本地 conf 冒名/改写）：
 --       nis            = NVIDIA Image Scaling v1.0.2（compute 32×24×256 + 两张
 --                        2×64 rgba32f 系数纹理；MIT；内含锐化，绝不叠 NVSharpen；
@@ -66,11 +68,12 @@ local utils = require 'mp.utils'
 local options = require 'mp.options'
 
 local o = {
-    key_menu = "F8",
+    key_menu = "F8",       -- 留空＝不绑默认键，只注册 script-binding scale-selector-menu
     menu_font_size = 22,
     anime4k_chain = "a",   -- stock CTRL+1..6 链选择：a..f（默认 a=CTRL+1）
 }
 options.read_options(o, "scale-selector")
+if o.key_menu == "" then o.key_menu = nil end
 
 ------------------------------------------------------------------
 -- 常量与托管属性
@@ -82,8 +85,11 @@ local CORE_PROPS = { "glsl-shaders", "scale", "cscale", "dscale" }
 -- P3 迁移（逐条理由见 docs/P3/P3实现说明.md）：加入 osd-width/osd-height ——
 -- Integer 档需要窗口像素变化（含全屏切换）触发 k 重算；二者本就在
 -- GEO-01 只读允许集内，永不写入。
+-- 2026-10-12 迁移（SHD-1）：加入 osd-dimensions —— //!WHEN 的 OUTPUT 是视频
+-- 实际显示矩形（不含黑边），放大比须取 osd-dimensions 扣除边距后的矩形；
+-- 仅用于 //!WHEN 镜像与说明，Integer 的 k 仍只取原窗口像素（防黑边反馈不变）。
 local GUARD_PROPS = { "video-out-params", "video-crop", "current-window-scale",
-                      "osd-width", "osd-height" }
+                      "osd-width", "osd-height", "osd-dimensions" }
 
 -- 哨兵：快照时属性不可用（例如无视频时的显示几何）；恢复时跳过，绝不写回该字符串
 local UNAVAIL = "@@unavailable@@"
@@ -193,7 +199,7 @@ local BUILTIN_GEARS = {
       chain = { { prop = "glsl-shaders", op = "append", value = "~~/shaders/p2-SGSR1.glsl" } },
       keywords = { "Snapdragon Game Super Resolution" },
       when_ratio = true },
-    { id = "anime4k", label = "Anime4K（stock v4）", luma = true, whole = true,
+    { id = "anime4k", label = "Anime4K（stock v4）", luma = false, hdr = true, whole = true,
       reason = "stock Anime4K v4 " .. ANIME4K_MODE_LABELS[o_anime4k_mode]
                .. "（CTRL+" .. ({a=1,b=2,c=3,d=4,e=5,f=6})[o_anime4k_mode] .. " 等效链，零改动副本）",
       chain = anime4k_chain_set(o_anime4k_mode),
@@ -380,13 +386,25 @@ local function luma_guard_reason(is_luma, vo)
     return nil
 end
 
--- 放大倍率：窗口像素相对源尺寸（video-out-params 的 dw/dh 与窗口无关，
--- 仅反映显示宽高比，不能用于 //!WHEN 判断；osd-width/height 才是窗口像素）。
--- 未知返回 nil。
+-- //!WHEN 的输出尺寸：着色器的 OUTPUT 是视频实际显示矩形（不含黑边）。
+-- 2026-10-12 修正（SHD-1）：优先取 osd-dimensions 扣除边距后的矩形
+-- （vid_w/vid_h）；原先用整窗口像素，有黑边（如 1920×800 全屏于 1080p）时
+-- 误判为放大，着色器按 WHEN 合法跳过却被当作编译失败回滚。矩形未知时
+-- 回退到窗口像素（视频铺满窗口时二者相等）。
+-- video-out-params 的 dw/dh 与窗口无关，仅反映显示宽高比，不能用于此处。
+local function when_output_size(vo)
+    local ow, oh = vo.vid_w, vo.vid_h
+    if not (ow and oh) or ow <= 0 or oh <= 0 then
+        ow, oh = vo.osd_w, vo.osd_h
+    end
+    return ow, oh
+end
+
+-- 放大倍率：视频显示矩形相对源尺寸。未知返回 nil。
 local function upscale_ratio(vo)
     if type(vo) ~= "table" then return nil end
     local w, h = vo.w, vo.h
-    local ow, oh = vo.osd_w, vo.osd_h
+    local ow, oh = when_output_size(vo)
     if not (w and h and ow and oh) or w <= 0 or h <= 0 then return nil end
     return (ow * oh) / (w * h)
 end
@@ -395,7 +413,7 @@ end
 local function axis_scales(vo)
     if type(vo) ~= "table" then return nil end
     local w, h = vo.w, vo.h
-    local ow, oh = vo.osd_w, vo.osd_h
+    local ow, oh = when_output_size(vo)
     if not (w and h and ow and oh) or w <= 0 or h <= 0 then return nil end
     return ow / w, oh / h
 end
@@ -769,6 +787,13 @@ local function next_enabled(entries, index, dir)
     end
 end
 
+-- 同 next_enabled，但到首尾后循环（菜单按键用）
+local function next_enabled_wrap(entries, index, dir)
+    local i = next_enabled(entries, index, dir)
+    if i then return i end
+    return next_enabled(entries, dir > 0 and 0 or #entries + 1, dir)
+end
+
 -- 计算激活某档位需要写入的属性序列。
 --   gear           档位对象（gear.whole = 注册整主链语义）
 --   current_list   当前 glsl-shaders 列表
@@ -954,10 +979,13 @@ local S = {
     anime4k_mode = o_anime4k_mode,
     chain_kind = nil,         -- 本次接管主链类别："whole"（注册整主链）|"compat"（p1-test-* 桩历史语义）
     integer_k = nil,          -- P3：Integer 档当前生效的整数倍数（激活/重算时更新）
+    menu_note = "",           -- 菜单打开时的最近提示（代替与菜单重叠的 OSD 消息）
 }
 
 local overlay = nil
 local open_menu, close_menu, activate_gear, do_off
+-- 菜单打开时的重绘入口（实现见菜单段；osd_message 先于菜单定义，故前置声明）
+local render_menu
 local verify_timer = nil
 -- M-2：守卫属性回调的去抖定时器（一次性；同帧多个 GUARD_PROPS 触发合并为一次重估）
 local guard_recheck_timer = nil
@@ -1008,7 +1036,15 @@ local function managed_props(model)
     return props
 end
 
+-- 菜单打开时不弹 OSD 消息（二者都在左上角，会重叠约 3 秒）：改写进菜单
+-- 状态头的提示行；菜单关闭时照常弹 OSD。
 local function osd_message(text)
+    if S.menu_open then
+        S.menu_note = text
+        msg.info("note:", text)
+        if render_menu then render_menu() end
+        return
+    end
     mp.osd_message("缩放选择器: " .. text, 3)
 end
 
@@ -1016,14 +1052,28 @@ local function user_data_set(key, value)
     pcall(mp.set_property_native, "user-data/scale-selector/" .. key, value)
 end
 
+-- osd-dimensions 扣除边距 = 视频实际显示矩形（//!WHEN 的 OUTPUT）；未知返回 nil
+local function video_rect(dims)
+    if type(dims) ~= "table" then return nil end
+    local w, h = dims.w, dims.h
+    if not (w and h) or w <= 0 or h <= 0 then return nil end
+    local vw = w - math.max(0, dims.ml or 0) - math.max(0, dims.mr or 0)
+    local vh = h - math.max(0, dims.mt or 0) - math.max(0, dims.mb or 0)
+    if vw <= 0 or vh <= 0 then return nil end
+    return vw, vh
+end
+
 -- video-out-params 子集 + 窗口像素（GEO-01：几何/适用性唯一只读来源）
+-- + 视频显示矩形（vid_w/vid_h，仅供 //!WHEN 镜像；Integer 不用）
 local function read_vo_params()
     local vop = jget("video-out-params")
     if type(vop) ~= "table" then return nil end
+    local vid_w, vid_h = video_rect(jget("osd-dimensions"))
     return {
         w = vop.w, h = vop.h, dw = vop.dw, dh = vop.dh,
         pixelformat = vop.pixelformat, gamma = vop.gamma,
         osd_w = jget("osd-width"), osd_h = jget("osd-height"),
+        vid_w = vid_w, vid_h = vid_h,
     }
 end
 
@@ -1033,6 +1083,7 @@ local function vo_same_context(a, b)
     return a.w == b.w and a.h == b.h and a.dw == b.dw and a.dh == b.dh
         and a.pixelformat == b.pixelformat and a.gamma == b.gamma
         and a.osd_w == b.osd_w and a.osd_h == b.osd_h
+        and a.vid_w == b.vid_w and a.vid_h == b.vid_h
 end
 
 ------------------------------------------------------------------
@@ -1126,23 +1177,35 @@ local function state_header_text()
     return "状态: " .. S.state
 end
 
-local function render_menu()
+-- 当前实际生效的条目 id（active 档；未接管为 off；其余状态不标）
+local function current_entry_id()
+    if S.state == "active" and S.active then return S.active end
+    if S.state == "off" or (S.state == "fallback" and not S.takeover) then return OFF_ID end
+    return nil
+end
+
+render_menu = function()
     if not overlay then return end
     local fs = o.menu_font_size
     local parts = {}
-    parts[#parts + 1] = string.format("{\\fs%d}{\\b1}缩放选择器 [P3]{\\b0}\\N{\\fs%d}%s\\N\\N",
-        fs, math.floor(fs * 0.75), state_header_text())
+    local note = ""
+    if S.menu_note ~= "" then
+        note = "\\N{\\c&H88DDFF&}» " .. S.menu_note .. "{\\c}"
+    end
+    parts[#parts + 1] = string.format("{\\fs%d}{\\b1}缩放选择器 [P3]{\\b0}\\N{\\fs%d}%s%s\\N\\N",
+        fs, math.floor(fs * 0.75), state_header_text(), note)
+    local cur_id = current_entry_id()
     for i, e in ipairs(S.entries) do
         local marker = (i == S.cursor) and "▶ " or "　"
         local text
         if e.enabled then
-            text = string.format("%s%s", marker, e.label)
+            text = string.format("%s%s%s", marker, e.label, (e.id == cur_id) and "  ✓当前" or "")
         else
             text = string.format("{\\c&H999999&}%s%s〔禁用〕%s{\\c}", marker, e.label, e.reason)
         end
         parts[#parts + 1] = text .. "\\N"
     end
-    parts[#parts + 1] = "\\N{\\fs" .. math.floor(fs * 0.66) .. "}{\\c&HBBBBBB&}↑/↓ 选择 · Enter 确认 · Esc 或菜单键关闭\\N关＝恢复接管前配置（不停止mpv必需的缩放/色彩管理）\\NP3：LUMA 档（FSR1/SGSR1/Anime4K/NIS）RGB/HDR 自动禁用；xBR/Sharp 档支持 RGB、HDR 自动禁用；Integer 黑边明示{\\c}"
+    parts[#parts + 1] = "\\N{\\fs" .. math.floor(fs * 0.66) .. "}{\\c&HBBBBBB&}↑/↓/滚轮 选择 · Enter 确认 · Esc 或菜单键关闭\\N关＝恢复接管前配置（不停止mpv必需的缩放/色彩管理）\\NFSR1/SGSR1/NIS：RGB/HDR 自动禁用；Anime4K/xBR/Sharp：支持 RGB、HDR 自动禁用；Integer 黑边明示{\\c}"
     overlay.data = "{\\an7}{\\bord1}{\\shad1}{\\1c&HFFFFFF&}{\\3c&H000000&}" .. table.concat(parts)
     overlay:update()
 end
@@ -1158,22 +1221,36 @@ local function refresh_cursor()
     S.cursor = next_enabled(S.entries, 0, 1) or 1
 end
 
+-- 状态迁移统一出口（LUA-4）：菜单打开时重建条目并重绘，再导出 user-data。
+-- 异步路径（链验证结束/跳过/无视频、fallback、external）都走这里，菜单
+-- 状态行不再停在「链验证: 进行中…」。
+local function notify_state_changed()
+    if S.menu_open then
+        refresh_entries()
+        refresh_cursor()
+        render_menu()
+    end
+    sync_user_data()
+end
+
 open_menu = function()
     if S.menu_open then return end
     S.vo = read_vo_params()
     refresh_entries()
+    -- 打开时光标停在当前生效档上（可选时）
+    local cur_id = current_entry_id()
+    for i, e in ipairs(S.entries) do
+        if e.id == cur_id and e.enabled then S.cursor = i end
+    end
     refresh_cursor()
+    S.menu_note = ""
     S.menu_open = true
     overlay = mp.create_osd_overlay("ass-events")
-    mp.add_forced_key_binding("UP", "scale-selector-up", function()
-        local i = next_enabled(S.entries, S.cursor, -1)
+    local function move(dir)
+        local i = next_enabled_wrap(S.entries, S.cursor, dir)
         if i then S.cursor = i; render_menu(); sync_user_data() end
-    end, { repeatable = true })
-    mp.add_forced_key_binding("DOWN", "scale-selector-down", function()
-        local i = next_enabled(S.entries, S.cursor, 1)
-        if i then S.cursor = i; render_menu(); sync_user_data() end
-    end, { repeatable = true })
-    mp.add_forced_key_binding("ENTER", "scale-selector-activate", function()
+    end
+    local function activate_selected()
         local e = S.entries[S.cursor]
         if not e then return end
         if not e.enabled then
@@ -1186,11 +1263,15 @@ open_menu = function()
         else
             activate_gear(e.id)
         end
-        refresh_entries()
-        refresh_cursor()
-        render_menu()
-        sync_user_data()
-    end)
+        notify_state_changed()
+    end
+    mp.add_forced_key_binding("UP", "scale-selector-up", function() move(-1) end, { repeatable = true })
+    mp.add_forced_key_binding("DOWN", "scale-selector-down", function() move(1) end, { repeatable = true })
+    -- UX-5：滚轮与小键盘回车（日常 input.conf 中 KP_ENTER=全屏，菜单打开时须接管）
+    mp.add_forced_key_binding("WHEEL_UP", "scale-selector-wheel-up", function() move(-1) end)
+    mp.add_forced_key_binding("WHEEL_DOWN", "scale-selector-wheel-down", function() move(1) end)
+    mp.add_forced_key_binding("ENTER", "scale-selector-activate", activate_selected)
+    mp.add_forced_key_binding("KP_ENTER", "scale-selector-activate-kp", activate_selected)
     mp.add_forced_key_binding("ESC", "scale-selector-close", function() close_menu() end)
     render_menu()
     sync_user_data()
@@ -1200,7 +1281,11 @@ end
 close_menu = function()
     if not S.menu_open then return end
     S.menu_open = false
-    for _, name in ipairs({ "scale-selector-up", "scale-selector-down", "scale-selector-activate", "scale-selector-close" }) do
+    S.menu_note = ""
+    for _, name in ipairs({ "scale-selector-up", "scale-selector-down",
+                            "scale-selector-wheel-up", "scale-selector-wheel-down",
+                            "scale-selector-activate", "scale-selector-activate-kp",
+                            "scale-selector-close" }) do
         pcall(mp.remove_forced_key_binding, name)
     end
     if overlay then
@@ -1213,6 +1298,54 @@ end
 
 local function toggle_menu()
     if S.menu_open then close_menu() else open_menu() end
+end
+
+-- UX-1：直接切档（input.conf / 其它脚本 / IPC 可用，不必走菜单）。
+--   script-message scale-selector-set <id|off>
+--   script-message scale-selector-cycle [next|prev]
+-- 与菜单 Enter 走同一入口（activate_gear/do_off），守卫、禁用、external
+-- 拒绝等规则完全一致；禁用档不激活并如实提示原因。
+local function select_entry_by_id(id)
+    S.vo = read_vo_params()
+    refresh_entries()
+    local entry = nil
+    for _, e in ipairs(S.entries) do
+        if e.id == id then entry = e end
+    end
+    if not entry then
+        osd_message("未知档位: " .. tostring(id))
+        msg.warn("script-message: unknown gear", tostring(id))
+        return
+    end
+    if not entry.enabled then
+        osd_message(entry.label .. " 不可用： " .. entry.reason)
+        return
+    end
+    if id == OFF_ID then do_off() else activate_gear(id) end
+    notify_state_changed()
+end
+
+local function on_set_message(id)
+    if id == nil or id == "" then
+        osd_message("用法: script-message scale-selector-set <档位id|off>")
+        return
+    end
+    select_entry_by_id(id)
+end
+
+local function on_cycle_message(direction)
+    local dir = (direction == "prev") and -1 or 1
+    S.vo = read_vo_params()
+    refresh_entries()
+    local from = 0
+    local cur_id = current_entry_id()
+    for i, e in ipairs(S.entries) do
+        if e.id == cur_id then from = i end
+    end
+    if from == 0 and dir < 0 then from = #S.entries + 1 end
+    local i = next_enabled_wrap(S.entries, from, dir)
+    if not i then return end
+    select_entry_by_id(S.entries[i].id)
 end
 
 ------------------------------------------------------------------
@@ -1311,7 +1444,7 @@ verify_chain_tick = function()
     S.vo = vo or S.vo
     if vo == nil then
         S.chain_verified = "no-video"
-        sync_user_data()
+        notify_state_changed()
         return
     end
     -- 守卫复核（视频在验证期间切换到 RGB/HDR 的情形）
@@ -1326,7 +1459,7 @@ verify_chain_tick = function()
         S.chain_verified = "skipped-when"
         S.skip_note = chain_skip_note(gear, vo)
         S.chain_epoch = S.chain_epoch + 1
-        sync_user_data()
+        notify_state_changed()
         return
     end
     local missing = chain_keywords_missing(gear)
@@ -1347,9 +1480,7 @@ verify_chain_tick = function()
         end
         S.chain_epoch = S.chain_epoch + 1
         S.verify_fails = 0
-        refresh_entries()
-        if S.menu_open then render_menu() end
-        sync_user_data()
+        notify_state_changed()
         return
     end
     S.pending_verify_attempts = (S.pending_verify_attempts or 0) + 1
@@ -1421,10 +1552,10 @@ end
 -- 返回替换后的 gear 副本（或 nil+原因）。
 local function integer_gear_for_activation(gear, vo)
     local k = integer_k(vo)
-    S.integer_k = k
     if k == nil then
         return nil, "窗口/显示尺寸未知，无法计算整数倍数（不假整数激活）"
     end
+    S.integer_k = k
     local g = {}
     for key, v in pairs(gear) do g[key] = v end
     g.set = {}
@@ -1547,7 +1678,7 @@ enter_fallback = function(gear_id, reason, released)
     end
     msg.warn("fallback at gear", gear_id, ":", reason)
     osd_message(string.format("fallback：%s（已回退到 %s）", reason, S.stable))
-    sync_user_data()
+    notify_state_changed()
 end
 
 -- 接管：快照托管基线；期间检测外部竞争，失败则不接管
@@ -1583,7 +1714,7 @@ local function external_changed(prop)
     S.skip_note = ""
     msg.info("external change on", prop, "- yielding")
     osd_message("检测到外部修改（" .. prop .. "），已让出")
-    sync_user_data()
+    notify_state_changed()
 end
 
 activate_gear = function(gear_id, opts)
@@ -1615,15 +1746,9 @@ activate_gear = function(gear_id, opts)
         end
     end
 
-    local props = managed_props(S.model)
-    local first = not S.takeover
-    if first then
-        if not take_snapshot(props) then
-            osd_message("接管失败：接管期间属性被外部修改，请重试")
-            return
-        end
-    end
-
+    -- 2026-10-12 修正（LUA-3）：Integer 计划先于快照计算。原先快照后才算，
+    -- 无视频（idle）时计划失败直接 return，留下 takeover=true + 冻结的 idle
+    -- 基线（状态显示 off，之后易误判 external 或「关」恢复陈旧基线）。
     if gear.integer then
         local vg, ierr = integer_gear_for_activation(gear, read_vo_params())
         if not vg then
@@ -1633,6 +1758,15 @@ activate_gear = function(gear_id, opts)
             return
         end
         gear = vg
+    end
+
+    local props = managed_props(S.model)
+    local first = not S.takeover
+    if first then
+        if not take_snapshot(props) then
+            osd_message("接管失败：接管期间属性被外部修改，请重试")
+            return
+        end
     end
     local cur_list = jget("glsl-shaders")
     if type(cur_list) ~= "table" then cur_list = {} end
@@ -1713,7 +1847,9 @@ activate_gear = function(gear_id, opts)
     S.chain_keywords = gear.keywords or {}
     S.optional_missing = {}
     S.skip_note = chain_skip_note(gear, S.vo)
-    S.chain_verified = (gear.keywords and #gear.keywords > 0) and nil or true
+    -- 有 shader 链：nil＝验证中（原写法 `x and nil or true` 恒为 true，激活
+    -- 即谎报已验证）；无链档位由下方 else 分支置 true
+    S.chain_verified = nil
     S.pending_verify_attempts = 0
     msg.info("active gear:", gear_id)
     osd_message("已应用档位: " .. gear.label)
@@ -2344,6 +2480,31 @@ local function run_selftest()
     tc("when: dw/dh is aspect-only (not upscale)", upscale_ratio(aspect1x) == 1.0)
     tc("when: unknown window -> unknown", when_applies(BUILTIN_BY_ID["fsr1"], { w = 2, h = 2 }) == nil)
     tc("when: anime4k has no ratio condition", when_applies(BUILTIN_BY_ID["anime4k"], same1x) == true)
+    -- UX-5：菜单导航首尾循环，跳过禁用项
+    tc("menu: wrap-around navigation skips disabled",
+        (function()
+            local es = { { enabled = true }, { enabled = false }, { enabled = true }, { enabled = false } }
+            return next_enabled_wrap(es, 3, 1) == 1 and next_enabled_wrap(es, 1, -1) == 3
+                and next_enabled_wrap(es, 1, 1) == 3
+                and next_enabled_wrap({ { enabled = false } }, 1, 1) == nil
+        end)())
+    -- SHD-1：有黑边时按视频显示矩形（vid_w/vid_h）判断，而非整窗口
+    local scope1x = { w = 1920, h = 800, osd_w = 1920, osd_h = 1080,
+                      vid_w = 1920, vid_h = 800, pixelformat = "yuv420p", gamma = "bt.1886" }
+    local scope_up = { w = 1280, h = 534, osd_w = 1920, osd_h = 1080,
+                       vid_w = 1920, vid_h = 801, pixelformat = "yuv420p", gamma = "bt.1886" }
+    tc("when: letterboxed 1x skipped (video rect, not window)",
+        when_applies(BUILTIN_BY_ID["fsr1"], scope1x) == false)
+    tc("when: letterboxed upscale applies", when_applies(BUILTIN_BY_ID["fsr1"], scope_up) == true)
+    tc("when: 16:10 window with 1080p video skipped",
+        when_applies(BUILTIN_BY_ID["nis"], { w = 1920, h = 1080, osd_w = 1920, osd_h = 1200,
+            vid_w = 1920, vid_h = 1080 }) == false)
+    tc("when: video_rect subtracts margins",
+        (function()
+            local vw, vh = video_rect({ w = 1920, h = 1080, mt = 140, mb = 140, ml = 0, mr = 0 })
+            return vw == 1920 and vh == 800 and video_rect(nil) == nil
+                and video_rect({ w = 0, h = 0 }) == nil
+        end)())
     tc("skip note: 1x honest skip", chain_skip_note(BUILTIN_BY_ID["fsr1"], same1x):find("跳过", 1, true) ~= nil)
     tc("skip note: 2x no note", chain_skip_note(BUILTIN_BY_ID["fsr1"], up2x) == "")
     tc("skip note: fsr >2x clamp note",
@@ -2369,7 +2530,16 @@ local function run_selftest()
     tc("builtin: default anime4k mode is a", o_anime4k_mode == "a")
     tc("builtin: fsr1/sgsr1 marked luma, nearest not",
         BUILTIN_BY_ID["fsr1"].luma and BUILTIN_BY_ID["sgsr1"].luma
-        and BUILTIN_BY_ID["anime4k"].luma and not BUILTIN_BY_ID["nearest"].luma)
+        and not BUILTIN_BY_ID["nearest"].luma)
+    -- SHD-2：anime4k 为 MAIN 链（无 LUMA hook）：RGB 可用、HDR 拒用
+    tc("builtin: anime4k is MAIN HDR-guarded, not luma",
+        not BUILTIN_BY_ID["anime4k"].luma and BUILTIN_BY_ID["anime4k"].hdr)
+    tc("guard: anime4k allows RGB",
+        activation_guard_reason(BUILTIN_BY_ID["anime4k"],
+            { pixelformat = "rgb24", gamma = "srgb" }) == nil)
+    tc("guard: anime4k refuses HDR",
+        (activation_guard_reason(BUILTIN_BY_ID["anime4k"],
+            { pixelformat = "yuv420p10", gamma = "pq" }) or ""):find("HDR", 1, true) ~= nil)
 
     -- 17. P3 新增内建档位：防冒名/防换链（conf 覆盖一律无效并告警）
     -- 限域接续修正（brief 根因1）：上一草稿把换行写成了双引号串内的真实
@@ -2574,9 +2744,11 @@ local function main()
     msg.info("managed properties:", table.concat(props, ", "))
     msg.info("guard watch properties:", table.concat(GUARD_PROPS, ", "))
     msg.info("anime4k chain mode:", o_anime4k_mode, "(" .. ANIME4K_MODE_LABELS[o_anime4k_mode] .. ")")
-    msg.info("binding menu key:", o.key_menu)
+    msg.info("binding menu key:", o.key_menu or "（无默认键，仅 script-binding scale-selector-menu）")
     install_observers(props)
     mp.add_key_binding(o.key_menu, "scale-selector-menu", toggle_menu)
+    mp.register_script_message("scale-selector-set", on_set_message)
+    mp.register_script_message("scale-selector-cycle", on_cycle_message)
     mp.register_script_message("scale-selector-selftest", run_selftest)
     mp.register_event("shutdown", shutdown_handler)
     sync_user_data()

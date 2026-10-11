@@ -1,12 +1,12 @@
 # mpv 缩放算法选择器
 
-**状态（2026-10-11）：P1–P3 插件已实现，客观隔离验证收口通过，但真人主观验收未做；P4 画质性能测量进行中、未收口；P5 部署未开始。全部验证仅在 `--config-dir` 隔离临时配置中运行，活动 mpv 配置零改动（live_configuration_written=false）。**
+**状态（2026-10-12）：P1–P3 插件已实现，客观隔离验证收口通过，但真人主观验收未做；P4 画质性能测量进行中、未收口；P5 正式部署流程未开始。开发期全部验证仅在 `--config-dir` 隔离临时配置中运行（live_configuration_written=false）。另：2026-10-12 已按 [安装流程-日常mpv](docs/插件/安装流程-日常mpv.md) 手动安装到日常 mpv 一次（非 P5 流程，INS-01…05 未走完，见 [安装报告](docs/插件/安装报告-2026-10-12.md)）；之后的修复（见 [评审与改进建议-2026-10-12](docs/评审与改进建议-2026-10-12.md)）需重新安装才会生效。**
 
 菜单共 **12 项**：关 + **9 个真实内建档位** + LS1/BCAS 两个**禁用占位**。9 个真实内建档位为：FSR1、SGSR1、Anime4K（本机 stock v4 链零改动副本）、Nearest Neighbor（P2 期）与 NIS、xBR、Sharp Bilinear AUTO、Sharp Bilinear 手动 2×、Integer（P3 期）。LS1（无公开源码/权重/移植许可）与 BCAS（算法定义身份未核实）恒为禁用占位并在菜单展示原因。P3 最终以 `docs/验证/开发/p3-001/revision-r2/交付收口检查.json` 的 `PASS_OBJECTIVE_CLOSEOUT` 收口（客观口径）。
 
 ## 安装
 
-> 注意：正式部署属 P5，**尚未开始**（安装/卸载工具与用户许可流程均未建）。以下说明描述的是隔离验证过的部署形态，供了解与部署前自查；验证所用构建为 mpv `v0.40.0-393-gad59ff1b4` + libplacebo `v7.357.0`（gpu-next 后端）。
+> 注意：正式部署属 P5，**尚未开始**（安装/卸载工具与用户许可流程均未入库）。2026-10-12 的一次手动安装按 [安装流程-日常mpv](docs/插件/安装流程-日常mpv.md) 执行。以下说明描述的是隔离验证过的部署形态，供了解与部署前自查；验证所用构建为 mpv `v0.40.0-393-gad59ff1b4` + libplacebo `v7.357.0`（gpu-next 后端）。
 
 把三组文件复制到 mpv 配置目录（Windows 默认 `%APPDATA%\mpv`）的对应位置：
 
@@ -22,12 +22,19 @@
 
 ## 使用
 
-- **F8** 打开菜单，↑/↓ 选择，Enter 确认，Esc/F8 关闭；选「关」恢复插件接管前记录的托管属性（off 不等于停止 mpv 必需的缩放与色彩管理）。
+- **F8** 打开菜单，↑/↓ 或滚轮选择（首尾循环），Enter / 小键盘 Enter 确认，Esc/F8 关闭；菜单标出「✓当前」档，打开时光标停在当前档；菜单打开期间的提示写在菜单内，不另弹 OSD。选「关」恢复插件接管前记录的托管属性（off 不等于停止 mpv 必需的缩放与色彩管理）。
+- **不经菜单直接切档**（可写进 `input.conf`，也供其它脚本/IPC 调用；规则与菜单完全一致，禁用档会被拒绝并提示原因）：
+  ```
+  Alt+1  script-message scale-selector-set fsr1      # 档位 id：off fsr1 sgsr1 anime4k nearest nis xbr sharpbilinear sharpbilinear2x integer
+  Alt+0  script-message scale-selector-set off
+  Alt+n  script-message scale-selector-cycle next    # 或 prev；跳过禁用档，首尾循环
+  ```
+- **换菜单键**：`script-opts/scale-selector.conf` 中 `key_menu=` 改为其它键；留空则不绑默认键，可在 `input.conf` 写 `<键> script-binding scale_selector/scale-selector-menu`。注意默认 F8 会覆盖 mpv 内置的 F8（显示播放列表）。
 - 档位守卫语义（菜单/状态行如实显示真实生效状态，不冒充）：
-  - LUMA 档（FSR1 / SGSR1 / Anime4K / NIS）：SDR RGB 与 HDR 输入自动禁用并显示原因；
-  - MAIN RGB 档（xBR / Sharp Bilinear 两档）：RGB 可用，HDR 禁用（独立守卫）；
+  - LUMA 档（FSR1 / SGSR1 / NIS）：SDR RGB 与 HDR 输入自动禁用并显示原因；
+  - MAIN RGB 档（Anime4K / xBR / Sharp Bilinear 两档）：RGB 可用，HDR 禁用（独立守卫；Anime4K 于 2026-10-12 由 LUMA 档改归此类，见 SHD-2）；
   - nearest / Integer：不受上述 LUMA/HDR 限制；
-  - NIS 仅放大生效（`//!WHEN`），非放大时诚实跳过并注明；Sharp Bilinear AUTO 无放大时明示「退化为双线性」；Integer 的黑边与 k<1 回退均如实注明。
+  - FSR1 / SGSR1 / NIS 仅放大生效（`//!WHEN`），非放大时诚实跳过并注明；「是否放大」按视频实际显示区域（不含黑边）判断；Sharp Bilinear AUTO 无放大时明示「退化为双线性」；Integer 的黑边与 k<1 回退均如实注明。
 - 用户说明（按阶段）：
   - [P1 骨架用户说明](docs/插件/缩放选择器-P1用户说明.md)（状态机与菜单框架）
   - [P2 真实档位用户说明](docs/插件/缩放选择器-P2用户说明.md)（FSR1 / SGSR1 / Anime4K / Nearest）

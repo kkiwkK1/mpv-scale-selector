@@ -150,7 +150,10 @@ P2_BUILTIN_IDS = ("fsr1", "sgsr1", "anime4k", "nearest")
 # lives in p3_lib (audit_gears_conf_p3), NOT here (minimal-migration rule).
 STILL_DISABLED_IDS = ("ls1", "bcas")
 P3_BUILTIN_IDS = ("nis", "xbr", "sharpbilinear", "sharpbilinear2x", "integer")
-LUMA_GEAR_IDS = ("fsr1", "sgsr1", "anime4k")   # LUMA-hook chains (RGB/HDR guarded)
+LUMA_GEAR_IDS = ("fsr1", "sgsr1")   # LUMA-hook chains (RGB/HDR guarded)
+# 2026-10-12 (SHD-2): anime4k hooks only MAIN/PREKERNEL (no LUMA hook), so it
+# moved from the LUMA set to the MAIN HDR-guarded set: RGB allowed, HDR refused.
+HDR_GUARD_GEAR_IDS = ("anime4k",)
 # nearest is a pure scale/cscale/dscale gear: NO LUMA guard by design.
 # P3: nis is a LUMA compute chain (RGB/HDR guarded); xbr/sharpbilinear/
 # sharpbilinear2x are MAIN RGB chains with an INDEPENDENT HDR guard; integer
@@ -370,33 +373,62 @@ def luma_guard_reason(is_luma_gear: bool, vo: dict) -> str | None:
     return None
 
 
-def upscale_ratio(vo: dict) -> float | None:
-    """(osd_w*osd_h)/(w*h): real window pixels vs source pixels.
+def video_rect(dims: dict) -> tuple | None:
+    """osd-dimensions minus margins = the real video display rect (what a
+    shader's //!WHEN OUTPUT measures). Mirror of the Lua video_rect; None when
+    unknown."""
+    try:
+        w, h = dims["w"], dims["h"]
+        if not w or not h or w <= 0 or h <= 0:
+            return None
+        vw = w - max(0, dims.get("ml") or 0) - max(0, dims.get("mr") or 0)
+        vh = h - max(0, dims.get("mt") or 0) - max(0, dims.get("mb") or 0)
+        if vw <= 0 or vh <= 0:
+            return None
+        return (vw, vh)
+    except (KeyError, TypeError, AttributeError):
+        return None
 
-    video-out-params.dw/dh are display ASPECT parameters, NOT the window
-    output size — they must never be used for the //!WHEN decision (brief
-    纠正). osd-width/osd-height are the window pixels. None = unknown
-    (unknown must never be reported as the algorithm being active).
+
+def _when_output_size(vo: dict) -> tuple:
+    """//!WHEN output size: the video display rect (vid_w/vid_h) when known,
+    else the window pixels (equal when the video fills the window).
+
+    2026-10-12 (SHD-1): the window pixels alone mis-predict letterboxed video
+    (e.g. 1920x800 fullscreen on 1080p) as an upscale while the shader's
+    OUTPUT (video rect) is 1x and the pass is legitimately skipped.
+    video-out-params.dw/dh are display ASPECT parameters, NOT the output
+    size — they must never be used for the //!WHEN decision (brief 纠正).
     """
+    ow, oh = vo.get("vid_w"), vo.get("vid_h")
+    if not ow or not oh or ow <= 0 or oh <= 0:
+        ow, oh = vo["osd_w"], vo["osd_h"]
+    return ow, oh
+
+
+def upscale_ratio(vo: dict) -> float | None:
+    """(out_w*out_h)/(w*h): video display rect vs source pixels.
+    None = unknown (unknown must never be reported as the algorithm being
+    active)."""
     try:
         w, h = vo["w"], vo["h"]
-        ow, oh = vo["osd_w"], vo["osd_h"]
+        ow, oh = _when_output_size(vo)
         if not w or not h or not ow or not oh:
             return None
         return (ow * oh) / float(w * h)
-    except (KeyError, TypeError, ZeroDivisionError):
+    except (KeyError, TypeError, ZeroDivisionError, AttributeError):
         return None
 
 
 def axis_scales(vo: dict) -> tuple | None:
-    """(osd_w/w, osd_h/h) per-axis window scale; None when unknown."""
+    """(out_w/w, out_h/h) per-axis scale; None when unknown."""
     try:
         w, h = vo["w"], vo["h"]
-        ow, oh = vo["osd_w"], vo["osd_h"]
+        ow, oh = _when_output_size(vo)
         if not w or not h or not ow or not oh:
             return None
         return (ow / float(w), oh / float(h))
-    except (KeyError, TypeError, ZeroDivisionError):
+    except (KeyError, TypeError, ZeroDivisionError, AttributeError):
         return None
 
 

@@ -193,6 +193,35 @@ class TestGuardOracles(unittest.TestCase):
         self.assertIsNone(p2.upscale_ratio({"w": 2, "h": 2}))
         self.assertIsNone(p2.upscale_ratio(None))
 
+    def test_upscale_ratio_uses_video_rect_when_letterboxed(self):
+        # SHD-1：有黑边时 //!WHEN 的 OUTPUT 是视频显示矩形，不是整窗口
+        scope = {"w": 1920, "h": 800, "osd_w": 1920, "osd_h": 1080,
+                 "vid_w": 1920, "vid_h": 800}
+        self.assertEqual(p2.upscale_ratio(scope), 1.0)
+        self.assertFalse(p2.fsr_when_applies(scope))
+        self.assertIn("跳过", p2.chain_skip_note("fsr1", scope))
+        wide = {"w": 1920, "h": 1080, "osd_w": 1920, "osd_h": 1200,
+                "vid_w": 1920, "vid_h": 1080}
+        self.assertFalse(p2.fsr_when_applies(wide))
+        up = {"w": 1280, "h": 534, "osd_w": 1920, "osd_h": 1080,
+              "vid_w": 1920, "vid_h": 801}
+        self.assertTrue(p2.fsr_when_applies(up))
+        # 矩形未知时回退到窗口像素（视频铺满窗口时二者相等）
+        self.assertEqual(p2.upscale_ratio({"w": 640, "h": 360, "osd_w": 1280,
+                                           "osd_h": 720, "vid_w": None,
+                                           "vid_h": None}), 4.0)
+
+    def test_video_rect_mirror(self):
+        self.assertEqual(p2.video_rect({"w": 1920, "h": 1080, "mt": 140,
+                                        "mb": 140, "ml": 0, "mr": 0}),
+                         (1920, 800))
+        self.assertEqual(p2.video_rect({"w": 640, "h": 480}), (640, 480))
+        self.assertIsNone(p2.video_rect({"w": 0, "h": 0}))
+        self.assertIsNone(p2.video_rect(None))
+        self.assertIsNone(p2.video_rect({}))
+        self.assertIn("local function video_rect(dims)", LUA_SOURCE)
+        self.assertIn("vid_w = vid_w, vid_h = vid_h", LUA_SOURCE)
+
     def test_fsr_when_and_skip_notes(self):
         up = {"w": 640, "h": 360, "osd_w": 1280, "osd_h": 720}
         same = {"w": 640, "h": 360, "osd_w": 640, "osd_h": 360}
@@ -298,6 +327,21 @@ class TestMainChainPolicy(unittest.TestCase):
         # p2_lib 镜像一致：nearest 无 shader、无 LUMA 守卫
         self.assertNotIn("nearest", p2.LUMA_GEAR_IDS)
         self.assertIn("nearest", p2.P2_BUILTIN_IDS)
+
+    def test_anime4k_is_main_hdr_guarded(self):
+        """SHD-2: anime4k hooks MAIN/PREKERNEL only — RGB allowed, HDR refused."""
+        hooks = set()
+        for f in (lib.REPO_ROOT / "shaders" / "anime4k").glob("*.glsl"):
+            for line in f.read_text(encoding="utf-8").splitlines():
+                if line.startswith("//!HOOK"):
+                    hooks.add(line.split()[1])
+        self.assertTrue(hooks)
+        self.assertNotIn("LUMA", hooks)
+        lua_block = LUA_SOURCE[LUA_SOURCE.index("local BUILTIN_GEARS"):
+                               LUA_SOURCE.index("local BUILTIN_BY_ID")]
+        self.assertRegex(lua_block, r'\{ id = "anime4k",.*luma = false, hdr = true')
+        self.assertNotIn("anime4k", p2.LUMA_GEAR_IDS)
+        self.assertIn("anime4k", p2.HDR_GUARD_GEAR_IDS)
 
     def test_luma_gear_sets_match_lua(self):
         """Python/Lua mirror consistency for the LUMA guard set."""

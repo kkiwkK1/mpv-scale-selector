@@ -69,6 +69,16 @@ import p4_analyze as an           # noqa: E402
 import p4_check_evidence as ce    # noqa: E402
 import p4_verify as vf            # noqa: E402
 
+# PY-1: docs/验证/开发/ 是本机证据树（.gitignore 排除，fresh clone 下不存在）。
+# 读取真实 work-permit 的测试在证据缺失时 skip（而非误报失败）；证据在场时
+# 照常运行，行为不变。合成临时 root 的测试不受影响。
+HAS_LOCAL_EVIDENCE = (REPO_ROOT / vf.WORK_PERMIT_REL).is_file()
+LOCAL_EVIDENCE_SKIP_REASON = (
+    "本机证据树缺失（docs/验证/开发/ 被 .gitignore 排除）/ local evidence "
+    "tree absent (git-ignored, not in a fresh clone): " + vf.WORK_PERMIT_REL)
+needs_local_evidence = unittest.skipUnless(HAS_LOCAL_EVIDENCE,
+                                           LOCAL_EVIDENCE_SKIP_REASON)
+
 PLAN = lib.PLAN_SHA256
 TREE = "docs/验证/开发/p4-001/trial-x/"
 TREE_DIR = TREE.rstrip("/")
@@ -1115,6 +1125,7 @@ class TestStageSynthesis(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 class TestStageVerifier(unittest.TestCase):
+    @needs_local_evidence
     def test_real_repo_stage_all_not_run_partial(self):
         report = vf.verify_stage()
         self.assertTrue(report["ok"],
@@ -1139,6 +1150,7 @@ class TestStageVerifier(unittest.TestCase):
         self.assertTrue(all(e["violation"] is None
                             for e in report["write_path_coverage"]))
 
+    @needs_local_evidence
     def test_cli_exit_zero_and_json_contract(self):
         rc = vf.main(["--json"])
         self.assertEqual(rc, 0)
@@ -1168,6 +1180,7 @@ class TestStageVerifier(unittest.TestCase):
             with self.assertRaises(lib.P4ContractError):
                 vf.load_plan(root)
 
+    @needs_local_evidence
     def test_tampered_work_permit_flagged(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -1187,6 +1200,7 @@ class TestStageVerifier(unittest.TestCase):
         _stage_inputs(root)
         return root
 
+    @needs_local_evidence
     def test_duplicate_trial_test_id_flags_fail(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)
@@ -1204,6 +1218,7 @@ class TestStageVerifier(unittest.TestCase):
             self.assertIn("TRIAL_TEST_ID_DUPLICATE", codes)
             self.assertEqual(report["per_test"]["PER-01"], "FAIL")
 
+    @needs_local_evidence
     def test_unknown_trial_test_id_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)
@@ -1253,6 +1268,7 @@ class TestStageVerifier(unittest.TestCase):
         lib.create_only_file(trial_dir + "trial.json",
                              lib.canonical_json_bytes(trial), root=root)
 
+    @needs_local_evidence
     def test_real_chain_earns_pass_objective_at_stage(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)
@@ -1267,6 +1283,7 @@ class TestStageVerifier(unittest.TestCase):
                              an.STATUS_PARTIAL)
             self.assertEqual(report["stage_status"], "PARTIAL_MEASURED")
 
+    @needs_local_evidence
     def test_bare_trial_json_never_upgrades_at_stage(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)
@@ -1284,6 +1301,7 @@ class TestStageVerifier(unittest.TestCase):
             self.assertEqual(report["n_measured"], 0)
             self.assertEqual(report["measurement_status"], "NOT_RUN")
 
+    @needs_local_evidence
     def test_fixture_only_chain_never_earns_stage_pass(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)
@@ -1295,6 +1313,7 @@ class TestStageVerifier(unittest.TestCase):
             self.assertIn("FIXTURE_AS_STAGE_EVIDENCE", codes)
             self.assertEqual(report["n_measured"], 0)
 
+    @needs_local_evidence
     def test_rejected_run_chain_never_earns_stage_pass(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)
@@ -1308,6 +1327,7 @@ class TestStageVerifier(unittest.TestCase):
 
     # -- F9 stage-level gate wiring ----------------------------------------
 
+    @needs_local_evidence
     def test_candidate_gate_wired_and_coverage_enforced(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)
@@ -1357,6 +1377,7 @@ class TestStageVerifier(unittest.TestCase):
             self.assertIn("CANDIDATE_COVERAGE_MISSING",
                           {v["code"] for v in report["violations"]})
 
+    @needs_local_evidence
     def test_closed_tree_gate_wired(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._stage_root(tmp)

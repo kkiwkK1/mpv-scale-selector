@@ -137,6 +137,37 @@ class TestP3RegistryMirror(unittest.TestCase):
 
     def test_guard_props_include_osd(self):
         self.assertIn('"osd-width", "osd-height"', LUA_SOURCE)
+        # SHD-1：osd-dimensions（视频显示矩形）纳入守卫观察与 journal 允许集
+        self.assertIn('"osd-width", "osd-height", "osd-dimensions" }', LUA_SOURCE)
+        self.assertIn("osd-dimensions", lib.ALLOWED_JOURNAL_PROPS)
+
+    def test_script_messages_and_menu_keys(self):
+        """UX-1/UX-5/LUA-4: direct-switch messages; every forced menu binding
+        added in open_menu is removed in close_menu; pending chain is nil."""
+        self.assertIn('register_script_message("scale-selector-set", on_set_message)', LUA_SOURCE)
+        self.assertIn('register_script_message("scale-selector-cycle", on_cycle_message)', LUA_SOURCE)
+        open_body = LUA_SOURCE[LUA_SOURCE.index("open_menu = function()"):
+                               LUA_SOURCE.index("close_menu = function()")]
+        close_body = LUA_SOURCE[LUA_SOURCE.index("close_menu = function()"):]
+        close_body = close_body[:close_body.index("\nend\n")]
+        names = re.findall(r'add_forced_key_binding\("[A-Z_]+", "([a-z-]+)"', open_body)
+        self.assertIn("scale-selector-activate-kp", names)
+        for name in names:
+            self.assertIn(f'"{name}"', close_body, name)
+        self.assertNotIn("#gear.keywords > 0) and nil or true", LUA_SOURCE)
+
+    def test_integer_plan_precedes_takeover_snapshot(self):
+        """LUA-3: an Integer plan failure (e.g. idle, no video) must return
+        BEFORE take_snapshot, so no takeover/baseline leaks while state=off."""
+        start = LUA_SOURCE.index("activate_gear = function(gear_id, opts)")
+        end = LUA_SOURCE.index("do_off = function()", start)
+        body = LUA_SOURCE[start:end]
+        self.assertLess(body.index("integer_gear_for_activation(gear, read_vo_params())"),
+                        body.index("take_snapshot(props)"))
+        # integer_k 只在计划成功时更新
+        fn = LUA_SOURCE[LUA_SOURCE.index("local function integer_gear_for_activation"):]
+        fn = fn[:fn.index("\nend\n")]
+        self.assertLess(fn.index("if k == nil then"), fn.index("S.integer_k = k"))
 
     def test_stage_export_is_p3(self):
         # P3 迁移（见模块 docstring）：导出必须等于当前阶段
