@@ -1,0 +1,188 @@
+{
+  "name": "mpv-scale-p4-foundation",
+  "description": "P4 explicit-chat isolated performance/AB/RIFE planning: protected P3 baseline, bounded read-only runtime inventory, preregistered methodology, adversarial plan gate, calibration-only work permit.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 2500000
+  },
+  "phases": [
+    {
+      "id": "preserved",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "preserved"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "environment",
+      "type": "agent",
+      "agent": "scout",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "P4只读环境勘察者，仅指定Flash/xhigh。完整读docs/P4/P4执行约束与验收brief.md、docs/执行授权-P4.json和P4启动基线关键字段；P3已客观PASS不等真人验收。scope限时30-45工具调用，不宽泛联网研究、不扫描私人视频库、不跑GPU播放或import真实VS/RIFE（要先计划+隔离许可）。相关只读目录D:/MPV/vs和D:/MPV/rife、活动APPDATA/mpv/rife/rife.vpy及D:/MPV/mpv-RIFE.cmd仅所需静态代码，保护正文不要复制到Git；摘录算法参数与sha可。活动RIFE540pwork/model70/factor2/gpu_thread2保原frames+插middle，不冒全1080p推理。定位selectedmodel70实际文件/模型身份(default path依据源码/readme/现runtime相关说明)、依赖DLL/VSSCRIPT/python版本/路径和可能pycache/cache/modelauto-download写入；临时clone依赖树size估计、实际加载前防任何DMPVwrite措施，不安装pip/下载模型/运行updater。gpu nvidia-smi只读queries可，输出无私密路径；系统refresh/显示分辨率只读核，不改DPI/频率/电源。安全subprocess环境从allowlist构造去APIenv，--version等无播放指令在TEMP cwd并禁止pycache。审mpv固定版本vo-passes滚动count/samples语义、actual available properties docs/list-options来源，PresentMon/ETW工具是否已安装仅where/staticinventory不提权/安装；没有真实present源须明确TIME未测条件而非IPCpollgap当帧时长。实际off/ON48/60需要的decodePTS/vf metadata可先定义待校准。\n只写新的docs/P4/P4环境勘察.json UTF8LF/createonly，schema自由但stage=P4,session=p4-001, runtime_files:{path:{sha256,bytes,role}}, read_only_observations, unknowns/blockers、safe_clone_recipe、instrumentation_sources、available_media及privacy说明。不在repo存私人脚本正文/凭据，sourcehash绑定实际选定deps（权重可大hash流式，不要hash整个无关模型全集）。新docs/验证/开发/p4-001/environment/只放查询命令/安全输出/环境report实证清单，旧5715文件不可改。无自然视频用户未给则synthetic-only确认+PENDING_USER素材，不假提供。最后短环境入口与实证限制；只勘察不做benchmark/readiness代签。",
+      "dependsOn": [
+        "preserved"
+      ]
+    },
+    {
+      "id": "plan",
+      "type": "agent",
+      "agent": "planner",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "P4单计划写者，Flash/xhigh。读docs/P4/P4执行约束与验收brief.md（权威约束）与环境勘察json、P4启动基线allowed_write_paths；参考原docs/实施计划.md和测试计划.md(PIC/PER)，P3交付报告RV2/fixturebinding残余不能再犯。只写docs/P4实施计划.json与docs/P4/P4测量方法.md，UTF8LF/createonly，不修改任何旧文件/新guard/auth/基线，禁止跑真实GPU。预注册protocol详尽可执行但不要巨大全因子：预热稳定判据、运行时长/重复次数/随机seed平衡顺序/环境污染阈值、分组equalrect/diffrect+Integer分层、high-quality ewa_lanczossharp基线、stockModeA与6modecoverage声明、全部新档、RIFEoff/on×24->48/30->60、真实540p模型设定/初始化缓存隔离、防伪middleframes，nsms/freshredraw/passsum非总时延、rollingcounter饱和/每run快照而非按值去重、真实present源可用性及proxy局限、全参数sharpsemantics分层/CPUgolden同frame匹配+OSDfreePNG真实目标/自然media未知用户评分pending。缺真实动画/实拍不能synthetic冒充PIC01完成；真实present不可得不得报告全部帧节奏PASS。必要BLOCKED_ENV/partial/userpending预定义，不弱化必需项逼pass。\n精确JSON合同: stage:P4/session:p4-001/ready:pass或block/environment_sha256:实算环境json哈希/required_tests:[PIC01..04实际带横线格式、PER01..05、CAL-01,TIME-01,RIFE-01,EVI-01]/write_paths:[allowed中具体将创建文件且无目录]/human_subjective_acceptance_claimed:false/live_configuration_write_allowed:false。必须非空object字段 fairness,sampling,frame_pacing,rife,environment_safety,evidence,objective_user_split,resource_budget,execution_batches,limitations，各含明确方法/门限/数据不足状态，不是关键词布尔空壳。把PIC subjectiveuserpending和客观机器证据拆表，mandatory真实RIFE无load仅FPS不能PASS，未来phase判partial不会假PASS_OBJECTIVE全P4。分smallserial implementation batches（纯分析contract→采集RIFEisolatedruntime→校准→独立方法复核→productionrun→独立replicate→两审），每写者最少source数/精确本地checks/交接shas；不要单角色180tools。前检已pass后user授权允许直接执行隔离，但直到校准独立review才可production。纯源additive-onlyP4新工具tests，guard新预检少量schema只帮审不得你改凑就绪。最大墙钟/媒体体积/模型clone磁盘/每trial预算可执行，先pilot如果热/负载/来源无法量化或不足则block/pending说明，禁止参数看结果后调优排名。最终短plan路径/sha/ready/估算成本与未测边界，无需要再等用户启动确认。",
+      "dependsOn": [
+        "environment"
+      ]
+    },
+    {
+      "id": "plan-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "plan-check"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "plan"
+      ]
+    },
+    {
+      "id": "plan-adversary",
+      "type": "agent",
+      "agent": "risk-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "P4实施前独立方法学+安全对抗审查（Flash/xhigh，同模型不同上下文）。只读docs/P4实施计划.json、P4执行约束与验收brief和环境勘察、P4启动基线/授权、p4_guard源码。检查公平同源同帧同rect同色彩RIFE状态/Integer不同有效尺寸是否分组/锐度数字不等价/defaultunchanged；stock零改/ewo基线真实；真实RIFEselectedmodel70/540p限额/原帧middle/VSclone加载缓存零原runtime写是否可实施；present帧时长来源真实可得与proxy限度；滚动vo sample重叠/独立run统计单位/环境观测开销/预热/温时钟污染/AB平衡seed/禁止启动墙钟和pass数冒GPU，预算可执行，无自然素材/PICscore未测不能全PASS。协议应支持不提升/负结果而非把快慢=代码PASS；人评分与部署没有授权，缺必需真实数据不得伪造就绪。\n规划前检 {steps.plan-check.output}。没有GPU/模型加载权限，不改plan/guard/oldfiles，只读+安全临时mock可。任何blocker/major输出block而不是私下改计划；原证据与环境未run项目明确NOT_RUN。不要空泛清单，发现具体设计漏洞指出字段/拟测例及修法。最终仅JSON verdict:pass|block,plan_sha256:实际算,findings:[{id,severity:blocker|major|minor,file,issue,fix}],checks:[],limitations:[],reason；强制合同，不Markdown长终报。约20-30定点工具回合内完成；无必要不重复hash5715大tree(leadergate已查)，真正审方案不是默认放行。",
+      "dependsOn": [
+        "plan-check"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "plan_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "plan_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "work-permit",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "permit"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "plan-adversary"
+      ],
+      "input": "{steps.plan-adversary.json}",
+      "final": true
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "name": "mpv-scale-p4-real-identity",
+  "description": "Independent readonly-source real RIFE short identity execution in TEMP clone after safety review; single GPU, original runtime zero-write, no performance/production claims.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 1500000
+  },
+  "phases": [
+    {
+      "id": "precheck",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_identity_gate.py",
+        "pre"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "real-identity",
+      "type": "agent",
+      "agent": "test-engineer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "precheck"
+      ],
+      "task": "独立只读源B2真实RIFE首载执行者，Flash/xhigh。完整read docs/P4/P4-B2只读首载执行brief.md严格执行，源只读，不patch/改tools或任何前序manifest/plan/guard，也不以假runtime做本轮实证。前检已过固定candidate0d0bf8…；现在授权用已审collectorCLI真实clone+短12帧identity-probe24fps，成功初始化真实推理且有有用结果再新sandbox30fps；单GPU串行总≤10min。活动DMPV/APPDATA/mpv/backup零写；无API凭据环境+自有PID cleanup。先使用唯一createonlyidentity-run-001根证据目录，已存在就拒绝。不要prepare-runtime后同路径identity重复沙箱；identity自己clone。预注册sample12sourceframes不是性能窗/不能当B3测量，voimage仅filter证据。CLIpreflight/help必要少量，其他mpv/负载拒则记录BLOCKED不kill别人。外层supervisor timeout300s涵盖clone/hash，内部identity160s，不因为失败擅改上限或循环重试。任何确定性bug/素材proof不足保留并准确REWORK/NOT_ESTABLISHED，不越scope现场修代码。\n保留stdout/stderr与实际raw PNG/Y4M/logs/witness到新证据根，复制与原sha一致；禁止私人vpy全文/runtime/modelbinary进repo，只绑定hash。TEMPmanifest不可重写当repo manifest，新联合inventory区分原path和retainedcopy。新report schema按brief，特别实际是否mpv成功spawn/GPU初始化/proof不足/模型name未打印/性能未测。最终evidence-manifest.json必须{files:{仓库相对实际文件路径:sha256}}全覆盖本证据树除自身，stdouthandles子PID均关闭才写。绑定本执行brief/flow/taskflows/p4_identity_gate.py与TEMPwrapper源码(不含私密)。报告后p4_identity_gate post会独立hash全树与backup，只验证诚实执行记录不代P4PASS。最多35toolscall，停止任何确定性前置失败，最后明确report+sha+GPU是否启动+runtime/source漂移+下一步阻断。"
+    },
+    {
+      "id": "report-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_identity_gate.py",
+        "post"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "real-identity"
+      ],
+      "final": true
+    }
+  ]
+}

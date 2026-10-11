@@ -1,0 +1,125 @@
+{
+  "name": "mpv-scale-p4-plan-recheck-v3",
+  "description": "Bounded recheck of R2-01..06 after preserved blocked plan, then calibration-only permit; no reexecution of writers.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 2500000
+  },
+  "phases": [
+    {
+      "id": "plan-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "plan-check"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "plan-adversary",
+      "type": "agent",
+      "agent": "risk-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "P4限域只读复审，固定Flash/xhigh，不启动GPU、不写文件。先读docs/P4/P4计划限域返工brief-v3.json及其保留的v2审查/snapshot，再核当前docs/P4实施计划.json、P4测量方法.md对应六项delta。重点pixelart30s/720帧能覆盖原30s计时协议、B6 timing/capture清单算术、B2预算、磁盘门口径与无扫档，R204须分原35guard与新增P4 13，全发现48，不把原行为测试删到13。其它旧F/LF修正只查无回归，不新开宽泛项目审查。前检{steps.plan-check.output}。不得把计划就绪说成真实benchmark已完成。实算新planSHA，最多15定点工具回合完成；必要新major才block，minor明确列。最终仅JSON: verdict:pass|block, plan_sha256:string, findings:[{id,severity:blocker|major|minor,file,issue,fix}], checks:[], limitations:[], reason:string。",
+      "dependsOn": [
+        "plan-check"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "plan_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "plan_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "work-permit",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "permit"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "plan-adversary"
+      ],
+      "input": "{steps.plan-adversary.json}",
+      "final": true
+    }
+  ]
+}

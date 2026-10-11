@@ -1,0 +1,149 @@
+{
+  "name": "mpv-scale-p4-plan-rework-v2",
+  "description": "Retained first BLOCK findings plus leader methodology counterchecks; scoped preregistration correction and independent recheck before isolated calibration permit.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 2500000
+  },
+  "phases": [
+    {
+      "id": "repair-plan",
+      "type": "agent",
+      "agent": "planner",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [],
+      "task": "单一P4计划修订者(Flash/xhigh)。完整读docs/P4/P4计划限域返工brief-v2.json、P4执行约束与验收brief.md、docs/P4实施计划.json、P4测量方法.md及保留计划审查。共7原意见+LF01..07，逐项执行领导者decision，关注rollingcount10s后已饱和不当活性门、extendedwarmup/window/24秒media冲突、全部arms同HQconfig、vo=image仅filter鉴别非shader A/B、RIFE无GPU S/M归因和总体余量数字、原件持久保留、固定参数不假扫档。只允许edit docs/P4实施计划.json和docs/P4/P4测量方法.md，两文件旧byte已归档。禁止任何GPU/真实VS运行/产品代码/工具实现/guard/auth/环境/旧5715变化。可用read/bash静态脚本核查计算和test p4guard schema，无需整repo重复hash。JSON execution_batches/limitations为非空object保留，ready是方法就绪非执行PASS。加精确修正映射字段review_resolution，补充brief实际sha绑定，source/globalbound旧依赖不变。预热测量客观可执行，资源量逐组复算，固定seed/order，因无present和素材预注册最高PARTIAL_MEASURED，不丢真实RIFE共存和等rect本轮必做；公平画质的机器工件实际gpu-next输出+Sframe身份，不宣称stock无益。计划中引用旧stage方法即便有误不能盲从，真实模型需独立鉴别但不强求线性模型特性；无代码权限试错。最多45toolcalls，不宽泛探索。完成后只输出plan/method实算sha、F/LF映射摘要、预算、机器plan-check结果。不要把未跑或被拒的检查说通过。"
+    },
+    {
+      "id": "plan-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "plan-check"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "repair-plan"
+      ]
+    },
+    {
+      "id": "plan-adversary",
+      "type": "agent",
+      "agent": "risk-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "只读限域P4计划复审，Flash/xhigh，不能写源/计划/guard或启动GPU。请完整读docs/P4/P4计划限域返工brief-v2.json保留F01..07+LF01..07，并读原reviews docs/验证/开发/p4-001/plan-v1-blocked/plan-adversarial-review.json。新候选docs/P4实施计划.json与P4测量方法.md、当前p4_guard.py/test，machine前检{steps.plan-check.output}。验证每个decision实际落文且字段互不矛盾，尤其vo-passes.count饱和+预热时间、所有arms相同HQ基础、vo=image不是gpu shader、RIFE-on S/M混合不能GPU归因和毫秒余量造数、无present来源/PENDING_USER最高部分测量、fixed product params不假扫档、原PNG持久化、WDDM N/A门的可复算降级、准确trial数/总时长/媒体seed。guard自绑定只提供一致性非恶意写者沙箱。修订method/plan要全文关联查矛盾，但这不是宽泛项目审查，<35calls，不重复5715全hash。保留原问题及修法；newmajor必须block，minor清楚建议。最终只JSON verdict:pass|block, plan_sha256实际SHA, findings:[{id,severity:blocker|major|minor,file,issue,fix}], checks:[], limitations:[], reason:string。不要将校准仍需真实mpv确认与方案无法执行混淆，允许明定校准BLOCKED_ENV但不能一切以未来run再定而无规则。",
+      "dependsOn": [
+        "plan-check"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "plan_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "plan_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "work-permit",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "permit"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "plan-adversary"
+      ],
+      "input": "{steps.plan-adversary.json}",
+      "final": true
+    }
+  ]
+}

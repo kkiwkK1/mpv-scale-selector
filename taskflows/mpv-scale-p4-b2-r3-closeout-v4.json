@@ -1,0 +1,206 @@
+{
+  "name": "mpv-scale-p4-b2-r3-closeout-v4",
+  "description": "Readonly source closeout after archived writer timeout; no writer replay. Then machine freeze, independent scoped review and one real24 identity.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 2400000
+  },
+  "phases": [
+    {
+      "id": "preserved",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_r3_gate.py",
+        "pre"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "closeout",
+      "type": "agent",
+      "agent": "verifier",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "preserved"
+      ],
+      "task": "只读source B2-r3中断收尾者，Flash/xhigh。完整读docs/P4/P4-B2-r3中断收尾brief.md和P4-B2首载修正brief-v3.md交接格式，旧writer已超时48产物归档。严禁修改tools/p4_collect.py/test(当前sha b6e4d65.../a8bb564...)或任何旧证据/plan/guard/前序libs。仅读相关API/原smoke证据，跑安全localtests，新authorlogs/handoffcreateonly。原129collectorOK但全suite未完，需实跑全+48guards；失败REWORK别fix。可以且建议对同固定source新目录run config-smoke（唯一vo=null/ao=null sentinel，无GPU/VS），以真实case绑定当前source hash，继承10秒timeout/隔离env/ownPID；不要identity/RIFE/clone。最大15toolcalls，不进行新广泛研究；输出handoff与真实测试/限制。config-dir独占配置语义有固定docs可证，审查仍要验证cache/env/无系统配置加载，不能伪造或放宽。测试所有stdout/stderr新日志原样，config_smoke字段按gate要求。此角色source只读，有必要新错误即REWORK停。"
+    },
+    {
+      "id": "freeze",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_r3_gate.py",
+        "build"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "closeout"
+      ]
+    },
+    {
+      "id": "recheck",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "freeze"
+      ],
+      "task": "B2-r3只读独立限域复审，Flash/xhigh。先完整read docs/P4/P4-B2首载修正brief-v3.md和旧identity-run-001/execution-report.json，新candidate由机器冻结{steps.freeze.output}。只查R3-1..5及相关安全边界，不重做全项目审查或重跑617所有tests（机检已全跑）。必须实读作者真实vo=null config-smoke命令/日志/sentinel/配置证明源码采用的启动链确实读隔离cfg，no-config isolation未退化；默认auto-sandbox CLI不能预创建，真实log唯一及空缺rc0/passthrough/argvvf不等runtimeinit，PNG格式与输出PTS/GPU状态诚实，finally结束后再witness与manifest，connectmonotonic，nonblend不是hash不同。不要假设所有文件名是模型身份，也不替将来的GPU执行签PASS。TEMPmock负例可，无真实GPU/VS，无源修改；最多25定点工具回合。严格最终仅JSON verdict pass|block,candidate_sha256实算,findings:[{id,severity:blocker|major|minor,file,issue,fix}],checks:[],limitations:[],reason:string，info放limitations。任何major阻断。通过只允下一角色一个24fps/12source帧的真实隔离identity，不允30fps/性能。",
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "execution-permit",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_r3_gate.py",
+        "review"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "recheck"
+      ],
+      "input": "{steps.recheck.json}"
+    },
+    {
+      "id": "identity24",
+      "type": "agent",
+      "agent": "test-engineer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "freeze",
+        "execution-permit"
+      ],
+      "task": "独立只读source真实执行者，Flash/xhigh。完整read docs/P4/P4-B2首载修正brief-v3.md的『唯一真实执行identity-run-002』并按它执行。固定新candidate {steps.freeze.output}，执行许可 {steps.execution-permit.output}。所有源/plan/guard/旧manifest只读，不patch或临改vf/素材/阈值。createonlyidentity-run-002，已存在就拒绝。只跑修复后CLI的默认auto-sandbox --mode identity-probe --fps 24，12sourceframes，ONE attempt；先必要read-only preflight/help，禁止prepare-runtime后复用目录，禁止失败切显式sandbox重试，不跑30fps/全矩阵。环境去APIenv+专用TEMP cwd/HOME/cache，clone runtime是工具本职允许，原DMPV/APPDATA/backup零写，onlyownPID，内部160秒/外部300秒不改。GPU单owner≤10min。真实模型没运行或证据不足即REWORK/NOT_ESTABLISHED，精准报日志错误，不以正常退出/FPS翻倍代四件套。原无private Y4M/PNG/log/stdout/witness/manifest持久保留，私有vpy/fullruntime/modelbinary只hash不入repo；TEMPmanifest原byte不改。所有进程与句柄关闭后新联合evidence-manifest files={repo_relative_path:sha256}覆盖目录除自身。execution-report字段按brief含candidate_sha256、source_unchanged、production/performance/livewritefalse，gpu_started根据真正运行证据而非工具旧固定flag。绑定brief/实际closeout-v4flow/gate/TEMPsupervisor到本次证据。最多30工具回合；停止具体失败不现场修。最后报告入口/sha/真实vf与输出/初始化状态/未完成项，最终机器post只校验报告完整性，非P4PASS。"
+    },
+    {
+      "id": "execution-report-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_r3_gate.py",
+        "post"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "identity24"
+      ],
+      "final": true
+    }
+  ]
+}

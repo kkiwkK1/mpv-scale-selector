@@ -1,0 +1,410 @@
+{
+  "name": "mpv-scale-p3-plan-rework-v1",
+  "description": "Bounded correction and independent recheck of all five retained P3 plan findings; source implementation not yet started.",
+  "strictInterpolation": true,
+  "concurrency": 2,
+  "budget": {
+    "maxTokens": 8000000
+  },
+  "phases": [
+    {
+      "id": "repair-plan",
+      "type": "agent",
+      "agent": "planner",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [],
+      "task": "你是P3原规划的限域纠正者（不是源码实施者）。原flow mpv-scale-p3-auto-muttaj5c-70be75在work-permit因计划major实际block，源码没有开始，session目录尚未创建。完整读docs/P3/P3计划对抗审查-v1.json（5条原findings，严重性保留）和docs/P3/P3实施计划-v1.critic-block.json（原计划sha fc1bac…363a4已归档）。只编辑当前docs/P3实施计划.json，原归档/审查/基线/授权/brief/flow/guard/源码均只读，不增宽scope/不改35 required及30 write_paths。按P3A01..05逐根因一起改：唯一注册表目标为四占位转BUILTIN+新增sharpbilinear2x，LS1/BCAS仍disabled；conf真实内建只gears成员和解释注释（删除新内建_mode/_label/_reason/_set覆盖键，文案固定Lua，不能写active无效键凑身份）。逐条同步Lua BUILTIN/DEFAULT_GEARS_TEXT及内嵌selftest、p1_lib.audit_gears_conf原still_disabled仅ls1/bcas的新审计语义与p3builtins_active、p2_lib镜像迁移与配对测试（121覆盖不删不弱化）；保持防conf冒名/非法override负例。P3A02把全部21个参考邻域采样点改成实际21个tex2D参考坐标逐点对照（A1..I4等），不能修改数学；P3A03四占位加第五sharp2x与30 write_paths口径；P3A04保留原NIS WHEN仅放大生效，等尺寸/缩小断言合法跳过/正常内建接管且链完好，不改WHEN凑active；P3A05在GEO02/GEO04既有ID加会话内1080→720换片与pause几何/k重算/epoch无陈旧（不是仅分开进程）。添加correction_notes指出原5意见、每项delta和实际新计划目标，维持不部署/隔离安全/pending与全部约束。最后简短报告修正路径/不改源码，别输出大JSON。"
+    },
+    {
+      "id": "plan-check",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_guard.py",
+        "plan-check"
+      ],
+      "timeout": 120000,
+      "dependsOn": [
+        "repair-plan"
+      ]
+    },
+    {
+      "id": "plan-adversary",
+      "type": "agent",
+      "agent": "critic",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "plan-check"
+      ],
+      "task": "这是P3计划限域独立复核，不是新 broad 审核。先完整读取docs/P3/P3计划对抗审查-v1.json和旧docs/P3/P3实施计划-v1.critic-block.json（保留P3A01 major及02..05 minor），新计划docs/P3实施计划.json，机器绑定{steps.plan-check.output}。只核对5原共同根因及必要邻近范围，独立比照实际Lua/config/p1/p2 audit注册表与21个tex2D坐标/WHEN。旧major未真实改正必须block，不能因为另一个代理说已修而pass。检查新明确目标态conf仅gears+comments删除新builtin身份覆盖、Lua DEFAULT/selftest/p1audit/p2audit全部同步迁移的具体计划与非法conf负例，四占位+sharp2x/30paths口径，真实21坐标逐点，NISWHEN保留合法skip，GEO会话内paused换片/k/epoch必测。不得要求真人批准/不部署，不修改源/计划/旧finding、不跑GPU。最终严格JSON对象{verdict:pass或block,plan_sha256:本机新计划SHA与machine一致,findings:[未解决意见或新由修正引起相关根因{id,severity,file,issue,fix}],checks:[逐项P3A01..05闭环与局限],reason:字符串}，不要前后摘要/围栏，flow已配置expect。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "plan_sha256",
+          "findings",
+          "checks",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "plan_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "work-permit",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_guard.py",
+        "permit"
+      ],
+      "timeout": 120000,
+      "dependsOn": [
+        "plan-adversary"
+      ],
+      "input": "{steps.plan-adversary.json}"
+    },
+    {
+      "id": "implement",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "work-permit"
+      ],
+      "task": "唯一P3源码实施者。先完整读docs/P3/P3执行约束与验收brief.md，docs/P3实施计划.json，p3-001/work-permit与plan-adversarial-review（权威必须落地）。显式用户授权已就绪，不等待批准。只在计划具体write_paths实施；旧2100左右证据/旧flow/guard/授权/快照/备份工具/P2说明均不动，P2共享源码旧字节已归档，不重copy stock，不改P2资源。NIS compute边界barrier适配+系数；xBR-lv2 MAIN参考3×完整数学/坐标+smallRGB oracle；SharpAUTO/手动2×分项/1×退化/scale0；Integer独立窗口几何、nearest、无shader、rotate/crop/SAR/黑边/k<1/切档恢复全部ownership；brief其余8点严格满足。执行依赖和所有测试留候选冻结；原121行为保留合法迁移说明，修P2restartconsole/截图附证/计数空真及VL-F1同刻几何，用EVI01实际全目录清单闭环和负例证明；不改旧清单。用新p3-001/implementer/子证据目录create-only，失败轮原样保留另用新目录，不force覆盖。写tools/p3_verify.py支持--session/--evidence-dir/--case及全35+ID真实矩阵，p3_lib、纯函数/PNG pixel-oracle与负例tests、独立p3资源manifest、新P3实现/用户说明（旧文档只读）；guard/flow不可调整凑过。产品算法不是p1/p2-test桩，也不能只用路径或pass计数证明生效；记录新鲜帧/epoch/算法DESC和目标实际尺寸、pixelGolden等可核实依据。仅直接mpv.exe、固定gpu-next/vulkan、合成媒体/tmp无凭据HOMEAPPDATAcache/自有PID，活动配置/DMPV/备份零写，不改全局DPI，不做P4公平画质/perf/RIFE，若RIFE环境无安全证明本轮留未测；用户偏好pending。全单测+全矩阵自测，必需失败不可降门槛；交接要写p3-001/implementer作者报告，列源码sha/产物/局限/检查精确总数。最终简短文本即可，不设易错大JSON输出。\n原计划对抗审查docs/P3/P3计划对抗审查-v1.json五项及新计划correction_notes仍为必要验收：注册表/DEFAULT/selftest/p1p2审计同步，conf仅成员/注释，21参考坐标，NIS原WHEN不改，Integer同会话paused换片重算。旧意见保留不可删除。"
+    },
+    {
+      "id": "unit-tests",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "implement"
+      ]
+    },
+    {
+      "id": "integrate-freeze",
+      "type": "agent",
+      "agent": "test-engineer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "unit-tests"
+      ],
+      "task": "独立P3唯一集成测试/冻结负责人，源码作者已退出。先读P3brief/计划/permit与作者报告，源码不允许编辑（你的write只用于p3-001自己证据/报告/tests/candidate）；发现bug实际留FAIL交作者，不能边修边验。new p3-001/verify-lead证据目录，全单测121+新/guard安全mock及全35+P3必测ID真实gpu-next/vulkan重跑。test从候选源码开跑前记录hash，结束逐项比不漂移；同候选/新帧/明确目标尺寸和真实小RGB pixeloracle，不凭相同图/hash/0==0或旧vo-passes报PASS。重点NIS实际compute两coef/workgroup/partialtile边界+failure、xBR参考采样alpha/3×、Sharp AUTO1440退化与manual2X/scale0、Integer1080黑边320/180与720满屏2×/k<1/rotate crop SAR原窗口非自margin反馈/resize稳定/切P2gear恢复几何/外部zoom和shader完整保留/暂停换片再算。三新增shader及Integer分别8/10bit/RGB/HDR守卫、legacyP2真实pass和originalhigh-quality基线Off恢复、快速切换/退出四态与禁用防conf冒名。不并行GPU，合成标准库源HDR明确metadata override、隔离无凭据env/tmp/cache/自有PID不全局kill，无活动写入或P4收益宣称；窗口机器GEO04必测，真人DPI跨屏/P1P2P3偏好pending。自动证据清单必须包含所有restartconsole/截图输入log等并EVI01检目录覆盖，采集所有产物后再manifest排除自身循环。如果漏项如实findings并新联合清单补绑定，不能改旧manifest。输出固定新tests.json/candidate.json UTF8LF/create-only于p3-001，tests(stage:P3,session:p3-001,status:PASS或FAIL,required_unmeasured:[],live_configuration_written:false,human_subjective_acceptance_claimed:false,pending_user_checks:[],evidence_manifest:[{path,sha256}],cases:[每计划ID唯一PASS/FAIL、evidence/evidence_files规范相对POSIX、command、variants])；candidate(schema:mpv-scaler-stage/v1,stage:P3,session:p3-001,files:{所有执行源码/测试/shader资源/hash许可/新文档和guard ENV_FILES/brief计划permit依赖:sha256},tests_sha256)。计划write_paths已创建file都必须入candidate，别把目录当文件。只读p3_guard check门与p1_check_evidence --stage P3完整manifest chain。写verify-lead集成报告并绑定其hash（先报告再manifest），原P2保全与备份复核。必需未执行/失败不得PASS，若真实fail允许停止下游以留场，不调整标准。最后短候选sha/精确case总数与局限，不展开原始大报告。\n原计划对抗审查docs/P3/P3计划对抗审查-v1.json五项及新计划correction_notes仍为必要验收：注册表/DEFAULT/selftest/p1p2审计同步，conf仅成员/注释，21参考坐标，NIS原WHEN不改，Integer同会话paused换片重算。旧意见保留不可删除。"
+    },
+    {
+      "id": "candidate-check",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_guard.py",
+        "check"
+      ],
+      "timeout": 120000,
+      "dependsOn": [
+        "integrate-freeze"
+      ]
+    },
+    {
+      "id": "technical-review",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "独立技术真实性审核。机器绑定{steps.candidate-check.output}。固定docs/验证/开发/p3-001/candidate.json和tests.json，P3brief/计划/集成报告及raw evidence为权威；审核P3源相对docs/阶段源码快照/p2-001差异与原所有意见，不能只信作者/集成PASS。只读不改文件、不启动任何GPU，会话/安全mock机器检查可临时执行。另一审核者结论禁止读取，同GLM独立上下文不是异质模型。逐核candidate/tests/manifest/rawhash与源时间/inputs，旧数据未冒充，全部35+客观必测有真实支撑，没有pending代机器缺测。必要高严重性必须block，findings原严重性不降，重复按根因归并。不能因真人未满意而阻断本次明确授权的客观开发，也不能把客观PASS等于批准/部署。最终仅JSON{verdict:pass或block,candidate_sha256:实际固定SHA,findings:[{id,severity:blocker或major或minor,file:路径行号,issue:根因与真实重现或证据,fix:限域修正}],checks:[],limitations:[],reason:字符串}。重点shader主体对应许可参考/NIScoef与compute组/barrier/越界（GPU没报错不等于无越界）、xBR完整21个参考邻域采样点/3×映射alpha/sample、Sharplinear/Auto1退化/2×和clamp0正确、不用vf/xbr或identity桩冒名。Integer实际windowPNG pixel块/黑边/目标/rotate裁剪SAR/min(k)真实行为，源码原窗口不依自身margin反馈；GLSL目标尺寸和截图不能互相偷换，实际DESC采样帧/epoch，8/10bit/RGB/HDR分档守卫。采样oracle需独立于实现公式复制的空真，原highQ/stocks零改，Lua/原121回归不弱化；P4画质/性能/RIFE未测如实。\n原计划对抗审查docs/P3/P3计划对抗审查-v1.json五项及新计划correction_notes仍为必要验收：注册表/DEFAULT/selftest/p1p2审计同步，conf仅成员/注释，21参考坐标，NIS原WHEN不改，Integer同会话paused换片重算。旧意见保留不可删除。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "adversarial-review",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "独立对抗/安全审查，不是摘要复述。机器绑定{steps.candidate-check.output}。固定docs/验证/开发/p3-001/candidate.json和tests.json，P3brief/计划/集成报告及raw evidence为权威；审核P3源相对docs/阶段源码快照/p2-001差异与原所有意见，不能只信作者/集成PASS。只读不改文件、不启动任何GPU，会话/安全mock机器检查可临时执行。另一审核者结论禁止读取，同GLM独立上下文不是异质模型。逐核candidate/tests/manifest/rawhash与源时间/inputs，旧数据未冒充，全部35+客观必测有真实支撑，没有pending代机器缺测。必要高严重性必须block，findings原严重性不降，重复按根因归并。不能因真人未满意而阻断本次明确授权的客观开发，也不能把客观PASS等于批准/部署。最终仅JSON{verdict:pass或block,candidate_sha256:实际固定SHA,findings:[{id,severity:blocker或major或minor,file:路径行号,issue:根因与真实重现或证据,fix:限域修正}],checks:[],limitations:[],reason:字符串}。主动沿恶意配置和事件序列攻击：保留id/label/mode/set绕过新档注册、off冒名、Sharp2x重复/未知id、P2资源/manifest偷换、启动Integer已外部zoom/pan、Integer自身属性observer反馈抢ownership、resize0/idle切片SARrotatecrop和暂停陈旧pass、Integer→FSR或NIS失败→Off哪些几何残留/陈旧基线、外部同名shader条目与标量冲突未被覆写、restart清单自动完整性/缺档日志/相同PNG虚假佐证/计数0==0、证据重用穿越link/变体SHA源不匹配或新脚本依赖漏冻。用源码或已有raw证据实证/临时纯逻辑反例，不能凭假设罗列阻断；发现实际major需block，不以“类似被测”掩盖相邻案例。授权只P3临时零活动写入/无APIenv/自有PID，声明非OS沙箱。新增几何风险须做联合ownership adversarial检查，既有findings不是已自动消失。\n原计划对抗审查docs/P3/P3计划对抗审查-v1.json五项及新计划correction_notes仍为必要验收：注册表/DEFAULT/selftest/p1p2审计同步，conf仅成员/注释，21参考坐标，NIS原WHEN不改，Integer同会话paused换片重算。旧意见保留不可删除。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "objective-result",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_guard.py",
+        "result"
+      ],
+      "timeout": 120000,
+      "dependsOn": [
+        "technical-review",
+        "adversarial-review"
+      ],
+      "input": "{\"technical\":{steps.technical-review.json},\"adversarial\":{steps.adversarial-review.json}}",
+      "final": true
+    }
+  ]
+}

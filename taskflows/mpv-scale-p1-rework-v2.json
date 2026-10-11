@@ -1,0 +1,371 @@
+{
+  "name": "mpv-scale-p1-rework-v2",
+  "description": "Linked bounded correction of retained P1 review roots A/B/C, new session p1-002, then same-candidate limited rechecks. No live writes or human acceptance fabrication.",
+  "strictInterpolation": true,
+  "concurrency": 2,
+  "budget": {
+    "maxTokens": 5000000
+  },
+  "phases": [
+    {
+      "id": "preflight",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/guard.py",
+        "preflight",
+        "--stage",
+        "P1",
+        "--session",
+        "p1-002"
+      ],
+      "timeout": 60000
+    },
+    {
+      "id": "repair",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "dependsOn": [
+        "preflight"
+      ],
+      "task": "用户已授权计划就绪直接执行，不等再次确认；模型指定zai-coding-cn/glm-5.3-flash。你是P1唯一源码修正者。依赖preflight完成，但无需启动审批。权威限域brief：docs/P1/限域修正brief-v2.json，请完整读取并按A/B/C三根因及邻近案例修复；保留原始发现，不把旧minor忽略/把原major降为minor。任务基线HEAD=8f6b14e，新P1六源文件与已有新P1两说明可修改；taskflows/、docs/P1实施计划.json、docs/P1计划-GLM原始.json、授权记录、研究/准备/备份工具以及整个p1-001目录均不可改。源码的原候选字节已存p1-001/source-snapshot/。仅修改brief允许的源文件/新增两个证据验证文件，并新建p1-002报告。验收：A保留ID/标签及Off不变式fail-closed且真实IPC损坏配置/冒名变体通过；B不引用未生成截图，正确区分机读模型与实际视觉证据；C整个测试入口create-only不启动进程就拒绝重用目录，逐产物create-only，证据SHA清单与新的额外机器门可发现篡改/漏项/非法路径。修复不提前接入P2算法，也不得更改Off外部ownership既定语义。执行全单测与十二项真实固定gpu-next/vulkan回归，用新p1-002/implementer/目录，不运行旧目录/默认p1-001路径；新--session=p1-002和复现命令必须一致。仅自有PID、合成输入、隔离HOME/APPDATA/cache且不传凭据。先自测再交单一集成负责人，不修改旧报告来制造PASS。提供changed_files、根因纠正delta、实际local_checks、limitations与summary。所有必测客观缺失必须如实FAIL；真人偏好留PENDING_USER。无须等待用户或生成(approve)。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "stage",
+          "changed_files",
+          "local_checks",
+          "limitations",
+          "summary"
+        ],
+        "properties": {
+          "stage": {
+            "type": "string"
+          },
+          "changed_files": {
+            "type": "array"
+          },
+          "local_checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "unit-tests",
+      "type": "script",
+      "dependsOn": [
+        "repair"
+      ],
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "timeout": 300000
+    },
+    {
+      "id": "verify-and-freeze",
+      "type": "agent",
+      "agent": "test-engineer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "dependsOn": [
+        "repair",
+        "unit-tests"
+      ],
+      "task": "你是P1-v2单一集成验证/冻结负责人，不是源码修正者。读取docs/P1/限域修正brief-v2.json以及docs/P1实施计划.json；检查源码修正范围、旧p1-001证据/源码归档指纹未变。源码可读不可修改，失败给实施者，不擅修。运行所有旧/新单测（保留32备份+原23支持，新增多少如实计数）并保存原始输出；独立执行十二项真实mpv回归，固定gpu-next/vulkan，新的docs/验证/开发/p1-002/verify-lead/证据目录，传--session=p1-002且所有复现命令不指向旧默认目录。A/B/C修正的邻近变体须检查，独立确认LS1/BCAS与P1占位档位不能被conf冒名启用、Off不可缺失/禁用、清单无不存在PNG、重用evidence-dir拒绝且旧文件不变。B若没有含菜单的实际截图不可宣称视觉已验证；user-data是机读模型不是视觉证据。C生成规范项目相对POSIX路径的evidence SHA清单，含各case的真实原始产物/复跑报告和单测输出（不可把tests.json/candidate.json自引用加入其自己的hash清单），用tools/p1_check_evidence.py验证每个引用/hash并做临时合成篡改/漏项/路径负例；不改已有guard.py。创建新的p1-002/tests.json与candidate.json，schema、status、cases、required_unmeasured、live_configuration_written按旧guard协议，保留全部12必测ID并每ID一条（variants合并）。P1-UC-1..4保留PENDING_USER，禁止伪造审批/subjective验收。candidate冻结所有实际共享源/测试/配置/新增证据验证脚本等SHA与tests_sha256，额外证据SHA清单写tests.json并钉住。候选与证据必须UTF-8/LF、create-only，旧p1-001不覆盖。验证通过再给出严格JSON：{\"stage\":\"P1\",\"candidate_path\":\"docs/验证/开发/p1-002/candidate.json\",\"candidate_sha256\":\"64位小写SHA\",\"test_report\":\"docs/验证/开发/p1-002/tests.json\",\"tests_status\":\"PASS或FAIL\",\"required_unmeasured\":[],\"pending_user_checks\":[\"P1-UC-1\",\"P1-UC-2\",\"P1-UC-3\",\"P1-UC-4\"],\"limitations\":[]}。无须等用户确认，仅客观结论。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "stage",
+          "candidate_path",
+          "candidate_sha256",
+          "test_report",
+          "tests_status",
+          "required_unmeasured",
+          "pending_user_checks",
+          "limitations"
+        ],
+        "properties": {
+          "stage": {
+            "type": "string"
+          },
+          "candidate_path": {
+            "type": "string"
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "test_report": {
+            "type": "string"
+          },
+          "tests_status": {
+            "enum": [
+              "PASS",
+              "FAIL"
+            ]
+          },
+          "required_unmeasured": {
+            "type": "array"
+          },
+          "pending_user_checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "candidate-check",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "dependsOn": [
+        "verify-and-freeze"
+      ],
+      "input": "{\n  \"stage\": \"P1\",\n  \"ready\": \"pass\",\n  \"scope\": \"{\\\"session\\\": \\\"p1-001\\\", \\\"goal\\\": \\\"在隔离临时配置下交付缩放选择器P1骨架：F8菜单（绑定审查已确认F8在input.conf与scripts中零占用）、off/active/external/fallback状态机、托管属性快照与恢复（glsl-shaders列表、scale/cscale/dscale、插件设置的显示几何）、\\\\\\\"关\\\\\\\"档位、外部改链检测与让出、退出清理、LS1/BCAS禁用占位与原因文案；显式固定vo=gpu-next、gpu-api=vulkan。\\\", \\\"in_scope\\\": [\\\"scripts/新增插件Lua与script-opts/新增默认配置\\\", \\\"状态机与ownership：接管时记录托管基线，一次仅一档，外部修改优先、永不静默覆盖\\\", \\\"\\\\\\\"关\\\\\\\"：仅恢复托管且未被外部改动的属性，禁用glsl-shaders-clr全清\\\", \\\"external检测覆盖CTRL+1..6/F5/F6/CTRL+0及其他脚本set_property路径，让出并提示\\\", \\\"fallback：资源缺失/非法配置/桩档位失败时显示真实原因并回退上一稳定状态，无半生效残留\\\", \\\"退出清理：各状态quit后无跨会话残留（P1决定不持久化，重启回到off）\\\", \\\"菜单骨架预留P2+条目但必须显示\\\\\\\"未实现/后续阶段\\\\\\\"且不可选；LS1/BCAS禁用+原因（LS1无源码/权重/移植许可；BCAS身份未核实），不以CAS/Bicubic+CAS冒名\\\", \\\"CTL-04/06/07/08所需测试桩（缺失shader路径、非法配置、占位档位）由测试工具在临时目录运行时生成，不入库；如需入库仅放docs/验证/开发/p1-001/并在证据标注\\\\\\\"测试桩非产品档位\\\\\\\"\\\"], \\\"out_of_scope\\\": [\\\"P2+真实缩放档位（FSR1/SGSR1/stock Anime4K/Nearest等）及其shader接入\\\", \\\"HDR/RGB画质、8bit/10bit深度验证\\\", \\\"任何安装/部署/写活动APPDATA/mpv或D:/MPV\\\", \\\"LS1或BCAS任何可用实现或冒名替代\\\", \\\"修改stock Anime4K链内容、RIFE、mpv内核\\\"], \\\"task_baseline\\\": {\\\"git_head\\\": \\\"8f6b14e3a9aaf8585f5aa30dce70328509878a04\\\", \\\"research_tag\\\": \\\"research-baseline-20261002 (0cea666a4d4c)\\\", \\\"backup\\\": \\\"D:/workspace/小项目/mpv插件/_备份/缩放插件/mpv-config-20261002-233943；manifest_sha256=232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6；archive_sha256=207e8d3ffc701a819871eef99a8ede14ed96d6002353dcc30991e123018b6864\\\", \\\"prior_dirty_changes_preserved\\\": [\\\"docs/Taskflow使用说明.md\\\", \\\"docs/执行授权-P1.json\\\", \\\"taskflows/\\\"], \\\"environment_facts\\\": \\\"mpv v0.40.0-393-gad59ff1b4、libplacebo v7.357.0（D:/MPV/mpv.com）；input.conf占用F1-F3/F5/F6/F7/F9/CTRL+0..6，playback-status.lua与rife-env.lua无add_key_binding，F8空闲（作为CTL-01绑定审查证据基础）；活动mpv.conf含profile=high-quality（scale=ewa_lanczossharp）、fullscreen、vf-add=@rife:vapoursynth；ffmpeg不在PATH，测试输入须用Python标准库可生成的合成图像/片段并记录SHA-256\\\"}, \\\"dependency_on_prior_stage\\\": \\\"P0准备已完成且本session preflight=PASS（备份verify --compare-source通过、55文件指纹匹配）。guard.py对P1的dependency=null为设计行为；P0→P1进入许可由用户聊天授权与docs/执行授权-P1.json提供（allow_isolated_implementation_and_tests=true，live写=false）。本阶段验收产出的docs/验证/开发/p1-001/acceptance.json（user_approved=true）是P2的硬前置。\\\", \\\"acceptance_gates\\\": [\\\"12项required_tests在docs/验证/开发/p1-001/tests.json各有PASS或PENDING_USER条目（每ID一条，变体并入该条），required_unmeasured=[]，失败如实记录，不得以计划或桩通过冒充产品通过\\\", \\\"taskflows/guard.py check通过：candidate.json冻结后源文件指纹不变；两路只读审查（technical/safety）对同一candidate_sha256给出verdict=pass且无blocker/major findings\\\", \\\"CTL-02/03/08客观核对：属性diff日志证明无全清、外部改动完整保留、Off仅恢复托管且未冲突属性\\\", \\\"CTL-04/05客观核对：快速切换与各状态退出重启后无shader/几何残留，终态与所选一致；menu显示与属性/vo-passes事实一致\\\", \\\"live_configuration_written=false；全程零写入APPDATA/mpv、D:/MPV、备份payload\\\", \\\"user_checks以PENDING_USER保留至approval门，用户以字面\\\\\\\"(approve)\\\\\\\"确认后才生成acceptance.json；不伪造approve输出\\\"], \\\"test_execution_note\\\": \\\"客观测试用--config-dir=<临时目录>隔离配置+JSON IPC（--input-ipc-server）驱动按键/属性查询/quit与截图自动取证，显式--vo=gpu-next --gpu-api=vulkan，必要时--fullscreen=no保证确定性（GEO-07另行显式切全屏）；截图与日志定向到docs/验证/开发/p1-001/或临时目录，禁止使用活动配置指向的screenshot-directory。IPC自动化只证功能与状态真实性，不替代真人交互感受。\\\"}\",\n  \"write_paths\": [\n    \"scripts/\",\n    \"script-opts/\",\n    \"shaders/\",\n    \"src/\",\n    \"tests/\",\n    \"tools/\",\n    \"docs/P1\",\n    \"docs/插件\",\n    \"docs/验证/开发/p1-001/\"\n  ],\n  \"required_tests\": [\n    \"CTL-01\",\n    \"CTL-02\",\n    \"CTL-03\",\n    \"CTL-04\",\n    \"CTL-05\",\n    \"CTL-06\",\n    \"CTL-07\",\n    \"CTL-08\",\n    \"GEO-01\",\n    \"GEO-07\",\n    \"SHD-12\",\n    \"PIC-05\"\n  ],\n  \"user_checks\": [\n    \"P1-UC-1：F8菜单开/关与条目浏览的交互感受（OSD布局、字号、响应速度、文案排版）须用户亲自确认可接受；自动化仅证功能可达与状态真实，不证体验\",\n    \"P1-UC-2：\\\"关\\\"档位说明与LS1/BCAS禁用原因文案的准确性与可接受性（PIC-05的主观部分；\\\"不可选/不冒名\\\"的客观核对已含于自动检查，不推给用户）\",\n    \"P1-UC-3：external让出提示与Off前diff确认流程的提示内容/时机/确认方式是否符合期望（CTL-08客观diff正确性自动验证，交互方式取舍留用户）\",\n    \"P1-UC-4：真实播放中off/active/external/fallback状态显示的可读性是否可接受\"\n  ],\n  \"risks\": [\n    {\n      \"risk\": \"observe_property对glsl-shaders的外部检测与插件自身写入形成事件回环：屏蔽不严会自触发external，或漏检F5/CTRL+0的clr语义\",\n      \"mitigation\": \"写入前后标志位+变更来源判定；tests/内Lua逻辑级测试+CTL-03/04 IPC压力用例；缺陷记finding并修复后重新冻结candidate，不得带病标PASS\"\n    },\n    {\n      \"risk\": \"P1无真实档位，CTL-04/06/07/08依赖测试桩验证状态机；桩实现错误会制造假阴性/假阳性\",\n      \"mitigation\": \"桩在临时目录运行时生成、p1-test-命名、证据标注\\\"测试桩非产品档位\\\"；审查者核对桩未伪装成P2功能（范围守护）\"\n    },\n    {\n      \"risk\": \"本机构建gpu-next+vulkan初始化失败或窗口/驱动环境导致IPC驱动不稳定\",\n      \"mitigation\": \"失败如实记录并触发停止条件评估；禁止静默换--vo=gpu或换API掩盖；重试须记录次数与差异\"\n    },\n    {\n      \"risk\": \"开发中途用户合法修改活动配置导致guard finish时compare-source失败\",\n      \"mitigation\": \"属预期：单独verify快照本体仍须通过；guard以备份记录指纹为准；绝不改备份或回写用户配置\"\n    },\n    {\n      \"risk\": \"菜单占位条目可被选中或暗示可用，违反\\\"禁用项不冒名\\\"\",\n      \"mitigation\": \"占位条目一律disabled+原因文案；SHD-12/PIC-05自动核对文案与不可选状态；两路审查专项检查\"\n    },\n    {\n      \"risk\": \"Windows中文路径与编码问题导致Lua/工具异常或证据乱码\",\n      \"mitigation\": \"工具与测试统一UTF-8（-X utf8），临时目录优先ASCII路径；证据文件UTF-8/LF\"\n    },\n    {\n      \"risk\": \"会话证据被复用或覆盖破坏可追溯性\",\n      \"mitigation\": \"guard强制session目录不存在才能开始；所有证据只增不改，更正以追加条目注明；测试输入与生成文件逐个记录SHA-256\"\n    }\n  ],\n  \"summary\": \"P0前提完备：备份BAK-01..03通过且preflight复核PASS、32项单测通过、准备检查v2=PASS、双路复审无阻断；F8经实测审查空闲；mpv二进制与版本事实已在P0勘察确认；用户已通过聊天+docs/执行授权-P1.json明确授权隔离实施与测试。真实档位行为、画质、性能不在P1范围，按规则不构成前置阻断；未知资源（如各档pass行为）不假定通过。 Source: docs/P1计划-GLM原始.json. Automatic objective result only; no interactive approve fabricated and no subjective acceptance claimed. Off diff means current-vs-last-written ownership comparison; no extra modal confirmation is required.\"\n}\n",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-c",
+        "import importlib.util,json,sys; from pathlib import Path; s=importlib.util.spec_from_file_location('g',Path('taskflows/guard.py')); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); _,t,h=g.candidate('P1','p1-002'); p=json.load(sys.stdin); c={x['id']:x for x in t['cases']}; assert all(c[x]['status']=='PASS' for x in p['required_tests']); sys.path.insert(0,str(Path('tools').resolve())); import p1_check_evidence as e; print(json.dumps({'status':'PASS','candidate_sha256':h})); sys.argv=['p1_check_evidence.py','--session','p1-002']; ret=e.main(); assert ret in (None,0)"
+      ],
+      "timeout": 60000
+    },
+    {
+      "id": "technical-review",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "cache": {
+        "scope": "off"
+      },
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "dependsOn": [
+        "candidate-check",
+        "verify-and-freeze"
+      ],
+      "task": "独立只读P1-v2限域复审（技术/身份与测试覆盖），只对A/B/C及改动附近复核，不重做整个研究。必须完整读取docs/P1/限域修正brief-v2.json；原始发现保留在p1-001/technical-status.json与集成发现-v1.json，原候选源码在source-snapshot/。本轮候选docs/验证/开发/p1-002/candidate.json，固定SHA {steps.verify-and-freeze.json.candidate_sha256}，核验全部源hash+tests_sha256与原始证据hash清单。只查看本轮tests.json/verify-lead报告与A/B/C邻近变体；不看另一审核者结论。对原major R1及R2/R3/F-01..03逐根因给closed/remains，保留未闭项具体重现。不得写源码/报告/活动配置，不运行p1_verify（会写证据），不跑GPU基准；可执行只读机器证据检查和-B临时合成单测。角色分别独立，上下文隔离但同一GLM模型。源修正后旧R1-3证据仍完整保留，不把新候选当用户主观接受。最终只给JSON，不加围栏：{\"verdict\":\"pass或block\",\"candidate_sha256\":\"本新SHA\",\"findings\":[{\"id\":\"...\",\"severity\":\"blocker或major或minor\",\"file\":\"相对路径:行号\",\"issue\":\"...\",\"fix\":\"...\"}],\"checks\":[],\"limitations\":[],\"reason\":\"字符串\"}。checks逐根因描述关闭证据；未知/未测不当PASS。用户已授权自动继续实施，缺少再次启动确认不是阻断；P1-UC仍pending而非假用户评分。",
+      "output": "json",
+      "retry": {
+        "max": 2,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "safety-review",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "cache": {
+        "scope": "off"
+      },
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "dependsOn": [
+        "candidate-check",
+        "verify-and-freeze"
+      ],
+      "task": "独立只读P1-v2限域复审（安全/ownership及证据路径边界），只对A/B/C及改动附近复核，不重做整个研究。必须完整读取docs/P1/限域修正brief-v2.json；原始发现保留在p1-001/technical-status.json与集成发现-v1.json，原候选源码在source-snapshot/。本轮候选docs/验证/开发/p1-002/candidate.json，固定SHA {steps.verify-and-freeze.json.candidate_sha256}，核验全部源hash+tests_sha256与原始证据hash清单。只查看本轮tests.json/verify-lead报告与A/B/C邻近变体；不看另一审核者结论。对原major R1及R2/R3/F-01..03逐根因给closed/remains，保留未闭项具体重现。不得写源码/报告/活动配置，不运行p1_verify（会写证据），不跑GPU基准；可执行只读机器证据检查和-B临时合成单测。角色分别独立，上下文隔离但同一GLM模型。源修正后旧R1-3证据仍完整保留，不把新候选当用户主观接受。最终只给JSON，不加围栏：{\"verdict\":\"pass或block\",\"candidate_sha256\":\"本新SHA\",\"findings\":[{\"id\":\"...\",\"severity\":\"blocker或major或minor\",\"file\":\"相对路径:行号\",\"issue\":\"...\",\"fix\":\"...\"}],\"checks\":[],\"limitations\":[],\"reason\":\"字符串\"}。checks逐根因描述关闭证据；未知/未测不当PASS。用户已授权自动继续实施，缺少再次启动确认不是阻断；P1-UC仍pending而非假用户评分。",
+      "output": "json",
+      "retry": {
+        "max": 2,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "objective-result",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "dependsOn": [
+        "technical-review",
+        "safety-review"
+      ],
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-c",
+        "import importlib.util,json,sys,hashlib\nfrom pathlib import Path\nr=json.load(sys.stdin)\nspec=importlib.util.spec_from_file_location('flow_guard',Path('taskflows/guard.py'))\ng=importlib.util.module_from_spec(spec); spec.loader.exec_module(g)\nc,t,h=g.candidate('P1','p1-002')\nassert all(r[k]['candidate_sha256']==h for k in ['technical','safety'])\nsys.path.insert(0,str(Path('tools').resolve())); import p1_check_evidence as e; sys.argv=['p1_check_evidence.py','--session','p1-002']; assert e.main() in (None,0)\nbackup=g.verified_backup()\nblocked=any(r[k]['verdict']!='pass' or any(f['severity'] in ['blocker','major'] for f in r[k]['findings']) for k in ['technical','safety'])\nresult={'status':'REWORK' if blocked else 'PASS_OBJECTIVE','stage':'P1','session':'p1-002','candidate_sha256':h,'reviews':r,'pending_user_checks':t.get('pending_user_checks',[]),'user_subjective_acceptance_claimed':False,'authorization_source':'docs/执行授权-P1.json','live_configuration_written':False,'live_deployment_completed':False,'backup_source_unchanged':backup,'note':'Objective implementation/testing verdict only; not a fabricated user approval or product quality/performance acceptance.'}\nout=Path('docs/验证/开发/p1-002/technical-status.json')\nwith out.open('x',encoding='utf-8',newline='\\n') as stream: json.dump(result,stream,ensure_ascii=False,indent=2)\nprint(json.dumps({'status':result['status'],'candidate_sha256':h,'findings':[dict(f,reviewer=k) for k in ['technical','safety'] for f in r[k]['findings']],'pending_user_checks':result['pending_user_checks'],'record':out.as_posix(),'live_configuration_written':False},ensure_ascii=False,indent=2))\n"
+      ],
+      "input": "{\"technical\":{steps.technical-review.json},\"safety\":{steps.safety-review.json}}",
+      "timeout": 60000,
+      "final": true
+    }
+  ]
+}

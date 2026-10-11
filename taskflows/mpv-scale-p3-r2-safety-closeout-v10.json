@@ -1,0 +1,108 @@
+{
+  "name": "mpv-scale-p3-r2-safety-closeout-v10",
+  "description": "Bounded completion of persisted safety factcheck after provider stream termination. Technical v9 and v8 originals preserved; source unchanged.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 500000
+  },
+  "phases": [
+    {
+      "id": "adversarial-review",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 1200000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [],
+      "task": "仅P3 r2安全审查终报收尾，Flash/xhigh。前v9在56回合终报流Stream ended without finish_reason，已经落盘完整docs/验证/开发/p3-001/revision-r2/reviews-v9/safety/safety-review-sr-clarify.json和safety-review-sr01-factcheck.json。请只读这两文件+guard check源码关键调用链/原v8安全意见核当前candidateSHA=0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67(实算)，不重做实验/全审/35matrix/全哈希大型目录。SR01已绑文件删除在genericverify先拒绝，原意见误报；残留未创建且未绑定计划项设计完备性建议不同问题。SR02误置在项目root不是sessionroot。SR03确定性统计相同为说明非缺陷。副本oracle-sample.ppm未列53候选但是否间接在2440旧文件baseline钉住请1次实算确认，因此区分直接/间接绑定不可漏述。不得把旧错误事实继承成当前问题，不修改原report。scope最多6-10工具调用、聚焦文件/JSON，不启动mpv/GPU/任何writer/部署。基于实核给最终原合同JSON ONLY，findings只真正当前问题severity枚举blocker|major|minor（原SR03 informational迁入checks不是改意见），checks含原finding状态/既有mock局限/前序v8广泛检查依赖，不虚构本方重跑。若实证不足可以block不可代签。文件原byte保持，结束不能Markdown长导语，必须仅合法JSON保证完成，minor不等零缺陷。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "objective-result",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-c",
+        "import json,sys;from pathlib import Path;sys.path.insert(0,'taskflows');import p3_revision_guard as g;t=json.loads(Path('docs/验证/开发/p3-001/revision-r2/reviews-v9/technical/rv1-rv2-recheck.json').read_text(encoding='utf8'));a=json.load(sys.stdin);print(json.dumps(g.result({'technical':t,'adversarial':a}),ensure_ascii=False,indent=2))"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "adversarial-review"
+      ],
+      "input": "{steps.adversarial-review.json}",
+      "final": true
+    }
+  ]
+}

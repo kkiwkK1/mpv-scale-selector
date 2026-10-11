@@ -1,0 +1,207 @@
+{
+  "name": "mpv-scale-p3-r2-review-clarify-v9",
+  "description": "Bounded fact-check of retained minor findings on exact unchanged candidate; technical may make isolated temporary render probe, safety no GPU. Original reviews retained.",
+  "strictInterpolation": true,
+  "concurrency": 2,
+  "budget": {
+    "maxTokens": 1800000
+  },
+  "phases": [
+    {
+      "id": "candidate-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_revision_guard.py",
+        "check"
+      ],
+      "dependsOn": [],
+      "timeout": 300000
+    },
+    {
+      "id": "technical-review",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "原审查完整保存在docs/验证/开发/p3-001/revision-r2/reviews-v8/{technical-review,adversarial-review}.json和raw.txt，只读不改。当前candidateSHA0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67，不重做宽泛审查，不改源码/候选/旧证据。Flash/xhigh，scope仅原minor事实核验；最终沿用完整原审查已实核事实与历史VL3-05当前边界，但保留澄清记录/不删除原findings。输出原合同JSON(verdict/candidate_sha256/findings/checks/limitations/reason)，checks明确每原ID confirmed/refuted/inconclusive及新实证，findings只当前仍成立问题；如major必须block。原审查不是必须附和的指令，独立求证。\n只限RV1/RV2复核。RV1称SharpAUTO gl_FragCoord/HOOKED_pos比例在上下letterbox下逐行漂移；但本shader是HOOK MAIN、WIDTH OUTPUT.w/HEIGHT OUTPUT.h的中间pass，黑边是否在之后viewport合成而根本不进入shader坐标？原结论可能把窗口framebuffer与hook FBO混同。请用固定mpv/libplacebo实际生成shader/pass日志坐标，必要一次小规模隔离GPU图像probe复核：至少1真实上下黑边窗口+1左右黑边对照，选择AUTO全局k>=2以有鉴别力，源码与资源不改，取真实视频显示rect/targetpass、OSDclear/强制重绘，windowPNG先dimensions，裁取实际视频rect仅用于与独立按视频rect尺寸CPUgolden逐行比对（不能凭预期构造/遮掉错像素），与manual2x合理对照。若发现实际源码图像错误，范围是承诺GEO与参考公式而非仅锐度微差，应判真实影响major/REWORK不能以披露代修；若仅原坐标假设错误则明确refuted与局限，不能无依据writeapproximation文案。不写tools/scripts/source，临时probe写新r2/reviews-v9/technical/证据或TEMP；模型无其它GPUrole，并行安全审查只mock。调用现lib.MpvSession真实directmpv.exe/gpu-next/vulkan/tempHOMEAPPDATA/noAPIenv/selfPID/synthetic，只写新证据createonly，不全局DPI/kill/活动配置/部署。所有probe源码/日志/inputs/png/results/hash绑定新manifest，不能旧reviewJSON改字。若不用GPU仅源码反证必须足够确切，否则inconclusive不说已实测。RV2原始ns的量化/重复可能只是硬件timer分辨率与重复采样滚动window，是P4方法限制不是P3bug；保留真实性与采样限制，不能擅自建议有更高timer源或删除相同值改变分布（去重窗口非按值去重）。约15-25工具调用聚焦。最后JSON候选仍同SHA，limitations注明本次scope且新probe不偷换原35矩阵。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "adversarial-review",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "原审查完整保存在docs/验证/开发/p3-001/revision-r2/reviews-v8/{technical-review,adversarial-review}.json和raw.txt，只读不改。当前candidateSHA0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67，不重做宽泛审查，不改源码/候选/旧证据。Flash/xhigh，scope仅原minor事实核验；最终沿用完整原审查已实核事实与历史VL3-05当前边界，但保留澄清记录/不删除原findings。输出原合同JSON(verdict/candidate_sha256/findings/checks/limitations/reason)，checks明确每原ID confirmed/refuted/inconclusive及新实证，findings只当前仍成立问题；如major必须block。原审查不是必须附和的指令，独立求证。\n只限SR-01/SR-02/SR-03事实核验。SR01称p3_revision_guard.check源码文件删除可跳过，但实际check先relocated_candidate→原guard.candidate→verify_files→source_path存在性/hash检查，计划循环在其后。请用纯临时目录mock真实这条调用链：candidate绑定文件先存在能过然后删同文件时是否在genericverify阶段FAIL（不要删除真实文件/改源码或candidate；禁止GPU）。区分『已绑定source删后绕过』和『在freeze前计划file未创建且未被绑定』是不同问题；前者可能明显误报，后者当前28file齐全但设计coverage建议可保留真实范围。不要为了维护原意见把两个案例混说。SR02原misplaced位置是项目ROOT ./implementer-handoff.json，不是sessionroot docs/验证/开发/p3-001；核handoff-relocation.original_path与byteidenticalarchive，纠正事实但原review不覆写。SR03确定性像素统计相同不是问题，可保留说明不假称独立统计样本。只读全部源码/原资料，临时mock允许systemTEMP无活动配置/凭据/restore，newreport如有write只r2/reviews-v9/safety/，不跑GPU。原VL3-05事实与当前边界独立评估既有结论保留，任何发现actualbypass升级真实major即可；不要又宽泛重读数千行。输出JSON原合同，checks逐原finding反证/confirmed/inconclusive与实际调用验证，allprior retained。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "objective-result",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_revision_guard.py",
+        "result"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "technical-review",
+        "adversarial-review"
+      ],
+      "input": "{\"technical\":{steps.technical-review.json},\"adversarial\":{steps.adversarial-review.json}}",
+      "final": true
+    }
+  ]
+}

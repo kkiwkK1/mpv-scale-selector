@@ -1,0 +1,290 @@
+{
+  "name": "mpv-scale-p2-continue-v1",
+  "description": "Bounded completion of retained partial P2 source after provider connection failure; original planning and authorization retained, no blind writer replay.",
+  "strictInterpolation": true,
+  "concurrency": 2,
+  "budget": {
+    "maxTokens": 5000000
+  },
+  "phases": [
+    {
+      "id": "plan-check",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p2_guard.py",
+        "plan-check"
+      ],
+      "timeout": 120000
+    },
+    {
+      "id": "implement",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "plan-check"
+      ],
+      "task": "你是P2唯一源码接续实施者，不是重放旧已失败写者。完整读取docs/P2中断接续brief-v1.json（最新权威纠正/约束），结合冻结的docs/P2实施计划.json。当前部分源/assets指纹在docs/P2部分写入快照-v1.json：原作者80工具回合后provider Connection error，已写入26文件，121单测5失败2错误，尚无真实回归工具/报告/候选。在现有工作区继续，不重做前3阶段、不重复copy/规划/许可生成，不重跑已通过但因PLAN存在拒绝的preflight；只读plan-check已通过。特别按最新brief纠正单主链首次接管（已有baseline Anime4K必须整property替换，Off仅在整property仍owned且等于last_written时恢复，external后保留用户完整链，不能只去掉路径字符串，原草稿保存user-external再append是错的），真实窗口像素/字段一致与10bit媒体半长度、PPM错误断言等已知7fail/err同根因一起修；不得删测试降门槛。保留原91项，用明确兼容模式验证旧测试桩，正常P2注册profiles用正确整链ownership。不改变stock Shader字节/原ports算法/许可，hash与适配说明更新与真实内容对应。完成tools/p2_verify.py与所有24必测ID含正面/负面/clip-resize-paused陈旧验证；真执行每档actual pass/输出尺寸/WHEN/最大2倍、stock六模式与直接CTRL链、Nearest三核、YUV8/10bit、RGB/HDR守卫（synthetic metadata override明示）、资源/编译/PARAM失败，无真实结果不给PASS。单主链原始已有Anime基线的首次选择和Off恢复必须真实测。RGB/HDR未知/idle不能报伪active；窗口目标从video-out-params+osd显示矩形而不是dw/dh自当窗口。只修改冻结计划允许源码路径及此前部分源，并补缺新P2说明；原40准备研究/671旧证据、旧taskflows/P2guard/授权/基线/规划/阶段源码归档不变。不写APPDATA/mpv、D:/MPV、备份payload，不安装/不提交、不改全局DPI；HOME/APPDATA/cache等tmp、env无凭据、自有测试PID不全局kill。作者自测new p2-001/implementer目录，失败轮留档另选新目录，所有原始产物console/log/IPC/media/sourceSHA全绑定，create-only，不作性能/画质收益宣称，真人偏好pending。产物完整后作者写自测交接报告，最后简短changed/checks/limitations文字即可；不能说已独立验收。"
+    },
+    {
+      "id": "unit-tests",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "dependsOn": [
+        "implement"
+      ],
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "timeout": 300000
+    },
+    {
+      "id": "freeze",
+      "type": "agent",
+      "agent": "test-engineer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "unit-tests"
+      ],
+      "task": "你是P2唯一集成验证/冻结负责人，独立于源码作者。计划docs/P2实施计划.json，授权docs/执行授权-P2.json；读取作者p2-001/implementer自测报告、源码/新资源清单，原P1归档与证据只读。源码/规划/flow/guard不可修改，发现bug保留实证并FAIL交作者，不边改边验。执行全部现有+新增单测并留原始stdout/stderr；独立跑P2真实gpu-next/vulkan回归，必须新的p2-001/verify-lead/，按计划23+必测ID全部有证据、variants合并每ID一条。重点实际FSR EASU+RCAS两pass与4/3输出/最大2倍边界、SGSR单LUMA与PARAM/gather/夹值、stock完整未改链与CTRL绑定等价、Nearest各比例核/cscale、8/10bit、RGB/HDR拒绝/回退、WHEN跳过、编译失败无残留、单主链无Anime叠加、Off/external不陈旧覆写、视频/窗口变化守卫/陈旧vo-passes、快切（一秒内真实切换）退出、禁用身份。固定原高质量ewa_lanczossharp基线，不能把Bicubic自测冒充现网基线；缩放目标来自video-out-params与实际OSD显示矩形，记录actual pass输入/输出尺寸，不把window screenshot尺寸当中间输出纹理尺寸。测试只合成/隔离env、自有PID不读取凭据/原媒体，HDR覆盖选项测试要标metadata override非编码HDR。无实际结果不许PASS，P4画质/性能/RIFE真实共存不在P2；机器可做的功能不推给用户，真人观感和全局DPI/跨屏实操保持pending/明确范围。创建新的tests.json和candidate.json于p2-001（UTF8/LF/create-only）：tests={stage:P2,session:p2-001,status:PASS或FAIL,required_unmeasured:[],live_configuration_written:false,pending_user_checks:[],cases:[每必测ID唯一,status,evidence,evidence_files(规范项目相对POSIX路径),command,variants]};所有客观必测必须PASS，缺失列required_unmeasured，不偷改计划。保留原P1-UC未验收说明，可新增P2用户检查但不得user_approved。candidate={schema:mpv-scaler-stage/v1,stage:P2,session:p2-001,files:{全部源码/共享模块/测试/shader/参数/资源源hash与许可/文档:SHA256},tests_sha256:SHA(tests)}。evidence_manifest数组绑定所有使用的清单（包括单测输出/集成报告/所有日志截图/负例结果，无tests/candidate循环自指）；利用已有p1_check_evidence.py --stage P2检查完整链，或纳入新的P2checker。旧P1所有文件和40研究准备SHA必须保持。若作者CLI收集漏console须明确finding，只有完整联合集才可通过，不重写旧已生成清单。冻结后源/证据不再变；最终简短候选路径/hash/真实总数与limitations即可，不必大JSON输出，不等待人工审批。\n接续brief docs/P2中断接续brief-v1.json是最新单主链约束（首次接管已有Anime必须整property替换，不能保留原链再append），核对接续者是否修完7个draftfail且未删91原测试。不要复跑旧preflight（PLAN已存在），保全由P2guard完成。"
+    },
+    {
+      "id": "candidate-check",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p2_guard.py",
+        "check"
+      ],
+      "timeout": 120000,
+      "dependsOn": [
+        "freeze"
+      ]
+    },
+    {
+      "id": "technical",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "独立只读P2审核：技术真实性/算法pass与测试矩阵。机器绑定：{steps.candidate-check.output}（仅简短hash）；权威计划docs/P2实施计划.json，fixed candidate docs/验证/开发/p2-001/candidate.json、tests.json、verify-lead报告/原始证据。核对全部源/第三方shader/许可哈希和证据清单，以及新P2源相对于docs/阶段源码快照/p1-002/差异，不只看作者结论。重点P2全部23+ID的actual pass/输出/WHEN/8-10bit/RGB-HDR守卫/编译失败/单主链与stock零改动/Off与external边界，禁止只用path/pass总数量猜算法、旧frame vo-passes陈旧、阈值不符合2倍、将mock/metadataOverride误称编码片实测；Nearest核策略、原高质量基线、stock CTRL1..6真实对照与许可。P1旧major与三minor的变化附近回归，不能重做整份研究；不将暂无真人偏好确认列为启动阻断，用户明确授权P2但不是主观评分/部署。不得改源/报告/配置、不启动GPU测试（真实数据由单一集成者采），可-B临时合成/只读机器checker。不要读另一审核者结论，两角色同一GLM但独立上下文。保留所有findings并按最高实际严重性判，真实blocker/major verdict=block。只输出JSON对象（不加围栏，不把字符串变对象）：{verdict:pass或block,candidate_sha256:机器固定SHA,findings:[{id,severity:blocker或major或minor,file:相对路径与行号,issue:实际根因/重现,fix:限域修正}],checks:[],limitations:[],reason:字符串}。\n同时读取docs/P2中断接续brief-v1.json。它澄清原计划method6歧义：首次接管baseline已有原Anime不得append，注册P2profiles整propertyownership、external后保留用户整链（含同名重新添加项），不能套P1路径字符串元素删除。检查真实首次baseline Anime→FSR/SGSR/Nearest与Off证据。",
+      "retry": {
+        "max": 2,
+        "backoffMs": 0
+      },
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "safety",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "timeout": 7200000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "独立只读P2审核：安全/集成/ownership与证据边界。机器绑定：{steps.candidate-check.output}（仅简短hash）；权威计划docs/P2实施计划.json，fixed candidate docs/验证/开发/p2-001/candidate.json、tests.json、verify-lead报告/原始证据。核对全部源/第三方shader/许可哈希和证据清单，以及新P2源相对于docs/阶段源码快照/p1-002/差异，不只看作者结论。重点P2全部23+ID的actual pass/输出/WHEN/8-10bit/RGB-HDR守卫/编译失败/单主链与stock零改动/Off与external边界，禁止只用path/pass总数量猜算法、旧frame vo-passes陈旧、阈值不符合2倍、将mock/metadataOverride误称编码片实测；Nearest核策略、原高质量基线、stock CTRL1..6真实对照与许可。P1旧major与三minor的变化附近回归，不能重做整份研究；不将暂无真人偏好确认列为启动阻断，用户明确授权P2但不是主观评分/部署。不得改源/报告/配置、不启动GPU测试（真实数据由单一集成者采），可-B临时合成/只读机器checker。不要读另一审核者结论，两角色同一GLM但独立上下文。保留所有findings并按最高实际严重性判，真实blocker/major verdict=block。只输出JSON对象（不加围栏，不把字符串变对象）：{verdict:pass或block,candidate_sha256:机器固定SHA,findings:[{id,severity:blocker或major或minor,file:相对路径与行号,issue:实际根因/重现,fix:限域修正}],checks:[],limitations:[],reason:字符串}。\n同时读取docs/P2中断接续brief-v1.json。它澄清原计划method6歧义：首次接管baseline已有原Anime不得append，注册P2profiles整propertyownership、external后保留用户整链（含同名重新添加项），不能套P1路径字符串元素删除。检查真实首次baseline Anime→FSR/SGSR/Nearest与Off证据。",
+      "retry": {
+        "max": 2,
+        "backoffMs": 0
+      },
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "objective-result",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p2_guard.py",
+        "result"
+      ],
+      "timeout": 120000,
+      "dependsOn": [
+        "technical",
+        "safety"
+      ],
+      "final": true,
+      "input": "{\"technical\":{steps.technical.json},\"safety\":{steps.safety.json}}"
+    }
+  ]
+}
