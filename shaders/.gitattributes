@@ -1,0 +1,2 @@
+# Preserve stock shader identity, including original CRLF bytes.
+*.glsl -text -whitespace
