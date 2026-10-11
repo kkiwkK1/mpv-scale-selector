@@ -1,0 +1,30 @@
+{
+  "schema": "mpv-scaler-recovery-brief/v1",
+  "stage": "P2",
+  "session": "p2-001",
+  "source_run": "mpv-scale-p2-auto-mus069a8-fd50fa",
+  "reason": "实施者在第80个工具回合后provider Connection error；已产生部分写入，不能盲目resume非幂等写者。规划与前置检查已完成；下游尚未运行。",
+  "authority": "继续开发P2 + 先前不用等待再次确认的明确用户授权；沿用zai-coding-cn/glm-5.3-flash/xhigh。",
+  "scope": "在已有部分实现上收敛P2，不重做规划/复制shader/改写旧记录。依docs/P2实施计划.json，但下列全局约束澄清优先于该计划methods中的歧义。",
+  "critical_decisions": [
+    "一次一条主缩放链包括首次接管：off状态下glsl-shaders若已有原Anime4K链，显式选择FSR/SGSR/Nearest应先快照并整property替换到新登记recipe（Nearest空shader列表），不把FSR append到原链。已有chain不等于运行中external；runtime外部竞争才yield。Off只在glsl-shaders仍等于last_written且仍owned时恢复原完整baseline；external修改该整property后保留外部完整列表，不能凭路径字符串删除用户重新添加的同名条目。P1测试桩的历史元素级语义可保留为明确兼容测试模式，不应套用于P2注册整主链。此条替代计划methods[6]“只替换自有链、保留外部baseline后追加”的歧义和test_p2_support中保留user-external.glsl叠新主链的草稿期待。",
+    "video-out-params.dw/dh是显示比例参数，不是当前窗口输出像素，不能用于WHEN；实际输出矩形依据osd-dimensions及letterbox/rotation/SAR，读回真实pass纹理目标。Python mirror与Lua字段名必须一致（pixelformat），unknown/idle不得假报算法已active，真实pass识别也不能只看计数。",
+    "保持冻结计划/授权/基线/旧taskflows和671个旧证据字节；不要重复p2_guard preflight（已有PLAN因此会拒绝，正确前检已通过），使用plan-check/保全核验继续。作者自测用全新p2-001/implementer/，如果失败则保留失败轮并另选新目录，不把半成品声明PASS。"
+  ],
+  "observed_local_failures": {
+    "command": "python -B -X utf8 -m unittest discover -s tests -v",
+    "result": "121 tests，5 failures + 2 errors；原91项未丢弃。下列是中断时部分写入的实证，不是审查PASS。",
+    "raw_output": "C:/Users/kkiw/AppData/Local/Temp/mpv-p2-execution/interruption-unit-tests.txt",
+    "roots": [
+      "tools/p2_lib.py的RGB guard用pixfmt，tests/Lua已迁移pixelformat；返回None而非拒绝原因。",
+      "ANIME4K_MODE_KEYWORDS mirror尚未定义，tests已引用；不能凭泛化stock计数推断方法实际pass。",
+      "upscale_ratio还用dw/dh，tests要求真实window pixel字段osd_w/osd_h。",
+      "10bit y4m一行生成仅半长度：8个16bit元素却按16像素块计repeat，帧总bytes错误；修正并用真实mpv记录实际pixelformat验证。",
+      "PPM测试草稿错误地要求payload为空，与其下一个尺寸断言矛盾；应核payload长度/像素范围/sha而不是删掉整个测试。",
+      "SGSR DEFINE参数最大值合法原文为1而非1.0；修正断言接受等值整数表示，勿为过测试改动真实原算法或许可。"
+    ]
+  },
+  "unfinished": "尚无tools/p2_verify.py和P2真实自测报告，也没有tests.json/candidate.json；控制器/资源/lib与新tests草稿已在工作区。完成能力探针、所有24必测ID真实回归、P1兼容回归、新说明和交接后再由独立负责人冻结。",
+  "checks": "保留原91单测，扩展/修正合理P2断言而非绕过；编译/PARAM失败要实测、Nearest三核明确、RGB/HDR守卫与resize/loadfile/paused旧vo-passes无陈旧状态，Stock模式a..f完整链零改且与绑定对照，资源许可/独立hash全固定。P2 HDR样本metadata override必须明示，不宣称编码HDR/画质/性能/RIFE共存。",
+  "safety": "固定gpu-next/vulkan、合成源、临时HOME/APPDATA/cache、无凭据env、自有测试PID，零活动配置/备份写入，日志证据create-only，新会话指纹绑定。最终仅客观结论，用户体验仍pending。"
+}

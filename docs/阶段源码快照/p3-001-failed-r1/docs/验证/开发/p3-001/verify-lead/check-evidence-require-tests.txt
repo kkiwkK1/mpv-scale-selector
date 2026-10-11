@@ -1,0 +1,17 @@
+{
+  "status": "FAIL",
+  "session": "p3-001",
+  "evidence_dir": "integration-r1",
+  "manifest": "D:\\workspace\\小项目\\mpv插件\\缩放插件\\docs\\验证\\开发\\p3-001\\verify-lead\\integration-r1\\evidence-manifest.json",
+  "results": "D:\\workspace\\小项目\\mpv插件\\缩放插件\\docs\\验证\\开发\\p3-001\\verify-lead\\integration-r1\\objective-results.json",
+  "excluded_from_manifest": [
+    "evidence-gate.json",
+    "evidence-manifest.json",
+    "manifest-verify.json",
+    "runner.console.txt"
+  ],
+  "gate_written": "D:\\workspace\\小项目\\mpv插件\\缩放插件\\docs\\验证\\开发\\p3-001\\verify-lead\\integration-r1\\evidence-gate.json",
+  "problems": [
+    "必需测试非 PASS: GEO-03 ('FAIL')"
+  ]
+}

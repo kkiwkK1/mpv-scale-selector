@@ -1,0 +1,2 @@
+# Frozen source snapshots are byte evidence, not newline-normalized copies.
+** -text -whitespace

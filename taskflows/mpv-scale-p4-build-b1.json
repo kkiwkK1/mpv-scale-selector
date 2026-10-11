@@ -1,0 +1,151 @@
+{
+  "name": "mpv-scale-p4-build-b1",
+  "description": "P4 pure measurement tooling in three serial single-writer units; independent machine gates preserve frozen P3 and approved plan. No GPU or production permission.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 3000000
+  },
+  "phases": [
+    {
+      "id": "permit",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "permit-check"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "write-lib",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "cache": {
+        "scope": "off"
+      },
+      "idempotent": false,
+      "dependsOn": [
+        "permit"
+      ],
+      "task": "P4 B1 lib单一纯工具写者，指定Flash/xhigh。完整读docs/P4/P4-B1纯工具实现brief.md以及其中绑定的批准plan/method，按W1a范围实现。前置机器门已过，禁止重复已完成写者、禁止GPU/mpv/VS/原runtime运行、禁止改old5715/product/旧test/plan/guard/前序unit源。已知工作区所有P1-P4未提交baseline不是可删dirty。你只写brief的本unit具体新tools/tests，create-only本unitbuild证据；源码首次create后局部edit可，handoff/log保原字节。依赖前序hand-off API须实读，有契约矛盾返回REWORK不跨域改源。不要工具泛探索；45工具调用软上限做小单元完成，必要尽早讲明缺口，不把TODO当BUILT。使用Python3.9标准库和tempfilemock tests，默认运行无外部副作用。先明确库函数接口再实现测试反例。tests应真实invoke你代码的拒绝逻辑，不测试自己手设bool。完成后本地unit tests，原stdout/stderr放新console文件并sourcehash/API一起写brief格式handoff.json。unit字段必须lib。交接tests.console_path仓库相对hash实算，returncode整数0。实际新源码集合必须exact等于brief本单元2或3文件(不加helper绕scope)。只有写者是你，后续独立gate会重新run新增全部tests并全baseline检查，再许可下单元。最后简述hand-off路径/sourceSHA/实跑case数/限制，别声称P4完成或校准通过。"
+    },
+    {
+      "id": "check-lib",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_build_gate.py",
+        "lib"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "write-lib"
+      ]
+    },
+    {
+      "id": "write-analyze",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "cache": {
+        "scope": "off"
+      },
+      "idempotent": false,
+      "dependsOn": [
+        "check-lib"
+      ],
+      "task": "P4 B1 analyze单一纯工具写者，指定Flash/xhigh。完整读docs/P4/P4-B1纯工具实现brief.md以及其中绑定的批准plan/method，按W1b范围实现。前置机器门已过，禁止重复已完成写者、禁止GPU/mpv/VS/原runtime运行、禁止改old5715/product/旧test/plan/guard/前序unit源。已知工作区所有P1-P4未提交baseline不是可删dirty。你只写brief的本unit具体新tools/tests，create-only本unitbuild证据；源码首次create后局部edit可，handoff/log保原字节。依赖前序hand-off API须实读，有契约矛盾返回REWORK不跨域改源。不要工具泛探索；45工具调用软上限做小单元完成，必要尽早讲明缺口，不把TODO当BUILT。使用Python3.9标准库和tempfilemock tests，默认运行无外部副作用。先明确库函数接口再实现测试反例。tests应真实invoke你代码的拒绝逻辑，不测试自己手设bool。完成后本地unit tests，原stdout/stderr放新console文件并sourcehash/API一起写brief格式handoff.json。unit字段必须analyze。交接tests.console_path仓库相对hash实算，returncode整数0。实际新源码集合必须exact等于brief本单元2或3文件(不加helper绕scope)。只有写者是你，后续独立gate会重新run新增全部tests并全baseline检查，再许可下单元。最后简述hand-off路径/sourceSHA/实跑case数/限制，别声称P4完成或校准通过。"
+    },
+    {
+      "id": "check-analyze",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_build_gate.py",
+        "analyze"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "write-analyze"
+      ]
+    },
+    {
+      "id": "write-evidence",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "cache": {
+        "scope": "off"
+      },
+      "idempotent": false,
+      "dependsOn": [
+        "check-analyze"
+      ],
+      "task": "P4 B1 evidence单一纯工具写者，指定Flash/xhigh。完整读docs/P4/P4-B1纯工具实现brief.md以及其中绑定的批准plan/method，按W1c范围实现。前置机器门已过，禁止重复已完成写者、禁止GPU/mpv/VS/原runtime运行、禁止改old5715/product/旧test/plan/guard/前序unit源。已知工作区所有P1-P4未提交baseline不是可删dirty。你只写brief的本unit具体新tools/tests，create-only本unitbuild证据；源码首次create后局部edit可，handoff/log保原字节。依赖前序hand-off API须实读，有契约矛盾返回REWORK不跨域改源。不要工具泛探索；45工具调用软上限做小单元完成，必要尽早讲明缺口，不把TODO当BUILT。使用Python3.9标准库和tempfilemock tests，默认运行无外部副作用。先明确库函数接口再实现测试反例。tests应真实invoke你代码的拒绝逻辑，不测试自己手设bool。完成后本地unit tests，原stdout/stderr放新console文件并sourcehash/API一起写brief格式handoff.json。unit字段必须evidence。交接tests.console_path仓库相对hash实算，returncode整数0。实际新源码集合必须exact等于brief本单元2或3文件(不加helper绕scope)。只有写者是你，后续独立gate会重新run新增全部tests并全baseline检查，再许可下单元。最后简述hand-off路径/sourceSHA/实跑case数/限制，别声称P4完成或校准通过。"
+    },
+    {
+      "id": "check-evidence",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_build_gate.py",
+        "evidence",
+        "--full"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "write-evidence"
+      ],
+      "final": true
+    }
+  ]
+}

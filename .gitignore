@@ -13,6 +13,13 @@ __pycache__/
 /test-output/
 *.log
 
+# Per-session verification evidence tree (docs/验证/开发/) is deliberately NOT
+# committed: *.log above already excludes playback logs; the whole directory
+# below stays on disk, archived off-repo per session. This is a revocable
+# default decision — policy and disposal records live in
+#   docs/验证/证据留存策略.md
+/docs/验证/开发/
+
 # Earlier interrupted research scratch files (preserved on disk, not baseline sources)
 /agy.json
 /agy1.json

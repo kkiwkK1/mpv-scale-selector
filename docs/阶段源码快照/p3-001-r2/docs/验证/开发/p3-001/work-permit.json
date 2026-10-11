@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "stage": "P3",
+  "plan_sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d",
+  "required_objective_tests": 35,
+  "authorization_source": "explicit_user_chat",
+  "session": "p3-001",
+  "permission": "isolated-P3-work-only",
+  "plan_review_sha256": "b1abaffa8bd9bd4db54f34f78a223d13768102b5b9b9e2717036f4162b423440",
+  "baseline_sha256": "f4d849b83e15d03fb3d9463a229a6f0002124ca5e8c8369f73d6d32ff81acee1",
+  "authorization_sha256": "935e7f12ab6b92495c16e878405a950c1686b1a4a86e5b5fb043c17dfc2fb3d8",
+  "human_subjective_acceptance_claimed": false,
+  "live_configuration_write_allowed": false
+}

@@ -1,0 +1,224 @@
+{
+  "name": "mpv-scale-p4-b1-rework-v2",
+  "description": "Scoped repair of frozen B1 negative-probe findings, serial analysis/evidence writers, independent full regression and same-candidate recheck; no GPU.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 3500000
+  },
+  "phases": [
+    {
+      "id": "preserved",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b1_rework_gate.py",
+        "pre"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "repair-analysis",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 5400000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "preserved"
+      ],
+      "task": "P4 B1 r2 analysis单一修复写者，Flash/xhigh。完整read docs/P4/P4-B1限域修正brief-v2.md，原review与原brief必要接口段，严格仅本analysis段4或3file写域。原B1各测试已绿但实反例block，必须真实修，不删原测试或只改期望凑过。旧23source已经归档，old5715/计划/许可/guard/oldhandoff/证据不可变，只有本单元新P4源可改。禁止mpv/GPU/VS/全媒体生成。tests tempfile内无凭据。所有修正F1..9/LF10..11按unit分工，尤其samples=array,count=int不能继续把错误mock当原生API；F5原建议混淆dw/dh已纠正，以source有效尺寸vs窗口/actualmargins rect独立验证；原productionlock保持拒。analysis只改lib/analyze及2tests，evidence仅checker/verify/testevidence且先读analysis新API_delta。不越域修前序；不兼容先报准确REWORK。注意取得合理独立样本资格不可只靠有字段，每个关键反例真invoke门。采样slot±.25sec和源frameidentity契约按brief，统计不得插值填补、不能重新发明ms余量。60calls软cap小单元可交接不谎称完工。完成后实际unit tests(analysis只两套，evidence全部tests及48guard)，全部console createonly对应build-b1-r2/analysis/，handoff格式是tests数组、exact source_hashes、planSHA、unit=analysis、status=BUILT/REWORK、gpu_started=false、live_configuration_written=false；APIdelta说清后续collector如何合法填写raw，以及尚未真实探测的部分。不要写任何最终验收JSON/P4PASS。"
+    },
+    {
+      "id": "analysis-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b1_rework_gate.py",
+        "analysis"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "repair-analysis"
+      ]
+    },
+    {
+      "id": "repair-evidence",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 5400000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "analysis-check"
+      ],
+      "task": "P4 B1 r2 evidence单一修复写者，Flash/xhigh。完整read docs/P4/P4-B1限域修正brief-v2.md，原review与原brief必要接口段，严格仅本evidence段4或3file写域。原B1各测试已绿但实反例block，必须真实修，不删原测试或只改期望凑过。旧23source已经归档，old5715/计划/许可/guard/oldhandoff/证据不可变，只有本单元新P4源可改。禁止mpv/GPU/VS/全媒体生成。tests tempfile内无凭据。所有修正F1..9/LF10..11按unit分工，尤其samples=array,count=int不能继续把错误mock当原生API；F5原建议混淆dw/dh已纠正，以source有效尺寸vs窗口/actualmargins rect独立验证；原productionlock保持拒。analysis只改lib/analyze及2tests，evidence仅checker/verify/testevidence且先读analysis新API_delta。不越域修前序；不兼容先报准确REWORK。注意取得合理独立样本资格不可只靠有字段，每个关键反例真invoke门。采样slot±.25sec和源frameidentity契约按brief，统计不得插值填补、不能重新发明ms余量。60calls软cap小单元可交接不谎称完工。完成后实际unit tests(analysis只两套，evidence全部tests及48guard)，全部console createonly对应build-b1-r2/evidence/，handoff格式是tests数组、exact source_hashes、planSHA、unit=evidence、status=BUILT/REWORK、gpu_started=false、live_configuration_written=false；APIdelta说清后续collector如何合法填写raw，以及尚未真实探测的部分。不要写任何最终验收JSON/P4PASS。"
+    },
+    {
+      "id": "full-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b1_rework_gate.py",
+        "evidence"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "repair-evidence"
+      ]
+    },
+    {
+      "id": "freeze",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b1_rework_gate.py",
+        "freeze"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "full-check"
+      ]
+    },
+    {
+      "id": "recheck",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "独立P4 B1 r2限域复审，固定Flash/xhigh，只读+TEMP mock，无GPU/mpv/VS。输入新固定candidate {steps.freeze.output}。完整读docs/P4/P4-B1限域修正brief-v2.md和old build-b1/independent-tooling-review.json，定位新7源的F1..9与新增samples-array(LF10)/同名pass索引(LF11)。新candidate build-b1-r2/candidate.json文件sha必须相符；独立机器全回归已过，不重复5715hash。逐项用真实API负例确认空fresh不能0ms实测、裸trial不能PASS、真实rejected_by_analysis list留迹、10slot墙钟锚/容差、source/window/actualrect/framecrosscheck、RIFE4垃圾字段和missingfps不能有效；raw samples数组/count/duplicatepassordinal保留，所有raw/stat/hash图闭合。F5请勿重复旧错误：video_out_params.dw/dh是effective源尺寸非窗口target，osd实际margins单独决定displayrect，合法G2window2560×1440+video1920×1080黑边必须过。公开stage入口不能绕过已有严格helper；缺候选/依赖有明确NOT_RUN/BLOCKED。恒production拒不是本轮缺陷，后续解锁新许可修订。新tests是否真的触发门(非自行造bool)，边界不足则具体major，不把未来GPU未做当失败。最多40calls，只复核相关根因与相邻边界，不宽泛产品审计。最终JSON verdict pass|block,candidate_sha256实际实算,findings[id/severity/file/issue/fix],checks[],limitations[],reason。结论仅工具构建专项，绝非校准/production/P4PASS。",
+      "dependsOn": [
+        "freeze"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "candidate_sha256": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "record-review",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b1_rework_gate.py",
+        "record"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "recheck"
+      ],
+      "input": "{steps.recheck.json}",
+      "final": true
+    }
+  ]
+}

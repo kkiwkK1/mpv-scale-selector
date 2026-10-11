@@ -1,0 +1,12 @@
+{
+  "stage": "P3",
+  "session": "p3-001",
+  "revision": "r2",
+  "source_run": "mpv-scale-p3-revision-r2-muw0t7cs-5bb5d5",
+  "error": "fix-freshness Connection error after63toolturns; lowerstages skipped, no completedhandoff",
+  "partial_source": "docs/验证/开发/p3-001/revision-r2/partial-fix-v5/sourcehash.json + source-snapshot 4files",
+  "leader_check": "afterproviderexit no subagent/mpv remaining. p3_revision_guard preserved PASS2440 files. Leader unit282 tests PASS(skipped1Windowsprivilegeexisting), original270 behavior notdeleted/weakened; interruption-unit-r2.txt boundasactualcheck. local-fix/geo03-fresh-1 actualGEO03 PASS, first3checksrequirement still two rawruns pending.",
+  "scope": "NO more source writer replay. Fresh source-readonly closeout role verify currentpartial sourcehash, finish remaining at least2fresh realGEO03 localruns and all originalproofconditions/counter-saturation/paused restoration. Source allstrictreadonly: no controller/libs/test/guard/flow edits, write only newr2evidence/report/implementer-handoff.json. If sourcebug found, reportREWORK not quietfix. Oldonepositive keepsexactbytes; newruns2/3orunusedfresh. Hand off READY_FOR_AUTHOR iff282+tests/currentrealRGBpixel_controlstep positive with no decoder/pngmetadata falsification andoriginal12negatives preserved, three rawruns true, allcounts andtime data honest. Then source-readonlyauthor35 and independent35/freeze/newcandidate dualtech+safety still mandatory.",
+  "authority": "Originalplan95920f… andpermit/session p3-001/explicitchat continuation unchanged. Priorbrief-v5 controlsVL3-01 andVL3-05. OriginalFAILEDrootcandidate/tests and old2440files unchanged. New proofnamespace revision-r2, no oldmanifests ascurrentpositive. Laterguards/sourcepins mustbind actualexecuted mpv-scale-p3-revision-r2-closeout-v6.json andthisbrief asdependencies alongside baseflow/revisionguard. No rewritingoldhashes oracceptance forgery.",
+  "safety": "Flash/xhigh allagents, read-onlycloseout beforefullsource-readonly author/integration; noGPUparallel, directmpv.exe gpu-next/vulkan/synthetic/noAPIenv/tmpHOMEAPPDATAcache/selfPID; zeroactiveconfigsDMPVbackup/globalKill/DPI/deployrestore/Gitwrites. Allhumanchecks stillpending andP4RIFE/perfclaims notmade."
+}

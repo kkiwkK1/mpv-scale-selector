@@ -1,0 +1,125 @@
+{
+  "name": "mpv-scale-p4-method-review-v1",
+  "description": "Continue after archived planner list/object contract mismatch. Representation only normalized; independent methodological review still required.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 2500000
+  },
+  "phases": [
+    {
+      "id": "plan-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "plan-check"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "plan-adversary",
+      "type": "agent",
+      "agent": "risk-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "P4实施前独立方法学+安全对抗审查（Flash/xhigh，同模型不同上下文）。只读docs/P4实施计划.json、P4执行约束与验收brief和环境勘察、P4启动基线/授权、p4_guard源码。检查公平同源同帧同rect同色彩RIFE状态/Integer不同有效尺寸是否分组/锐度数字不等价/defaultunchanged；stock零改/ewo基线真实；真实RIFEselectedmodel70/540p限额/原帧middle/VSclone加载缓存零原runtime写是否可实施；present帧时长来源真实可得与proxy限度；滚动vo sample重叠/独立run统计单位/环境观测开销/预热/温时钟污染/AB平衡seed/禁止启动墙钟和pass数冒GPU，预算可执行，无自然素材/PICscore未测不能全PASS。协议应支持不提升/负结果而非把快慢=代码PASS；人评分与部署没有授权，缺必需真实数据不得伪造就绪。\n规划前检 {steps.plan-check.output}。没有GPU/模型加载权限，不改plan/guard/oldfiles，只读+安全临时mock可。任何blocker/major输出block而不是私下改计划；原证据与环境未run项目明确NOT_RUN。不要空泛清单，发现具体设计漏洞指出字段/拟测例及修法。最终仅JSON verdict:pass|block,plan_sha256:实际算,findings:[{id,severity:blocker|major|minor,file,issue,fix}],checks:[],limitations:[],reason；强制合同，不Markdown长终报。约20-30定点工具回合内完成；无必要不重复hash5715大tree(leadergate已查)，真正审方案不是默认放行。",
+      "dependsOn": [
+        "plan-check"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "plan_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "plan_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "work-permit",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_guard.py",
+        "permit"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "plan-adversary"
+      ],
+      "input": "{steps.plan-adversary.json}",
+      "final": true
+    }
+  ]
+}

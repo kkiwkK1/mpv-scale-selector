@@ -1,0 +1,161 @@
+{
+  "schema": "p3-r2-author-delivery/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "revision": "r2",
+  "role": "author-verify (source-readonly), phase 1 of actually-executed taskflow mpv-scale-p3-revision-r2-integrate-v7",
+  "generated_at": "2026-10-06T11:10:00+0800",
+  "status": "PASS",
+  "status_scope": "author-side objective status only (all 35 required ids PASS on one fresh full matrix + full unit suite + machine gate 0 problems); integration freeze, independent full-35 integration and dual tech/safety review on the same candidate still mandatory downstream; ALL human/user checks remain pending and none are claimed",
+  "objective_evidence_dir": "docs/验证/开发/p3-001/revision-r2/author/full-r1",
+  "objective_evidence_new": true,
+  "objective_evidence_note": "fresh full-r1 created this session (author/ did not exist before); NOT assembled from any prior evidence; old implementer full-r1/full-r2 trees and the failed root candidate were never reused as positive proof",
+  "matrix": {
+    "command": "python -B -X utf8 tools/p3_verify.py --all --session p3-001 --evidence-dir docs/验证/开发/p3-001/revision-r2/author/full-r1",
+    "exit_code": 0,
+    "cases": 35,
+    "failures": 0,
+    "statuses": "all 35 PASS (CTL-01..09, EVI-01, GEO-01..07, PER-04-COMPUTE, PIC-05, SHD-01..13, UNIT-P2-01, UNIT-P3-01, WINDOW-01)",
+    "required_unmeasured": [],
+    "runner_console": "docs/验证/开发/p3-001/revision-r2/author/full-r1/runner.console.txt",
+    "runner_stdout_capture": "docs/验证/开发/p3-001/revision-r2/author/full-r1.runner-stdout.console.txt",
+    "objective_results_sha256": "d2b5041425bfd3f1c5088374f6c30b5b60ee97d6e6d3bb1040474e5aaab81769",
+    "evidence_manifest_sha256": "a17802f3f8ac87c5dd75ef4d73fbd763724cfaf7d3d8ea40d734d9b59abc17a1",
+    "manifest_verify_sha256": "5deda6897dd0d7e8e228a7a3aeab4356b72338506c5b3d6a827bce36bd313594",
+    "evidence_gate_sha256": "d5ec69ce88f5c2e530c5bb85face90ff7c443335d04a8eccc8667a8da57406e9",
+    "manifest_bound_files": 403,
+    "source_pins_sha256": "f20b253e2c0b14efe8f86b09cdc025d329db201b67abee918298a264f0d892b4"
+  },
+  "gate": {
+    "command": "python -B -X utf8 tools/p3_check_evidence.py --evidence-dir docs/验证/开发/p3-001/revision-r2/author/full-r1 --session p3-001 --require-tests --write-gate",
+    "exit_code": 0,
+    "status": "PASS",
+    "problems": [],
+    "console_capture": "docs/验证/开发/p3-001/revision-r2/author/full-r1.gate.console.txt",
+    "full_tree_coverage": "403 files bound; closed exclusion class only (evidence-manifest.json / manifest-verify.json / evidence-gate.json / runner.console.txt)",
+    "raw_triplet_per_case": "console.txt + mpv.log + mpv.transcript.jsonl collected per case and manifest-bound",
+    "inputs_and_source_hashes": "per-case *.inputs.json bound; source-pins.json pins harness source sha256s"
+  },
+  "unit_suite": {
+    "command": "python -X utf8 -m unittest discover -s tests -p \"test_*.py\" -v",
+    "exit_code": 0,
+    "result": "Ran 282 tests in 117.135s — OK (skipped=1)",
+    "log": "docs/验证/开发/p3-001/revision-r2/author/unit-r1.console.txt",
+    "log_sha256": "2556a025680e3adc823d928c4b959f70242c92a181a704a82f5b7d832fdaa633",
+    "old_270_preserved": true,
+    "skip": "single pre-disclosed Windows-privilege skip (existing, not new; test_p3_evidence 's')",
+    "in_matrix_rerun": "UNIT-P2-01 PASS 117.8s + UNIT-P3-01 PASS 111.4s (56+42+58 per-module logs bound in evidence manifest)",
+    "thresholds": "original thresholds unweakened; 12 new negative cases retained (TestP3FreshnessR2ControlledLeg incl. metadata-only PNG rejection, stale-epoch rejection, dimension/bitdepth mismatch rejection, pause-restore-on-pipe-death, counter-growth-without-controlled rejection)"
+  },
+  "geo03_render_proof": {
+    "verdict": "satisfies brief-v5 VL3-01 controlled-leg contract",
+    "method": "new-output-pixels (fresh 0->1), NOT counter growth, NOT decoder liveness/FPS/time-pos, NOT PNG byte diff",
+    "controlled_leg": "leg=controlled-frame-step; IPC frame-step error=success; source/gear/chain_epoch=8 stable pre/post witnesses (epoch_stable=true)",
+    "decoded_rgb_diff": "same dimensions + same bitdepth decode; 8418 points compared, 8194 differ, max channel delta 178, stride 21; pixels_identical=false",
+    "pause_control": "pause_before=false, paused_readback=true, restored unpaused, restore_ok=true (actual BEFORE/AFTER readback in finally)",
+    "counter_saturation_witness": "vo-passes fresh=[768,768] frozen bounded samplecount while controlled step yields new pixels — saturation never read as dead player",
+    "blind_alias_witness": "24fps repeating synthetic: blind 0.5s sampling can alias — recorded on-site, never used as freshness proof",
+    "metadata_only_png": "png_bytes_differ_but_pixels_identical=null in positive run (expected); metadata-only rejection proven at unit level (test_metadata_only_png_byte_change_is_not_new_pixels), metadata-only PNG diff and decoder liveness never used as render proof",
+    "uniformity": "integer block uniform_fraction=1.0 (230400/230400 blocks, spread 0) vs control 0.615 (141708/230400, spread 63); control_not_uniform=true; integer_vs_control_shots_differ=true",
+    "same_moment": "structured same_moment (pixelformat yuv420p, w/dw 1280, osd 2560x1440, vo-passes counts, same_window=true)"
+  },
+  "other_collect_obligations": {
+    "p2_frozen_behavior": "20 P2-frozen ids re-executed read-only on current sources (CTL/GEO-01/PIC-05/SHD-01..04/07/12/WINDOW/PER etc.); old behaviour not deleted/skipped",
+    "stock6chains": "stock chain coverage exercised via SHD cases and WINDOW-01 chain health (all PASS)",
+    "p3_algorithm_contract": "WHEN preserved (SHD-05), sizes incl. non-block-divisible 1366x768 (SHD-05), real LE16 payload + independent CPU oracle (SHD-06), geometry cases GEO-02..07 (all PASS)",
+    "same_moment_10bit": "SHD-09 12 runs (nis/xbr/sharpbilinear/sharpbilinear2x/integer/fsr1 x 8bit/10bit), pixelformats yuv420p / yuv420p10 recorded same-moment; decode claimed only with decode identity",
+    "ns_samples": "PER-04-COMPUTE raw fresh/redraw GPU ns samples collected value-by-value (perf_samples_ns, no aggregation); samples_note honest; no performance-gain claim; RIFE explicitly untested, left to P4",
+    "external_change": "GEO-04 external zoom/GLSL priority plugin-yields verified PASS"
+  },
+  "runtime_safety": {
+    "mpv": "direct D:/MPV/mpv.exe, vo=gpu-next gpu-api=vulkan, synthetic media, fullscreen gate 2560x1440 read back per case",
+    "isolation": "temp cfg HOME/APPDATA cache (temp_config_home_appdata=true), credential-free child env, own-PIDs-only sweep, live_configuration_written=false",
+    "gpu_serial": true,
+    "no_active_writes": "no live APPDATA mpv config / DMPV / backup payload writes; no global kill; no DPI change; no deploy/restore/install; no git commit/push; no P4/RIFE/perf-gain claims",
+    "pre_run_mpv_check": "tasklist showed no active mpv before matrix"
+  },
+  "readonly_integrity": {
+    "pre_snapshot": "docs/验证/开发/p3-001/revision-r2/author/pre-sourcehashes.json (75 files: scripts/shaders/script-opts/tools/taskflows/tests + cas.h)",
+    "post_check": "0 drift on all 75 files",
+    "baseline_preserved": "2440 preserved_p3_files + 74 prior_source_files + archive all hash-verified 0 drift (read-only re-check of docs/P3/P3候选修订基线-r2.json pins)",
+    "old_failed_candidate": "docs/验证/开发/p3-001/candidate.json sha256 62aa973ab6a68e299bf5b88289abef241f1bd2030e0709101ff34f55b534a53e unchanged; retained FAIL, never used as positive",
+    "source_writes_this_role": "none; only new artifacts under docs/验证/开发/p3-001/revision-r2/author/ + this delivery file"
+  },
+  "actual_source_sha256": {
+    "tools/p3_verify.py": "7f34df43670d8c09e2766a3825ed8a8a0ea870f2464db873fdb1598b9573df7f",
+    "tests/test_p3_support.py": "109132230d1f80a26ba1fe19e72ee72feb56af8a7a26feb4cb361bb77465b836",
+    "docs/P3/P3实现说明.md": "b0c9f9637f0cbf4a1acce628400590646240c4d929b8bcc1e92cc5f048c1b364",
+    "docs/插件/缩放选择器-P3用户说明.md": "13dcda73bb36a0f235b8f929a4f722983d21c0a90543ae5f1fcb7f670969a71d",
+    "tools/p3_check_evidence.py": "848f155e5e3e696de2b4bb67a1577db3d3c13e98409c0199e4ceda4154007b31",
+    "tools/p3_lib.py": "a266d32da16818f3805d96acdd254aec9b94abff58b558dc9bca7a4d3f3d0eb6",
+    "taskflows/p3_guard.py": "aeb26d474ad5d4953d1f479b4d1c5fff6c91ad97d549225d2c8452e87944f4ad",
+    "taskflows/p3_revision_guard.py": "c2dc9ce37aeea2c7117f0ce4d000060da954484421df579b463a5f910960cd15"
+  },
+  "partial_fix_v5_match": "all 4 allowed source files byte-identical to docs/验证/开发/p3-001/revision-r2/partial-fix-v5/sourcehash.json (record sha256 7c5842540b18c0c8ad2180a3ccb3ed39d69ab92712daeee3143b1fe01e86f210); no writer replay needed",
+  "bindings": {
+    "executed_taskflow_v7": {
+      "path": "taskflows/mpv-scale-p3-revision-r2-integrate-v7.json",
+      "sha256": "ad6c0db4d31850070128450c717bcec3565aa0356f8b237f726ec7deda3a251a",
+      "phase": "author-verify"
+    },
+    "relocation_report": {
+      "path": "docs/验证/开发/p3-001/revision-r2/local-fix/handoff-relocation.json",
+      "sha256": "a2488ace78400b2ea1a4b68c4946e440bb6652065e295c97bd309b60649427cf",
+      "note": "root misplaced handoff removed byte-identically into r2 path; archive hash equals current handoff hash"
+    },
+    "misplaced_handoff_archive": {
+      "path": "docs/验证/开发/p3-001/revision-r2/local-fix/misplaced-handoff-original.json",
+      "sha256": "9365c0e3f164c953d4b36c4030ffb85f550b91c2a1c1ff403340bb201ff84f0e"
+    },
+    "implementer_handoff": {
+      "path": "docs/验证/开发/p3-001/revision-r2/implementer-handoff.json",
+      "sha256": "9365c0e3f164c953d4b36c4030ffb85f550b91c2a1c1ff403340bb201ff84f0e",
+      "status": "READY_FOR_AUTHOR"
+    },
+    "closeout_v6_taskflow": {
+      "path": "taskflows/mpv-scale-p3-revision-r2-closeout-v6.json",
+      "sha256": "a1dfeeb4acc7352089be2071c40f487795d922f85ae822923757d1b51713347f"
+    },
+    "closeout_report": {
+      "path": "docs/验证/开发/p3-001/revision-r2/local-fix/closeout-r2.json",
+      "sha256": "1ef25bda47c8f0aaf193ed19a00941666a0c951ba18cd8f088544cc198c5f62b"
+    },
+    "brief_v6": {
+      "path": "docs/P3/P3-r2中断收尾brief-v6.json",
+      "sha256": "83317258ff610d835fe5b26864a23959d3ad4fc38f1e71ed7cd5928f09fdc634"
+    },
+    "brief_v5": {
+      "path": "docs/P3/P3独立集成限域修正brief-v5.json",
+      "sha256": "ec051d29fce8557d1b93e70398ccd725a0a899904adb0dfe1776bdcd98e0eed5"
+    },
+    "baseline_r2": {
+      "path": "docs/P3/P3候选修订基线-r2.json",
+      "sha256": "65dfc541ac10c23744fac837f008d8336cb52440f57fdea065e7b303b64a2d75"
+    },
+    "frozen_plan": {
+      "path": "docs/P3实施计划.json",
+      "sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d"
+    },
+    "authorization": {
+      "path": "docs/执行授权-P3.json",
+      "sha256": "935e7f12ab6b92495c16e878405a950c1686b1a4a86e5b5fb043c17dfc2fb3d8"
+    }
+  },
+  "prior_findings_retained": {
+    "VL3-01": "prior independent integration-r1 GEO03 freshness FAIL retained as history; this run closes the controlled-leg conditions with real new evidence (three local-fix fresh runs + this full-35 GEO-03), no old-evidence assembly",
+    "VL3-05": "6 historical hash disagreements + 1 CRLF manifest retained as nonacceptance history; no rebinding/normalization of old manifests; claim 'all P3 history immutable' NOT made",
+    "historical_root_fail": "root candidate.json/tests.json FAIL and all old 2440 files preserved byte-identical; old implementer full-r1/full-r2 author trees untouched; this delivery does not wash or rewrite any historical verdict"
+  },
+  "limitations": [
+    "author-side only: independent full-35 integration freeze + dual tech/safety review on the same candidate bytes still mandatory (taskflow v7 phases 3-7)",
+    "one pre-disclosed Windows-privilege unit skip remains (existing, unchanged)",
+    "png_bytes_differ_but_pixels_identical is null in positive runs; metadata-only rejection is proven at unit level, not in the positive GPU run",
+    "GEO-03 fresh proof produced in one matrix pass; repeat variance across days is covered downstream by the independent integration rerun, not by this delivery",
+    "all human checks pending; no user acceptance forged; P4/RIFE/performance-gain claims not made"
+  ],
+  "next_mandatory": [
+    "integrate-freeze owner: independent full 35 on same source SHA, candidate.json/tests.json freeze in r2 namespace",
+    "dual review (technical + adversarial) machine-bound to candidate-check",
+    "p3_revision_guard check/result as final gate"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "stage": "P3",
+  "session": "p3-001",
+  "source_run": "mpv-scale-p3-verifier-in-muu412zj-7ea7dc",
+  "run_state": "running record with phases={} retained; no live pi subagent/mpv process found at recovery",
+  "user_request": "继续",
+  "reason": "Previous invocation returned no result. Diagnose orphan record and partial bytes instead of replaying the non-idempotent writer.",
+  "partial_files": {
+    "tools/p3_check_evidence.py": "8a57a9c8280f132e2fdc316066e26d142e48d3cb1a9a4dc190b9018cf17ad0d6"
+  },
+  "core_handoff_sha256": "2468a647e9f67ee22c2fbead498854dc091dc6e68f0a45a34d1c529b061c5b96",
+  "checks": [
+    "p3_guard permit-check PASS",
+    "p3_core_handoff_check PASS 10 current source pins",
+    "CIM: only leader node process; no --no-session pi subagent; no mpv"
+  ],
+  "prior_findings": "Five plan-review findings retained in v1 critic record; CORE-R1/R2/R3 original failures and all run-001..004 kept. Core smoke alone is NOT stage completion. Decoder liveness fallback is not GPU render proof.",
+  "scope": "Fresh serial evidence-tools writer then case-harness writer then read-only author full verify, independent integrate/freeze, same-candidate readonly technical/security reviews. All GLMflash xhigh, no parallel writers/GPU.",
+  "safety": "No live APPDATA/mpv,D:/MPV,backup writes; direct mpv.exe gpu-next/vulkan; synthetic media/isolated home/cache/no credential env/self PID only; no Git commit or deployment; no acceptance.json/user scoring forgery."
+}

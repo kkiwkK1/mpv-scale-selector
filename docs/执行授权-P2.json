@@ -1,0 +1,18 @@
+{
+  "schema": "mpv-scaler-chat-authorization/v1",
+  "source": "explicit_user_message",
+  "user_request": "继续开发P2",
+  "prior_instruction": "计划写好就开始执行吧，不用等我确认；使用zai-coding-cn/glm-5.3-flash",
+  "stage": "P2",
+  "session": "p2-001",
+  "model": "zai-coding-cn/glm-5.3-flash",
+  "thinking_request": "xhigh",
+  "allow_isolated_implementation_and_tests": true,
+  "request_start_confirmation_again": false,
+  "development_prerequisite": "P1 p1-002 客观检查/双路复审PASS_OBJECTIVE，候选a51258be05a5bb9cca153347061652cd8f32b15ded3713003966c43d3cdf9385；新用户消息明确授权继续，不把尚待真人检查伪装成已批准。",
+  "human_subjective_acceptance_claimed": false,
+  "allow_live_configuration_write": false,
+  "allow_installation_or_live_restore": false,
+  "scope": "隔离SDR最小包：stock Anime4K、FSR1、SGSR1、Nearest；真实pass/WHEN/倍率/8bit与10bit、RGB/HDR守卫、单主链/Off/外部ownership及失败回退。沿用P1的待用户体验标记，不宣称画质或性能收益。",
+  "notes": "Legacy mpv-scale-dev的user_approved验收门不适用于这次明确聊天授权的开发接续；不伪造(approve)或主观验收，不削弱真实部署单独授权要求。"
+}

@@ -1,0 +1,582 @@
+{
+  "stage": "P4",
+  "session": "p4-001",
+  "artifact": "P4实施计划",
+  "created_at": "2026-10-07T02:20:00+0800",
+  "revised_at": "2026-10-07T02:46:00+0800",
+  "revision": "v2 限域返工: 被取代版(BLOCK) sha 3012110a…10cab 原字节归档于 docs/验证/开发/p4-001/plan-v1-blocked/, 按返工 brief-v2 的 F-01..F-07+LF-01..LF-07 逐项处置, 映射见 review_resolution",
+  "author_role": "single plan writer (单计划写者), glm-5.3-flash thinking=xhigh",
+  "model_directive": "zai-coding-cn/glm-5.3-flash, thinking=xhigh",
+  "ready": "pass",
+  "ready_semantics": "ready=方法就绪判定(两文件完成限域返工+一致性自查+机器 plan-check 可过), 绝非任何执行/测量/结果 PASS; 实际执行按 B1..B7 门推进且阶段状态上限=PARTIAL_MEASURED(见 status_vocabulary.rule)",
+  "ready_rationale": "环境勘察无计划级硬阻断；真实 present 源缺失与自然素材缺失均为预注册 limitation/PENDING_USER 状态而非计划阻断。执行按 batch 门推进：B1 纯分析可直接开始；B2/B3 隔离执行在既有用户授权与预检 PASS 下允许；B5 production 必须等 B4 校准独立复核通过。",
+  "environment_sha256": "7bd7384a8da308a3de119d8b8ae6be6ecda00dd532efa64b4aeed72ce7a9ecad",
+  "environment_source": "docs/P4/P4环境勘察.json (本计划唯一环境事实来源; sha256 为本文件实算)",
+  "binding": {
+    "authorization": "docs/执行授权-P4.json",
+    "authorization_sha256": "160373c4482b7c6d1a5590ef33dc996e46c5349761a89723f876631538253cac",
+    "brief": "docs/P4/P4执行约束与验收brief.md",
+    "brief_sha256": "5f39865478799794529d0f8d48d2148e27ea954787f3e67c532e02c35a1ded50",
+    "baseline": "docs/P4启动基线.json",
+    "baseline_sha256": "778151c607f8f2a3a4e1d753d9ce2d3cb2db403c6439f6973d787b35c90223cb",
+    "prior_candidate": "docs/验证/开发/p3-001/revision-r2/candidate.json",
+    "prior_candidate_sha256": "0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67",
+    "prior_status": "PASS_OBJECTIVE (仅继承客观结论; 不伪造任何真人验收)",
+    "rework_brief": "docs/P4/P4计划限域返工brief-v2.json",
+    "rework_brief_sha256": "b0cbaedc6f8d56a7d1471233a49951f240ff3e4e2adf9395c5c0da21f860d619",
+    "retained_review_archive": "docs/验证/开发/p4-001/plan-v1-blocked/ (旧失败 plan/method/review/guard 原字节归档; snapshot.json 实算 sha256=10ff816a28a70e008606722df2e3f533db18a6cf717f2df816e4ea05e43245c1)",
+    "superseded_plan_sha256": "3012110a21cb5477a913b31b4b618374525f283a8eccc6c59b0d1ef5b5110cab",
+    "superseded_method_sha256": "1bc03f1c07a449db57414a423f4c6f28a9b0667a4c26b60374e6fb8b8e18f29d",
+    "git_head_at_plan": "8f6b14e3a9aaf8585f5aa30dce70328509878a04",
+    "fixed_build": "D:/MPV/mpv.exe v0.40.0-393-gad59ff1b4, libplacebo v7.357.0, FFmpeg N-121425-g0bc54cddb, gpu-next/Vulkan, mpv.exe sha256=306f49323f846eca7a9a708bc35c505d5e6a4e246c5588c2fc7c1c68f9f53d6a",
+    "prior_residuals_to_not_repeat": [
+      "RV2: vo-passes 为滚动窗口采样, 存在窗口重叠与计时量化; 不得把重叠记录当独立样本, 不得按数值去重, 32ns 步长不能单独断言硬件 timer 分辨率",
+      "SR-04-FIXTURE-UNPINNED: 本阶段自第一天起把每个 fixture/媒体/工具/分析代码/参数/seed/模板全部实哈希绑定, 不留『计划路径未创建便跳过』的门洞; 每个新文件创建后立即入 manifest"
+    ]
+  },
+  "required_tests": [
+    "PIC-01",
+    "PIC-02",
+    "PIC-03",
+    "PIC-04",
+    "PER-01",
+    "PER-02",
+    "PER-03",
+    "PER-04",
+    "PER-05",
+    "CAL-01",
+    "TIME-01",
+    "RIFE-01",
+    "EVI-01"
+  ],
+  "required_test_notes": {
+    "PIC-01": {
+      "semantics": "SDR YUV 1080p→2560×1440 公平 A/B: 高质量基线(ewa_lanczossharp) vs stock Anime4K Mode A vs FSR1 vs SGSR1 vs NIS vs Nearest vs SharpBilinear 两变体; 同帧同输出 rect 同 RIFE 状态拼图",
+      "objective_deliverable_now": "同帧身份 PNG 捕捉(受控帧步进+OSD-free 校验+CPU golden 帧身份匹配)、盲标签随机顺序评分材料、崩溃/半生效检查",
+      "subjective": "PENDING_USER: 无动画/实拍素材, 合成样本不得冒充; 评分表与盲评材料程序预注册于 docs/P4/P4用户盲评说明.md",
+      "pass_rule": "PASS_OBJECTIVE_WITH_PENDING_USER 仅当客观部分完备; 主观偏好/自然素材代表性缺任一即不得机器代签"
+    },
+    "PIC-02": {
+      "semantics": "像素艺术独立组: xBR-lv2 / SharpBilinear-AUTO / nearest / Integer×nearest, 源 480×360→窗口 1440×1080(k=3); xBR 不默认适用于平滑动画/实拍, 场景建议仅限像素图案样本"
+    },
+    "PIC-03": {
+      "semantics": "锐化参数公平性静态绑定(本轮无扫档): 产品当前把锐化参数固定、不开放运行时调档, 不制造 default/+step/max 假三套扫档; B3 从 P3 交付 shader 原文件(只读)实读各 arm 默认参数值/可调范围/方向语义(FSR1 RCAS 低值=更锐、方向反向; NIS 默认 0.25∈[0,1]; SGSR1 机制不同)与机制差异, 冻结进 production manifest 并作公平性披露; 不同算法锐度数字不等价。可选参数 sweep 本轮明确 NOT_RUN_FIXED_PRODUCT_PARAMS, 不改 P3 shader/registry、不冒充产品默认身份; 机器工件=默认参数下 gpu-next 真实输出+同源 S 帧身份, 不凭先验宣称任何参数档有益或无益"
+    },
+    "PIC-04": {
+      "semantics": "RIFE 共存画质: 8 个 G1 档 × RIFE{off, on 24→48} × 3 个冻结帧号; 源帧类(S)才参与跨档画质拼图, 中间帧类(M)单独标注不混拼; 结论限『共存可用/观察到的问题』; 捕捉一律 gpu-next 真实输出+同源 S 帧身份, --vo=image 不顶替算法 A/B"
+    },
+    "PER-01": {
+      "semantics": "各档 fresh-frame GPU 耗时: vo-passes 逐 pass last/avg/peak/samples(ns÷1e6=ms), fresh/redraw 分列; 单位=完整 run; 每档 n=5 个有效 run; 端到端 GPU 时延不等于 pass 总和, 两者分别报告"
+    },
+    "PER-02": {
+      "semantics": "掉帧与节奏: dropped-frame-count/decoder-frame-drop-count/mistimed/delayed/vo-delayed 等属性先在固定构建实测可用性与 reset/累计语义(B3 探测), 只做 run 内 delta; 真实 present 帧时长无源(TIME-01), 只能报告 renderer 指标+媒体节奏 proxy 并明确『帧时长分布未测』"
+    },
+    "PER-03": {
+      "semantics": "RIFE 共存余量: 同一播放 pipeline 上 RIFE off/on × 同档配对实测; OFF run=全 S 帧渲染统计, ON run=S/M 混合帧统计; vo-passes 在 ON run 内无帧类粒度, 不做 S/M 单独 GPU 归因; 无真实 end-to-end/present 时间, 只报共存运行状态+drop+渲染 pass 快照的 OFF/ON 配对差, 不给数值总余量 ms、不反推 RIFE 时延; 20.83/16.67ms 只是节奏预算, 不做可加预算推导; 禁止 CPU walltime/日志/帧序凑 GPU 余量"
+    },
+    "PER-04": {
+      "semantics": "从 P3 NIS compute 后端扩展为 RIFE 竞争观察: NIS compute 档 × RIFE on 时的 pass 表现/fresh/redraw 区分, 记录竞争证据; 无数据记未测"
+    },
+    "PER-05": {
+      "semantics": "反指标拦截: 启动墙钟/pass 数/FPS/IPC 轮询开销不作为 GPU 结论; p4_check_evidence.py 机器扫描结果文件中的无证据性能表述(含无 CI 的『更快/更慢』、仅 FPS 的 RIFE PASS); 未测项必须如实标注"
+    },
+    "CAL-01": {
+      "semantics": "测量校准: 固定构建上实测 vo-passes 滚动窗口语义(count/samples/重叠表征)与计数饱和行为(≈10s 后饱和=已知事实, 不作活性/稳定门), IPC 轮询空载开销+nvidia-smi 稳态采样自身开销, 计数器 reset/累计语义, 同一渲染流受控步进的像素新鲜度校准(校准扰动与性能稳态 loop 分离), 全 GPU/WDDM 观察源门值可复算性(逐进程显存 N/A 行为记录), 逐 arm 渲染属性实读 diff 表; 产出冻结 production manifest(全部参数/阈值/顺序/模板)"
+    },
+    "TIME-01": {
+      "semantics": "呈现来源与局限: PresentMon 未安装, ETW 需提权不用 → 真实 present 帧时长未测; 记录探测过程与合法升级路径(需用户明确授权, 另行预注册), IPC 轮询间隔与 time-pos 差值不得当帧时长"
+    },
+    "RIFE-01": {
+      "semantics": "真实模型身份和执行: 克隆隔离树加载真实 VapourSynth R80 + ncnn-Vulkan RIFE DLL + rife-v4.25-lite_ensembleFalse; 仅 FPS 翻倍不足, 必须齐 4 件套(vf 链+真实 filter 输出 fps 实测+真实中间帧像素证据+VS/RIFE 日志); fps 取实际 filter 输出实测而非 container-fps 假设; 中间帧判据=预注册 noncopy/nonblend 负控+模型运行证据, 不以 CPU 线性插值特性强求神经网络, 判据不满足→NOT_ESTABLISHED 原样保留不换样本凑过; 任何原树写入→BLOCKED_ENV"
+    },
+    "EVI-01": {
+      "semantics": "证据完整性反指标负例: 每 trial 独立 create-only 目录/拒绝重用/句柄关闭后 manifest/失败保留; 全树递归哈希绑定; 无 vo-passes JSONL 支撑的性能表述=FAIL"
+    }
+  },
+  "write_paths": [
+    "docs/P4实施计划.json",
+    "docs/P4/P4测量方法.md",
+    "docs/P4/P4用户盲评说明.md",
+    "docs/P4/P4结果报告.md",
+    "tools/p4_lib.py",
+    "tools/p4_collect.py",
+    "tools/p4_analyze.py",
+    "tools/p4_check_evidence.py",
+    "tools/p4_verify.py",
+    "tests/test_p4_lib.py",
+    "tests/test_p4_collect.py",
+    "tests/test_p4_analyze.py",
+    "tests/test_p4_evidence.py"
+  ],
+  "write_path_notes": {
+    "excluded": "docs/P4/P4环境勘察.json 已由勘察者创建, 非『将创建』故不入本清单; 13 项均为 allowed_write_paths 内具体文件, 无目录",
+    "docs/P4实施计划.json": "本文件, 计划写者产出 (B0)",
+    "docs/P4/P4测量方法.md": "预注册测量方法全文, 与本 JSON 一致, 不一致以 JSON 为准 (B0)",
+    "tools/p4_lib.py": "纯分析/合同库: 哈希+manifest+IPC 同刻采样(单窗语义对齐 p3_lib.same_moment_sample, 按冻结字节独立复核扩展, 不符即自实现并记录差异)+媒体确定性生成器(MEDIA_SEED+SHA-256 派生)+golden 对比+seed 顺序生成 (B1)",
+    "tools/p4_analyze.py": "分析层: per-run 快照统计、run 级 bootstrap CI、分层表、禁止表述扫描支持 (B1)",
+    "tools/p4_check_evidence.py": "EVI-01 完整性门 + 反指标负例扫描 (B1)",
+    "tools/p4_verify.py": "阶段终检: 必需测试覆盖/状态词汇/绑定一致 (B1)",
+    "tests/test_p4_lib.py": "B1 配套单测 (B1)",
+    "tests/test_p4_analyze.py": "B1 配套单测 (B1)",
+    "tests/test_p4_evidence.py": "B1 配套单测(针对 evidence/verify 门) (B1)",
+    "tools/p4_collect.py": "采集层: trial 运行器(配置构建/mpv 启动/轮询/捕捉/RIFE 克隆初始化/污染检查) (B2)",
+    "tests/test_p4_collect.py": "B2 配套单测, 全部 mock/临时目录, 不启动真实 GPU (B2)",
+    "docs/P4/P4用户盲评说明.md": "盲评程序+素材入口+PENDING_USER 状态声明 (B7)",
+    "docs/P4/P4结果报告.md": "收口报告, 状态词汇四选一 (B7)"
+  },
+  "evidence_tree": {
+    "prefix": "docs/验证/开发/p4-001/",
+    "rule": "create-only; 每 trial 独立子目录, 已存在即拒绝并换新; 重试/复跑均新目录; 失败目录保留; 所有 self PID 结束、日志句柄关闭后才写 manifest; 收口对全树递归实算 SHA-256 绑定",
+    "known_existing": "docs/验证/开发/p4-001/environment/ (勘察者已建, 只读继承)"
+  },
+  "human_subjective_acceptance_claimed": false,
+  "live_configuration_write_allowed": false,
+  "fairness": {
+    "method": "全部 arms 在同一隔离配置/HOME/TEMP 子环境、同一固定构建、同一显示模式(全屏 2560×1440@164Hz 原样记录)下执行; 公平主比较的每个 arm(含全部插件档 arm)都从同一 profile=high-quality 与完全相同的非算法控制项起步, 唯一允许差异=所选主缩放链及其算法必需 owned 属性(scale/cscale/geometry 等, 逐项列出), 禁止 baselineHQ 用 HQ 其它 arm 用 defaults 后靠免责声明; 插件档位经真实插件 IPC 选择(产品路径), baselineHQ=high-quality 不加载插件脚本; 一次只挂一条主缩放链; RIFE 开关=隔离配置中 vf 行有无(克隆 vpy), 不经插件",
+    "groups": {
+      "G1_equalrect_main": "源 1920×1080 yuv420p → 全屏输出 rect 2560×1440; arms=[baselineHQ(ewa_lanczossharp), nearest, FSR1, SGSR1, NIS, SharpBilinear-AUTO(如实标注该场景退化为双线性), SharpBilinear-2x, Anime4K-ModeA(stock 六链身份固定 Mode A)]; 8 arms 同 rect 同组比较",
+      "G2_integer_display": "源 1920×1080 + Integer 档 → 显示 rect 1920×1080(k=1) 非全屏等尺寸; 单独『原生整数显示』类别, 永不混入 G1 排名; 另设 G2b: 源 1280×720→2560×1440 k=2 共同目标等 rect 组 [Integer×nearest, nearest, baselineHQ] 作公平参照, 媒体=motion720(resource_budget.media 确定性绑定, F-01)",
+      "G3_pixelart": "源 480×360 → 固定窗口 1440×1080(k=3); arms=[xBR-lv2, SharpBilinear-AUTO(k=3 真实 3x), nearest, Integer×nearest]; xBR 适用范围声明仅限像素图案样本, 不外推动画/实拍",
+      "rife_strata": "RIFE-off@24 为主分层; RIFE-on 24→48 为共存主分层(G1 全部 8 arms); fps 敏感性子集={baselineHQ, Anime4K-ModeA, FSR1}×{off@30, on@60}; 源 24 与源 30 数据永不合并; 中间帧(M 类)与源帧(S 类)分层标注, 不把不同中间帧硬称同帧"
+    },
+    "baselines": {
+      "high_quality_pin": "baselineHQ 必须 profile=high-quality 且 B3 实读 scale 属性=ewa_lanczossharp 才有效(记 scale-blur 等实际属性); 运行时读值不符→run 无效(E5); 禁止拿默认 bicubic 偷换",
+      "hq_base_uniformity": "B3 冻结逐 arm 渲染相关属性实读 diff/chain 表(scale/cscale/dscale/scaler-radius/deband/dither/sigmoid/colorspace/geometry 等, 来自运行时属性实读非配置推断); 非算法必需属性(deband/dither/colorspace 等)在 arms 间不同→该 arm 配置无效(E5), 修复后才进 production; 算法必需差异(scale/cscale/geometry)逐项列明; PIC-01 报告强制携带该表, 差异归因措辞受其约束",
+      "stock_anime4k": "保持 stock 原文件零修改与六链身份; 主矩阵固定 Mode A; 其余五链仅列适用范围, 不把单模式外推全家族",
+      "sharpAUTO": "SharpAUTO 在主场景的退化(floor(1440/1080+0.01)=1→双线性)如实分类为退化披露行, 不冒充有效缩放对比",
+      "pixel_art_scope": "xBR/Nearest 声明不默认适用实拍; SharpAUTO 退化如实分类",
+      "no_stacking": "同一 run 主链唯一, 不叠多算法; 参数语义独立列, 不同算法锐度数字不等价, 只报默认值/可调范围/机制差异"
+    },
+    "thresholds": "组内比较仅允许同 rect 同 RIFE 分层同帧类; 任何跨组拼表必须带『跨组禁止排名』标注",
+    "insufficient_data_status": "某 arm 有效 run < 预注册 n(5 或 3, 均为整数)中的 3 个时该 arm 记 PARTIAL_MEASURED; 0 run 记未测; 不以叙述补齐; 预算裁剪只减少『未跑』项并如实标注, 不改写目标 n"
+  },
+  "sampling": {
+    "method": "独立重复单位=一次完整 run(一个全新 mpv 进程, 播完整段, --no-loop 禁循环)。run 内: 预热 10..15s(触发 shader 编译/缓存), 稳定判据满足的首次轮询记 warmup_end; 测量窗口=[warmup_end, warmup_end+10s), 以 1.0s 周期做同刻原子采样(单窗语义对齐 p3_lib.same_moment_sample 并由 B1 按冻结字节独立复核扩展: video-out-params+osd-dimensions+vo-passes fresh/redraw 逐 pass 全表+计数器族+time-pos 单次快照; 若 p3_lib 实际实现与本计划口径不符, p4_lib 自行实现并记录差异, 不盲从旧方法); 窗口边界以 time-pos 单调增量核对; 退出=warmup_end+12.5s, EOF 守卫: 媒体 30s 保证不提前 EOF, 仍发生→run 无效(E6)保留; 全程记录真实 PTS 防循环/EOF",
+    "warmup_stabilization_criterion": "预热后连续 ≥3 次轮询满足全部客观条件: (1)pass 集合 desc 列表一致; (2)每 pass 计时非空(last/avg/peak/samples>0); (3)video-out-params 渲染状态稳定(格式/尺寸/fps 无 reinit); (4)源活性=time-pos 单调前进且帧计数无回退; (5)GPU 温漂≤2°C。显式废除『fresh 总 count 连增』要求: vo-passes count/samples 为滚动窗口计数, ≈10s 后饱和是已知事实, 饱和不作为失稳/停摆证据(LF-01); GPU 帧新鲜度不由解码活性/PNG 元数据冒充——像素新鲜度证据只在 CAL-01 用受控步进于同一渲染流上校准(vo-passes 值随真实新渲染帧变化), 校准扰动与性能稳态 loop 严格分离: 性能 run 内禁止截图/seek/加轮询, 仅 1Hz 原子采样, 真实计时 run 以可得 fresh/renderstate+媒体 progress 佐证并诚实标注局限; 判据不满足→延长预热至 15s 上限, 仍不满足→run 无效(E4)",
+    "run_duration": "媒体段 30s(=最大 warmup_end 15s+窗口 10s+加载/边界余量 5s, 与 LF-02 一致); 采样窗口 10s(相对 warmup_end); 每轮询含 vo-passes 每 pass {desc,last,avg,peak,samples} 原始 ns 值逐条落 JSONL, 不做窗口内二次加工; EOF 早于窗口完成→run 无效(E6)并保留",
+    "repeat_counts": "n 全部为整数: 主分层每 cell n=5 有效 run; 像素组/G2b n=3; 产品参数固定后无扫档 run(LF-05)。drop-affected run 一律保留计入, 不因效果方向剔除, 仅先验污染(E1-E3)或采集无效(E4-E6)可剔除并保留原因码; 失败与被剔除 run 保留原目录, 每 cell 最多 2 次补测, 仍不足→该 cell 数据不足状态, 不改写目标 n",
+    "seed_and_order": "全部 seed 定值写入本计划: 顺序 seed=20261007, bootstrap seed=424242, 媒体 seed 基底 MEDIA_SEED=20261007, 每 clip 派生 seed=int(SHA-256('p4-001/'+clip_id) 前 8 字节十六进制,16) mod 2^32(禁 Python 进程随机 hash(), F-07); 顺序表=n=5 用 5 个固定 per-block permutation(Fisher-Yates by 顺序 seed)+相邻 block 反转, n=3 用 3 个; 术语精确化(LF-07): 这是固定 per-block 置换+反转设计, 不是严格 ABBA 完全平衡, 奇数 n 的残余顺序不平衡如实披露; RIFE off/on 校准对按反转交替; 三类 seed 写入每 trial manifest, 顺序可由 seed 复算",
+    "rolling_window_rules": {
+      "no_independent_frame_claim": "vo-passes last/avg/peak 为滚动窗口值, 窗口重叠未知: 每 run 的诚实统计量=『窗口内 10 次轮询的 per-pass avg_ns 快照分布』, run 汇总=该分布的中位数; 明确含义为『末段滚动平均的快照』而非逐帧独立样本",
+      "no_value_dedup": "相同数值是真实不同帧的重采, 禁止按值去重; 不得把重采计数当独立样本数",
+      "saturation_rule": "计数器(含 vo-passes count/samples 与 dropped 类)只做 run 内首末 delta; 计数饱和/停止增长≈10s 后属已知滚动窗口行为, 禁止将『count 连增』用作活性/稳定门(LF-01), 也不单独断言播放器停摆(P3 教训); 活性以 time-pos/媒体 progress+渲染状态佐证; 32ns 倍数步长不单独断言硬件 timer 分辨率",
+      "ci_method": "跨 run 汇总=有效 run 中位数; 区间=对 5 个 run 做 bootstrap(n=10000, seed 424242) 的描述性百分位区间; 重复次数不足不做显著性检验与绝对优劣外推; IPC 轮询空载开销在 CAL-01 实测后仅记录不扣除"
+    },
+    "pollution_thresholds": {
+      "observation_semantics": "WDDM 下 nvidia-smi 逐进程图形显存常为 N/A(F-04): 门值只取全 GPU 字段(--query-gpu=memory.used,utilization.gpu,temperature.gpu,clocks.sm), --query-compute-apps 可得时仅辅助记录; 绝不把全 GPU util/memory 称作『其他进程』值; 观察源缺失→该门记 unverifiable 并如实披露, 不得空真视为干净",
+      "pre_run_gate": "全 GPU memory.used 相对勘察基线 1004MiB 增量 >1500MiB, 或全 GPU util ≥10% 持续≥5s(排除自有 mpv PID 后仍如此), 或存在非自有 mpv.exe 进程 → 不启动(E1), 记录等待重查",
+      "in_run_gate": "GPU 温度 ≥83°C 或 run 内升温 ≥8°C 或 实测核心时钟 <run 起始观测值 90% → run 无效",
+      "codes": "E1 其他负载/E2 温度/E3 降频/E4 稳定判据失败/E5 属性读值不符; 全部原因码预注册, 失败原始数据不删",
+      "no_kill": "只记录污染与暂停/拒绝测量, 不杀他人进程; nvidia-smi 只读查询输出无路径信息"
+    },
+    "insufficient_data_status": "cell 有效 run<3(整数)→PARTIAL_MEASURED; 窗口核对失败(time-pos 增量异常)或 EOF 早于窗口完成(E6)→该 run 剔除并保留; 采样链路本身在 CAL-01 不可量化→CAL-01 记未过, production 阻断"
+  },
+  "frame_pacing": {
+    "method": "B3 在固定构建上实测候选属性存在性与语义: dropped-frame-count, decoder-frame-drop-count, mistimed-frame-count/delayed 计数, vo-delayed, estimated-vsync/vsync-jitter 类, frame-timing 类属性; 逐一记录: 可用/不可用/单位/reset 或累计语义; 只做 run 内首末 delta, 记饱和标志",
+    "present_source": {
+      "status": "PresentMon 未安装; wpr/logman/tracerpt 需提权, 本阶段不提权不安装 → 真实屏幕 present 帧时长分布未测",
+      "proxy": "可报告=renderer 侧指标(fresh/redraw 计数节奏, dropped/mistimed delta)+媒体节奏(源 fps 与 RIFE 2x 后实际 filter 输出 fps 核对); IPC 轮询间隔与 time-pos 差值明确标注不得当呈现帧时长; 性能测量的墙钟采样窗口只是观测安排, 绝不表述为屏幕 present 间隔或帧时长(LF-02)",
+      "upgrade_path": "若用户明确授权 PresentMon 安装或提权采集, 须另行预注册修订并新目录复测, 不静默扩权"
+    },
+    "budget_semantics": "48fps≈20.83ms / 60fps≈16.67ms 仅作输出节奏预算参考列, 全文禁止将其当作 RIFE 与 shader 可相加的独立预算; 余量只来自同 pipeline off/on 匹配实测",
+    "thresholds": "窗口内 dropped 增量 >1% 帧数→run 标记 drop-affected(保留, 该 cell 结论必须携带标注); 属性探测缺失→PER-02 记 PARTIAL_MEASURED",
+    "insufficient_data_status": "真实 present 未测为既定事实: TIME-01 只能以『blocked-source + proxy 局限声明』交付; 任何『帧节奏完成/全 PASS』表述在 EVI-01 扫描中判违规"
+  },
+  "rife": {
+    "method": "按勘察 safe_clone_recipe 执行: robocopy D:/MPV/vs→%TEMP%/p4-001/clone/vs(整树≈213MiB); 复制 D:/MPV/rife 的 DLL 与 models/rife-v4.25-lite_ensembleFalse→clone/rife(相对布局不变); 克隆 vpy 仅改 LoadPlugin 一行为克隆 DLL 路径, 其余算法行字节不变并记录 diff=仅路径行; 环境=PATH 重定向+VSSCRIPT_PATH=克隆 vsscript.dll+PYTHONPYCACHEPREFIX/PYTHONDONTWRITEBYTECODE=1+HOME/USERPROFILE/APPDATA/LOCALAPPDATA/TEMP=沙箱+无 API 凭据; 禁 pip/下载/改原 runtime/提权",
+    "identity_checks": {
+      "model_mapping": "首次隔离加载捕获插件日志报告的模型名, 核对 model=70 ↔ rife-v4.25-lite_ensembleFalse; 不符→RIFE-01 BLOCKED_ENV",
+      "zero_write_proof": "加载前后对 D:/MPV/vs、D:/MPV/rife、活动 %APPDATA%/mpv 做清单+SHA-256 快照 diff, 必须为空; 任一差异→立即中止, RIFE 全线 BLOCKED_ENV, 证据保留",
+      "per_run_binding": "每 run manifest 记录: 克隆树 manifest 哈希、vpy diff、环境变量(脱敏)、DLL/模型/runtime 哈希(勘察已钉值对照)"
+    },
+    "execution_proof_bundle": {
+      "a_vf_chain": "vf 属性 dump 含 @rife vapoursynth 参数行",
+      "b_fps": "真实 filter 输出帧率取证(字段不臆造, LF-04): video-out-params fps 与 vo=image 鉴别 trial 的实际输出帧 PTS 中位差=1/(2×源 fps) 双重核对(24→48, 30→60); container-fps 未必随 vf 改变, 不作为判据; 字段语义在 B2 探针实测校准",
+      "c_middle_frames": "--vo=image 仅限 RIFE 滤镜输出鉴别这一个用途(明确非 gpu-next shader 渲染证据, 绝不供 PIC-01/02/04 算法 A/B, LF-04): 专用 trial 落帧帧数=2N, 帧类 S/M 按 index 奇偶+Interleave 语义判定; 鉴别样本=每帧位移≥6px 运动盘(预注册固定, 不看结果换样本)。预注册负控判据: noncopy=M 帧与两个邻 S 帧的亮度 MAE 均>2/255(排除邻帧复制); nonblend-duplicate=M 帧与 trial 内所有先前输出帧逐位比较非全等(排除重复帧/容器复制)。神经网络插帧不承诺近似线性: 废除 CPU 线性比 [0.15,0.75] 硬门, 不以线性模型特性强求真实模型; 附模型运行证据(VS 日志/gpu_thread 活动/滤波帧请求=2×输入)。预注册像素条件不满足→M 帧证据=NOT_ESTABLISHED 原样保留, 不换样本凑过(新样本只能走新预注册)",
+      "d_logs": "vapoursynth/vf_vapoursynth 调试日志+VS core 消息全程捕获",
+      "rule": "a-d 四件齐备 RIFE-01 才可过; 仅 FPS 翻倍=必要不充分, 永不单独 PASS"
+    },
+    "strata": "off@24 全 arms 主分层; on 24→48 G1 全 arms(真实 RIFE 共存与等 rect G1/G2b 为本轮必做, 不裁); on 30→60 与 off@30 仅 fps 子集 3 arms; PER-03 口径: OFF run(全 S 帧)统计 vs ON run(混合帧)统计配对比较, ON run 内 vo-passes 无 S/M 帧类粒度、不做单独 GPU 归因, 不给数值总余量 ms; S/M 帧类分层仅用于像素证据 trial(--vo=image 鉴别与 PIC-04 标注)",
+    "blocked_rules": "克隆/加载任一步无法安全完成→RIFE-01=BLOCKED_ENV; 全部 RIFE-on cell 记 BLOCKED_ENV 不删除; RIFE-off 部分照常交付, 阶段状态最高只到 PARTIAL_MEASURED",
+    "insufficient_data_status": "隔离加载不可行或身份不符→不假称已测; 勘察 unknowns(model=70 映射、克隆零写)均以首次加载实测收口"
+  },
+  "environment_safety": {
+    "method": "直接 D:/MPV/mpv.exe, 固定 gpu-next/Vulkan; 独立 HOME/USERPROFILE/APPDATA/LOCALAPPDATA/TEMP/cache/watch-later/截图目录=沙箱; 无 API 凭据 env; 子进程环境白名单(SystemRoot/windir/System32 PATH/沙箱 TEMP 系); 仅终止自有子进程 PID(启动时记录 PID, 结束后核对退出)",
+    "protected_trees": "活动 %APPDATA%/mpv、D:/MPV、私人备份 payload 零写; 不真实恢复/安装/卸载、不改 DPI/刷新率/电源/风扇/驱动、不全局 kill、不 git 提交推送; 系统显示 164Hz 原样记录不改动",
+    "media_policy": "仅合成自生成媒体; 不扫描私人视频库; 合成媒体与全分辨率 PNG 原件无私密内容, 必须持久保留于 docs/验证/开发/p4-001/ 证据树(或显式声明的外部持久 artifact 目录)并逐文件 SHA-256 绑定, %TEMP%/p4-001/ 仅作生成/缓存暂存(LF-06); 未授权 git 提交不等于必须删除或压缩原件: git 内只入哈希+≤1280×720 预览, 原件常驻证据树; 隐私: 活动 mpv.conf/rife.vpy 正文不入 Git, 仅算法参数行与既有摘要",
+    "gpu_single_owner": "任一时刻仅一个 GPU 测量 owner, 串行执行, 不并行测 GPU; 测量期普通用户 mpv/其他负载按 sampling.pollution_thresholds 处理",
+    "timeout_discipline": "代理单次调用超时 ≥ run 墙钟+60s 余量; 超时截短的 run 记无效并保留, 禁止『数据不足还 PASS』",
+    "insufficient_data_status": "沙箱越树写入或污染门不可判定→该 trial 无效; 安全前置不可满足→对应部分 BLOCKED_ENV"
+  },
+  "evidence": {
+    "method": "每 trial 独立 create-only 目录 docs/验证/开发/p4-001/<batch>/<trial-id>/; 目录已存在即拒绝; 收尾时(全部句柄关闭+self PID 已退出)写 manifest.json: 全部产物逐个实算 SHA-256 + plan/tool/config-template/media/seed/顺序/环境 JSON 哈希 + mpv log/console/transcript + vo-passes JSONL + 计数 delta 表 + PNG/截图 + 分析参数",
+    "binding_policy": "候选/工具/测试/fixture/媒体生成器/分析代码/参数 seed/计划/流程与环境依赖全量显式绑定; 候选固定后两审同 SHA; 改动使受影响证据失效; 不泛抓旧失败 manifest 作新正证; 本阶段所有新文件创建当天即入 manifest(SR-04 残余不复犯)",
+    "negative_controls": {
+      "reuse_refusal": "对已存在证据目录启动 mpv 前拒绝(工具内实现+单测覆盖)",
+      "claim_scan": "p4_check_evidence.py 扫描结果文件: 无 vo-passes JSONL 支撑的耗时表述、无 CI/run 数的快慢表述、仅 FPS 的 RIFE PASS、『帧节奏完成』而 present 未测、被剔除 run 消失——任一命中即 EVI-01 FAIL"
+    },
+    "failure_retention": "失败/被剔除 run 目录保留原名原名, 补测走新目录; 中断恢复先对实际工件/源码 SHA/自有 PID 核对, 禁止盲重放非幂等写者",
+    "closeout": "两审(方法学+安全)对同一冻结产物集同 SHA 独立进行; 收口对 docs/验证/开发/p4-001/ 全树递归哈希绑定入 P4结果报告.md",
+    "insufficient_data_status": "manifest 缺任一绑定项或树内发现未登记文件→EVI-01 FAIL, 收口阻断"
+  },
+  "objective_user_split": {
+    "method": "全部结果按『机器客观证据』与『真人主观』两栏分表; 机器栏只写有 vo-passes JSONL/像素证据/日志支撑的结论; 真人栏只写 PENDING_USER 入口与预注册程序, 无任何代签",
+    "machine_side": {
+      "PIC-01-obj": "同帧 PNG 捕捉+盲标签材料+无崩溃/半生效检查",
+      "PER-01/03/04": "GPU 耗时与 RIFE 余量(滚动窗口快照统计口径)",
+      "PER-02": "renderer 指标+媒体节奏 proxy(present 未测如实标注)",
+      "RIFE-01/CAL-01/TIME-01/EVI-01": "身份/校准/来源/完整性门"
+    },
+    "user_side": {
+      "PIC-01-subj": "动画/实拍素材盲评偏好=PENDING_USER; 素材入口与程序预注册于 docs/P4/P4用户盲评说明.md; 合成样本不得冒充自然素材完成 PIC-01",
+      "default_profile_choice": "默认档维持 P3 候选不变, 任何档位选择由用户决定, 机器不得代签",
+      "P1-UC/P2-UC 遗留": "继续 pending, 本阶段不处理"
+    },
+    "mandatory_rule": "真实 RIFE 无 load 仅有 FPS 不能 PASS(RIFE-01 四件套必需); 真实 present 不可得不得报告全部帧节奏 PASS; 缺真实动画/实拍不得 synthetic 冒充 PIC01 完成; 机器画质工件仅认实际 gpu-next 输出+S 帧身份, 不凭配置/机制先验宣称任何 arm(含 stock Anime4K)有益或无益, 快慢好坏只由实测数据支撑",
+    "insufficient_data_status": "两栏缺任一必需项→阶段状态降为 PARTIAL_MEASURED 或 PASS_OBJECTIVE_WITH_PENDING_USER, 不出全 P4 的纯 PASS_OBJECTIVE"
+  },
+  "resource_budget": {
+    "wall_clock": {
+      "B3_calibration": "≤60min GPU 串行(含属性探测/编码器探针/媒体生成/2-run pilot); 每个校准探针壁钟预算=4×对应 production 单 trial 上限(时间化 160s, 捕捉 60s, LF-02), 覆盖加载延迟",
+      "B5_production": "≤150min GPU 串行, 逐组整数实数(F-03): 时间化 run=136=G1×off@24 8arms×5=40 + G1×on24→48 8×5=40 + fps 子集 3×(off@30 5+on@60 5)=30 + G2 Integer 1×5=5 + G2b 3×3=9 + G3 4×3=12; 无扫档 run(产品参数固定, LF-05)。每 run 墙钟≤40s→≤90.7min; 捕捉 trial=82×≤15s→≤20.5min: PIC-01 G1 8×3=24, PIC-04 on-leg S 帧 8×3=24, RIFE M 帧鉴别 1, G3 4×3=12, G2 1×3=3, G2b 3×3=9, PIC-03 默认参数身份 3×3=9; 合计≤111.2min",
+      "B6_replicate": "≤45min: 5-run 主分层 cells 追加 2 run(G1 off 8+G1 on 8+fps 子集 6+G2 1=23 cells→46 run) + n=3 cells 追加 1 run(G2b 3+G3 4=7 run)，计时合计53 run×≤40s≈35.3min；另RIFE-01四件套重复2个capture trial(24→48与30→60各1)，每个≤15s，合计≤0.5min；共55 trial、≤35.84min，45min含启动/收尾余量",
+      "B2_identity_probe": "首次隔离加载与模型身份探针GPU墙钟≤10min，计入session总预算；不是production数据",
+      "hard_cap": "全 session GPU 墙钟 ≤5h(实算 B2 10+B3 60+B5 111.2+B6 45≈226.2min<300min); 超出→按预注册裁剪顺序(先砍 fps 子集, 再砍 G2b; 扫档不存在不可砍)缩减并在报告列未测组合, 只减未跑项、不改写目标 n, 禁止事后删失败"
+    },
+    "media": "确定性合成媒体, 参数全部预注册(F-01/F-07): 时长统一 30s(motion24=1920×1080 yuv420p 24fps×30s=720 帧; motion30=1920×1080 30fps×30s=900 帧; motion720=1280×720 24fps×30s=720 帧, G2b 专用, 同 motion24 生成器族: 深底 luma16+亮盘 luma235 半径 200px 每帧位移(4,2)px+8px 帧号标记条+慢梯度带); pixelart=480×360 24fps 30s(720 帧)，每帧滚动2px的8×8块调色板生成器与seed派生不变。MEDIA_SEED=20261007, 每 clip 派生 seed=int(SHA-256('p4-001/'+clip_id) 前 8 字节十六进制,16) mod 2^32, 禁 Python 进程随机 hash(); 生成器版本=p4_lib.py 冻结时 sha256+参数表写入 manifest。PNG 序列经固定构建 mpv --o 一次性转码 FFV1(yuv420p), 固定参数+输出实哈希绑定; 每段目标≤128MB、媒体总量≤700MB, %TEMP% 生成后移入证据树持久保留(LF-06); B3 探针编码器可用性, 预注册回退梯: ffv1(yuv420p)→ffv1 变体→PNG 序列直读并声明 LUMA 档不适用 RGB 的范围缩减(如实降范围, 不冒充)",
+    "disk": "模型/runtime 克隆≈240MB + 沙箱≤100MB + 证据树≤900MB(JSONL≈12MB + 全分辨率 PNG 原件≤600MB 常驻证据树逐 hash 绑定(LF-06: 不以 TEMP-only/缩略预览替代可复核原件), git 只加哈希+≤1280×720 预览) + 媒体≤700MB → 总预算 ≤1.94GB; 启动前实测目标盘剩余空间(D: 勘察时 free≈144GB), 要求 free≥2×总预算, 不足→先报告再按预注册降采样数, 不牺牲原件",
+    "per_trial": "时间化 run ≤40s 墙钟; 捕捉 trial ≤15s; 每 agent 调用块 ≤20 个 trial 后交接; 单角色不做全矩阵(所有写者分 batch, 每 batch 独立交接 sha)",
+    "api_call_budget": "每写者 batch ≤45 次工具调用; 超限即拆分交接, 禁止单角色 180 tools",
+    "insufficient_data_status": "任一预算在 pilot 期不可量化(如温度/负载无法稳定或来源不足)→该部分 block/pending 如实说明, 不带病进 production"
+  },
+  "execution_batches": {
+    "items": [
+      {
+        "id": "B0",
+        "name": "计划与测量方法冻结",
+        "owner": "plan writer (本任务)",
+        "creates": [
+          "docs/P4实施计划.json",
+          "docs/P4/P4测量方法.md"
+        ],
+        "min_source_bindings": 6,
+        "sources": [
+          "docs/P4/P4执行约束与验收brief.md",
+          "docs/P4/P4环境勘察.json",
+          "docs/P4启动基线.json",
+          "docs/执行授权-P4.json",
+          "docs/实施计划.md",
+          "docs/测试计划.md",
+          "docs/验证/开发/p3-001/revision-r2/P3交付报告.md"
+        ],
+        "local_checks": [
+          "python -X utf8 -c \"json.load(open('docs/P4实施计划.json',encoding='utf-8'))\" 合法 JSON",
+          "两文件均 UTF-8 无 BOM + LF 行尾",
+          "write_paths ⊆ allowed_write_paths 核对"
+        ],
+        "handoff_shas": [
+          "docs/P4实施计划.json 的 sha256",
+          "docs/P4/P4测量方法.md 的 sha256"
+        ],
+        "gate": "方法学/安全对抗审查通过前不得写任何工具代码"
+      },
+      {
+        "id": "B1",
+        "name": "纯分析/合同层(无 GPU)",
+        "owner": "analysis writer",
+        "creates": [
+          "tools/p4_lib.py",
+          "tools/p4_analyze.py",
+          "tools/p4_check_evidence.py",
+          "tools/p4_verify.py",
+          "tests/test_p4_lib.py",
+          "tests/test_p4_analyze.py",
+          "tests/test_p4_evidence.py"
+        ],
+        "writer_units": "W1a p4_lib+test_p4_lib → W1b p4_analyze+test_p4_analyze → W1c check_evidence+verify+test_p4_evidence; 逐单元交接 sha",
+        "min_source_bindings": 8,
+        "sources": [
+          "本计划 JSON+sha",
+          "P4环境勘察.json",
+          "tools/p3_lib.py(同刻采样语义只读参照)",
+          "docs/证据/mpv-input.rst",
+          "docs/证据/mpv-options.rst",
+          "P3 candidate.json",
+          "tests/fixtures/p3/oracle-sample.ppm(现字节即钉)",
+          "scripts/scale-selector.lua + script-opts(档位注册表只读参照)"
+        ],
+        "local_checks": [
+          "python -B -X utf8 -m unittest tests.test_p4_lib tests.test_p4_analyze tests.test_p4_evidence -v 全过且无未解释 skip",
+          "全部单测目标在系统临时目录/沙箱, 不触真实 GPU 与受保护树",
+          "p4_verify.py 对 B0 两文件自检(合同字段非空/路径在 allowed 内)"
+        ],
+        "handoff_shas": [
+          "7 个新文件 sha256",
+          "单测输出落 docs/验证/开发/p4-001/b1-handoff/"
+        ],
+        "gate": "门与合同先于任何测量存在, 之后不得为凑结果改门(改动需受影响证据全部重跑)"
+      },
+      {
+        "id": "B2",
+        "name": "采集层 + RIFE 隔离运行时初始化",
+        "owner": "collection writer",
+        "creates": [
+          "tools/p4_collect.py",
+          "tests/test_p4_collect.py"
+        ],
+        "min_source_bindings": 7,
+        "sources": [
+          "tools/p4_lib.py(B1 sha)",
+          "D:/MPV/mpv.exe 勘察钉值",
+          "D:/MPV/vs 树清单+哈希",
+          "D:/MPV/rife DLL/模型勘察钉值",
+          "%APPDATA%/mpv/rife/rife.vpy 勘察钉值",
+          "safe_clone_recipe(勘察)",
+          "scripts/scale-selector.lua(IPC 选择命令)"
+        ],
+        "local_checks": [
+          "python -B -X utf8 -m unittest tests.test_p4_collect -v 全过(mock mpv/临时目录, 不启动真实 GPU)",
+          "克隆演练: 克隆树建立+vpy diff=仅路径行+原树前后 diff 为空",
+          "首次隔离加载探针: 插件报告模型名捕获, 写 identity-probe 证据",
+          "目录重用拒绝/句柄关闭后 manifest 单测覆盖"
+        ],
+        "handoff_shas": [
+          "2 个新文件 sha256",
+          "克隆 manifest+identity probe 证据 sha256"
+        ],
+        "gate": "identity/零写任一失败→RIFE-01 BLOCKED_ENV, 仍可进入 B3 做 RIFE-off 校准; 本批允许在预检 PASS+既有用户授权下直接隔离执行, 不等 production 复核"
+      },
+      {
+        "id": "B3",
+        "name": "校准 CAL-01(短 pilot, 非 production)",
+        "owner": "calibration runner",
+        "creates": [
+          "证据: docs/验证/开发/p4-001/b3-calibration/*(create-only 证据树, 不占 write_paths 名额)"
+        ],
+        "min_source_bindings": 9,
+        "sources": [
+          "B1 工具 sha",
+          "B2 采集工具 sha+identity 证据",
+          "冻结媒体生成器输出哈希",
+          "固定构建 mpv",
+          "nvidia-smi 只读探针",
+          " vo-passes 语义探测样本",
+          "计数器语义探测样本",
+          "编码器可用性探针",
+          "污染门基线(勘察 1004MiB/54C)"
+        ],
+        "local_checks": [
+          "vo-passes 滚动窗口重叠表征(空载+播放连续轮询对照)",
+          "IPC 空载轮询开销实测记录 + nvidia-smi 稳态采样自身开销实测(CAL-01)",
+          "像素新鲜度校准: 受控步进于同一渲染流验证 vo-passes 随真实新帧变化(校准扰动与性能稳态分离, LF-01)",
+          "dropped/mistimed/vsync 类属性在固定构建的存在性与语义表",
+          "profile=high-quality 实读 scale=ewa_lanczossharp 验证 + 逐 arm 渲染相关属性实读 diff/chain 表(非必需属性不一致→该 arm 无效 E5, F-05/LF-03)",
+          "污染门观察源实测: 全 GPU memory.used/util 门值可复算性 + WDDM 逐进程 N/A 行为记录 + 非自有 mpv 进程探测(F-04)",
+          "媒体转码 FFV1 回退梯判定 + motion720 生成验证(F-01)",
+          "锐化 arm 参数默认值/范围/方向从 shader 原文件只读实读并冻结(无扫档数值, LF-05)",
+          "2-run pilot 全链(含污染门/稳定判据/剔除码演练)",
+          "冻结 production manifest: 全部 CLI/config 模板/arm 顺序表/threshold/媒体生成参数全部实哈希"
+        ],
+        "handoff_shas": [
+          "calibration manifest sha256(production 唯一参数来源)",
+          "pilot 证据目录 sha256"
+        ],
+        "gate": "热/负载/来源任一不可量化→对应部分 block/pending 说明并缩减范围; 本批通过前禁止 production"
+      },
+      {
+        "id": "B4",
+        "name": "独立方法与校准复核",
+        "owner": "independent reviewer (只读)",
+        "creates": [
+          "复核意见文件 docs/验证/开发/p4-001/b4-method-review/*"
+        ],
+        "min_source_bindings": 5,
+        "sources": [
+          "B0-B3 全部产物 sha",
+          "production manifest",
+          "本计划 JSON",
+          "brief",
+          "勘察 JSON"
+        ],
+        "local_checks": [
+          "核对预注册完备性: 判据/阈值/顺序/回退梯/状态词汇无事后空间",
+          "核对 RV2/SR-04 残余不复发(绑定完整性抽查)",
+          "核对安全前置与沙箱配方"
+        ],
+        "handoff_shas": [
+          "意见文件 sha256 + 所审产物 sha 清单"
+        ],
+        "gate": "major/blocker→限域修正+新目录后重审; 通过后 production 才解锁; 审后改参数/计划→受影响部分重新送审"
+      },
+      {
+        "id": "B5",
+        "name": "production 主矩阵(GPU 串行, 单 owner)",
+        "owner": "production runner",
+        "creates": [
+          "证据: docs/验证/开发/p4-001/b5-production/<trial-id>/*"
+        ],
+        "min_source_bindings": 6,
+        "sources": [
+          "production manifest(B3 冻结 sha, 唯一参数来源)",
+          "B1+B2 工具 sha",
+          "媒体哈希",
+          "P3 candidate(插件产品路径)",
+          "克隆 identity 证据",
+          "污染门基线"
+        ],
+        "local_checks": [
+          "每 trial create-only+manifest 收尾",
+          "顺序表按 seed 20261007 复算一致",
+          "每 20 trial 交接一次(部分 manifest+进度 sha)",
+          "剔除码 E1-E6 只按预注册使用",
+          "禁止任何 manifest 外参数(含『临时试一下』)"
+        ],
+        "handoff_shas": [
+          "每交接块 manifest sha256",
+          "最终全矩阵 run 清单 sha256"
+        ],
+        "gate": "硬墙钟超限→按预注册裁剪顺序缩减并列未测组合; 结果好坏都不回头调参"
+      },
+      {
+        "id": "B6",
+        "name": "独立复跑",
+        "owner": "independent replicator (新目录, 不看 B5 中间统计)",
+        "creates": [
+          "证据: docs/验证/开发/p4-001/b6-replicate/<trial-id>/*"
+        ],
+        "min_source_bindings": 5,
+        "sources": [
+          "production manifest(同参)",
+          "B1+B2 工具 sha",
+          "媒体哈希",
+          "B5 run 清单(仅 cell 列表, 不含数值)",
+          "克隆 identity 证据"
+        ],
+        "local_checks": [
+          "主分层每 cell 2 run 全新目录",
+          "RIFE-01 四件套证据重复采集",
+          "一致性判据: 同 cell 跨 B5/B6 的 per-run 中位数差 ≤ max(0.75ms, 20%)(按 pass avg); 超出→两套数据并报+不一致标注, 不平均不取舍"
+        ],
+        "handoff_shas": [
+          "复跑清单 manifest sha256"
+        ],
+        "gate": "复跑与 B5 系统性矛盾→触发 B7 前追加限域复核"
+      },
+      {
+        "id": "B7",
+        "name": "分析+两审+收口",
+        "owner": "analysis writer + two read-only reviewers",
+        "creates": [
+          "docs/P4/P4结果报告.md",
+          "docs/P4/P4用户盲评说明.md",
+          "证据: docs/验证/开发/p4-001/b7-closeout/*"
+        ],
+        "min_source_bindings": 8,
+        "sources": [
+          "B5+B6 全部 manifest sha",
+          "production manifest",
+          "B0 计划 sha",
+          "工具 sha",
+          "媒体哈希",
+          "identity 证据",
+          "calibration 属性语义表",
+          "brief 状态词汇"
+        ],
+        "local_checks": [
+          "python -B -X utf8 tools/p4_check_evidence.py(全 trial 完整性+反指标负例扫描) PASS",
+          "python -B -X utf8 tools/p4_verify.py(必需 13 测试覆盖+状态词汇+绑定一致) PASS",
+          "282既有Python单测及35既有guard测试行为不变核对(只跑不动)，另跑P4 guard新增13项；当前guard全发现合计48项，以运行时实际发现为准，不将原35误当P4独有13",
+          "客观/主观分栏表+每测试状态逐项给出",
+          "收口全树递归哈希绑定",
+          "技术+安全两路独立只读审, 同 SHA 各出意见"
+        ],
+        "handoff_shas": [
+          "报告/盲评说明 sha256",
+          "两审意见 sha256",
+          "全树根哈希"
+        ],
+        "gate": "任一必需项未测/被阻断→阶段状态按状态词汇给 PARTIAL_MEASURED / PASS_OBJECTIVE_WITH_PENDING_USER / BLOCKED_ENV / REWORK, 不出全 P4 纯 PASS_OBJECTIVE"
+      }
+    ]
+  },
+  "status_vocabulary": {
+    "per_test": [
+      "PASS_OBJECTIVE",
+      "PARTIAL_MEASURED",
+      "PENDING_USER",
+      "BLOCKED_ENV",
+      "FAIL",
+      "未测"
+    ],
+    "per_stage": [
+      "PASS_OBJECTIVE_WITH_PENDING_USER",
+      "PARTIAL_MEASURED",
+      "BLOCKED_ENV",
+      "REWORK"
+    ],
+    "rule": "阶段状态由 per-test 状态合成; 任一 pending/blocked 必然体现于阶段状态; 『没有提升/某档更慢/某指标无法获取』均为有效实测结论; 未测必需项不得包装为全 P4 PASS; 本阶段因 TIME-01 present 未测与自然素材缺失为既定事实, 预注册阶段状态上限=PARTIAL_MEASURED(即使全部可得项完成也不出全 P4 纯 PASS_OBJECTIVE)"
+  },
+  "limitations": {
+    "items": [
+      "TIME-01: 真实 present 帧时长分布未测(PresentMon 缺失, ETW 需提权不用); 仅 renderer 指标+媒体节奏 proxy; 帧节奏维度不得称完成",
+      "PIC-01 主观与自然素材代表性 PENDING_USER: 无动画/实拍素材, 客观仅 synthetic-only, 合成不得冒充自然样本; 素材入口已预注册",
+      "RIFE model=70↔rife-v4.25-lite_ensembleFalse 映射为静态推断, 以首次隔离加载插件报告为准; 不符即 BLOCKED_ENV",
+      "vo-passes 滚动窗口语义: 仅 per-run 快照分布可报, 无逐帧独立样本; CI 为 run 级 bootstrap 描述性区间, 不做显著性/绝对优劣外推",
+      "主场景 SharpBilinear-AUTO 退化为双线性, 该行为退化披露行, 不参与有效缩放对比",
+      "单一机器/GPU(2080 SUPER)/驱动 610.47/164Hz: 不外推其他环境; 其他刷新率/分辨率未测",
+      "PIC-03 产品参数固定, 本轮无参数扫档: NOT_RUN_FIXED_PRODUCT_PARAMS, 只静态绑定默认值/范围/方向/机制并公平披露; 不改 P3 shader/registry, 不冒充产品默认身份",
+      "RIFE 中间帧鉴别: noncopy/nonblend 负控判据预注册固定, 不以 CPU 线性插值特性要求神经网络模型; 判据不满足→M 帧证据 NOT_ESTABLISHED 原样保留, 不换样本凑过; ON run 内 vo-passes 无 S/M 帧类粒度, 不做单独 GPU 归因, PER-03 无数值总余量 ms",
+      "阶段状态上限=PARTIAL_MEASURED(预注册): 真实 present 帧时长未测(TIME-01)且自然素材缺失为既定事实, 即使全部可得项完成也不出全 P4 纯 PASS_OBJECTIVE",
+      "PER-02 属性可用性以 B3 固定构建实测为准; 候选属性缺失时按预注册候选表降级为可得指标并如实标注",
+      "stock Anime4K 六链仅 Mode A 入主矩阵, 其余五链只有适用范围声明, 无实测",
+      "BAK04 安装器/真实恢复路径留 P5, 本阶段不触碰",
+      "IPN: 媒体经 mpv 固定构建转码(FFV1), 编码器不可用则按预注册回退梯降范围, 不冒充 YUV 全覆盖"
+    ]
+  },
+  "cost_estimate": {
+    "agent_batches": "8 个小 batch(B0 计划者已完成于本文件; B1≈3 写者单元; B2/B3/B5/B6 各 1 执行者; B4/B7 各含 2 只读审), 每写者 ≤45 工具调用, 全程无单角色大包",
+    "gpu_wall_clock": "≤5h 串行(预算见 resource_budget)",
+    "disk": "≤1.94GB(克隆240MB+沙箱100MB+证据树900MB+媒体700MB；与resource_budget一致，30s pixelart仍受每段128MB门及总量门；生成后实测，超限阻断不得删原件)",
+    "human": "素材提供与盲评为用户可选入口, 不阻塞客观交付"
+  },
+  "untested_boundaries_declared": [
+    "HDR/RGB 画质(PIC-06 另行立项), 本阶段格式守卫不冒充 HDR 质量结论",
+    "真实 present 帧节奏分布, 真人主观评分, 自然动画/实拍代表性",
+    "stock Anime4K Mode B-F, 其他刷新率/分辨率/其他 GPU, RIFE 30→60 仅 3 arms 子集",
+    "BAK-04 真实安装器与恢复(P5)",
+    "PIC-03 参数 sweep(NOT_RUN_FIXED_PRODUCT_PARAMS), RIFE 数值总余量 ms(无端到端/present 源), WDDM 逐进程显存精细归因(观察源常 N/A)"
+  ],
+  "plan_notes": [
+    "本计划与 docs/P4/P4测量方法.md 同批交付; 冲突时以本 JSON 为准",
+    "用户授权已存在(执行授权-P4.json)且 brief 声明不再等启动确认: B1 可直接开始, B2/B3 隔离执行允许, B5 production 由 B4 复核门控制",
+    "全程不改任何旧文件/guard/auth/基线; 新增 guard 不在本阶段 write 域, 一切门以 B1 工具+既有 guard 只读运行实现",
+    "guard 自绑与 testsha 绑定已由领导者完成(taskflows/p4_guard.py permit/permit-check 实读核实, 本返工未改 guard/基线); 后续 candidate 须绑定全部 P4 环境与源码依赖(production manifest 全量实哈希, F-06)",
+    "旧 stage 方法引用(p3_lib.same_moment_sample)须按冻结字节独立复核语义, 不符则 p4_lib 自行实现并记录差异, 不盲从"
+  ],
+  "review_resolution": {
+    "F-01": {"decision": "G2b 补确定性 720p 媒体绑定", "changes": "fairness.groups.G2_integer_display / resource_budget.media(motion720: 1280×720 24fps 30s 生成器族参数/seed/体积绑定) / B3 local_checks / 测量方法 §6"},
+    "F-02": {"decision": "OFF/ON 配对口径, 无 S/M 单独归因, 无总余量 ms", "changes": "required_test_notes.PER-03 / rife.strata / 测量方法 §5; 废除『PER-03 余量按 S 帧类与总帧类分别报』"},
+    "F-03": {"decision": "逐组整数 trial 清单+预算复算", "changes": "resource_budget.wall_clock(B5=136 timed+82 capture 逐组列实数, B6=53, 裁剪只减未跑) / sampling.repeat_counts(n 整数) / 测量方法 §10"},
+    "F-04": {"decision": "全 GPU 门+非自有 mpv 探测+unverifiable 非空真+nvidia-smi 开销入 CAL", "changes": "sampling.pollution_thresholds(observation_semantics/pre_run_gate) / B3 local_checks / 测量方法 §4.4"},
+    "F-05+LF-03": {"decision": "全部 arms 同 profile=high-quality 同非算法控制起步+属性实读 diff 表", "changes": "fairness.method / fairness.baselines.hq_base_uniformity(非必需属性不一致→E5) / B3 local_checks / 测量方法 §3"},
+    "F-06": {"decision": "guard 自绑由领导者完成, writer 不改; candidate 依赖全绑定", "changes": "plan_notes(实读 p4_guard.py permit/permit_check 核实) / evidence.binding_policy 既有全绑定要求不变"},
+    "F-07": {"decision": "媒体 seed 基底常数+SHA-256 派生式定值, 禁进程随机 hash", "changes": "sampling.seed_and_order / resource_budget.media / 测量方法 §6; 生成器版本=冻结 sha 必需依赖"},
+    "LF-01": {"decision": "废『count 连增』活性门, 客观稳定判据+像素新鲜度校准分离", "changes": "sampling.warmup_stabilization_criterion(重写) / rolling_window_rules.saturation_rule / required_test_notes.CAL-01 / B3 local_checks / 测量方法 §4.1"},
+    "LF-02": {"decision": "预热范围+窗口相对 warmup_end+媒体 30s+校准 4×壁钟", "changes": "sampling.method / run_duration(30s+E6 EOF 守卫) / resource_budget.wall_clock.B3_calibration(4×预算) / frame_pacing.present_source.proxy(墙钟窗≠present 间隔) / 测量方法 §4.1/§10"},
+    "LF-04": {"decision": "--vo=image 仅滤镜鉴别非 shader A/B; 负控判据代线性硬门; fps 取实测", "changes": "rife.execution_proof_bundle.b_fps/c_middle_frames / required_test_notes.RIFE-01/PIC-04 / 测量方法 §2/§7"},
+    "LF-05": {"decision": "产品参数固定无假扫档: 静态绑定+公平披露+NOT_RUN_FIXED_PRODUCT_PARAMS", "changes": "required_test_notes.PIC-03 / limitations / untested_boundaries_declared / resource_budget(删 18 扫档 run) / 测量方法 §3"},
+    "LF-06": {"decision": "合成原件持久保留于证据树逐 hash, 先查 free", "changes": "environment_safety.media_policy / resource_budget.disk(证据树≤900MB 含原件≤600MB, free≥2×预算) / resource_budget.media / 测量方法 §6/§7"},
+    "LF-07": {"decision": "per-block permutation 术语+奇数 n 残余不平衡披露; drop-affected 保留", "changes": "sampling.seed_and_order / sampling.repeat_counts / 测量方法 §4.3"}
+  },
+  "representation_normalization": {
+    "type": "representation-only-normalization",
+    "original_path": "docs/P4/计划原始输出-v1.json",
+    "original_sha256": "cac60d377a4d429ca660c3206546b9857fa9425244809ed792afa799cd14d420",
+    "changes": {
+      "execution_batches": "list -> object.items retaining every original entry/order",
+      "limitations": "list -> object.items retaining every original entry/order"
+    },
+    "ready_and_method_content_changed": false,
+    "reason": "Original planner reported shape check passed but machine rejected missing object execution_batches; limitations also array. Preserve original, normalize only container type, keep methodological review pending."
+  }
+}

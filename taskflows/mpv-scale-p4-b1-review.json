@@ -1,0 +1,125 @@
+{
+  "name": "mpv-scale-p4-b1-review",
+  "description": "Independent pure B1 tooling audit on frozen candidate, before collector/calibration. Negative probes in temp only.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 1500000
+  },
+  "phases": [
+    {
+      "id": "candidate-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b1_review_gate.py",
+        "check"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "tooling-review",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "独立P4 B1纯工具审查，只读+安全临时mock，不启动mpv/GPU/VS。固定Flash/xhigh。机器绑定{steps.candidate-check.output}，candidate docs/验证/开发/p4-001/build-b1/candidate.json SHA b04b3823272be91422fcf812e613bb732b538179b83bd77c170aea25e428aced；7新增source/tests已机器复跑，23deps绑定；完整read docs/P4/P4-B1纯工具实现brief.md、批准plan必要段、3handoffAPIs，然后沿实际tools/p4_lib,p4_analyze,p4_check_evidence,p4_verify消费链审。不是宽泛项目审查：优先实构造负例证明关键语义漏洞，最多40calls。必须检查blank run/tool empty state不能写PARTIAL_MEASURED误导已有测量；10Hz计时采样有无真实monotonic10s/window约束而不只10条记录；frames/source/renderrect/DESC/recipe是否校验实值而非字段存在；RIFE仅4个任意非空字段/唯FPS是否可伪通过；raw统计重算/同值不去重/重复runs和epoch不混；hash全树/候选missingplan/fixture不漏，production锁为恒拒导致后期B4正常许可也需改被冻结源的问题(评估待校准版本边界不是强求现在unlock)；原有测试未弱化；源码只读说明与实际检查差异。不重复全5715baselinehash；独立机检已完成。局部temp mock可写OS temp，禁止项目证据覆写/源修复。不要为未来collector能担保就忽略本门公开API可接受伪断言，report每项具体触发路径与可复制反例；若接口未实现客观必需功能需major但不把尚未运行GPU当代码缺陷。已知RIFE鉴别独立样本需B2预注册不临造、plan JSON与method生成器冲突按JSON优先可披露。最终仅JSON verdict:pass|block,candidate_sha256实算,findings:[{id,severity:blocker|major|minor,file,issue,fix}],checks:[],limitations:[],reason。明确这不是P4最终双审或校准批准。",
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "candidate_sha256": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "record-review",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b1_review_gate.py",
+        "record"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "tooling-review"
+      ],
+      "input": "{steps.tooling-review.json}",
+      "final": true
+    }
+  ]
+}

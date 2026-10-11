@@ -1,0 +1,86 @@
+{
+  "stage": "P2",
+  "session": "p2-001",
+  "ready": "pass",
+  "scope": "P2 SDR 最小验证包：在 P1 状态机（候选 a51258be05a5bb9cca153347061652cd8f32b15ded3713003966c43d3cdf9385，PASS_OBJECTIVE，真人偏好未验收但用户已明确授权 P2）之上接入 4 个真实档位：stock Anime4K（本机现有 CTRL+1..6 链零改动复制引用，不用 ArtCNN/不另下载）、FSR1（EASU+RCAS 双 LUMA pass，MIT，每轴≤2×，超出由 mpv 接管）、SGSR1（单 LUMA pass，BSD-3，亮度适配差异记录在案）、Nearest Neighbor（scale=nearest + 显式 cscale/dscale 策略）。固定 gpu-next/vulkan，SDR YUV 8bit/10bit 1080p→1440p 为主场景。含：单主链替换（换档/接管只替换插件自有链，绝不在外部 Anime 链上追加 FSR；external 状态下拒绝直接换档并提示先 Off）、真实 vo-passes/hook 与输出尺寸/WHEN 验证、RGB 与 HDR 输入识别禁用/回退（HDR 仅守卫不评画质，PIC-06 另立项）、resize/比例/profile/crop 变化的防陈旧 pass、退出/Off/external/缺资源/编译失败回退。LS1/BCAS 禁用边界与文案沿用不改。P1 四项 minor 随共享模块变更限域修复：off 标签固定为关（不可被 conf 冒名，含 selftest）、每次产物完整收集（含重启 console，双清单联合绑定）、缺文件错误文案明确（文件缺失 vs 非常规文件）；不重写 p1-001/p1-002 旧证据，不改备份工具/原 taskflows/阶段源码归档。原 91 项单测保留，改旧断言仅限 P2 兼容迁移并逐条说明。GEO-04 完整系统 DPI/跨屏实操列为用户实操 pending，不假测、不改全局显示设置。",
+  "write_paths": [
+    "scripts/scale-selector.lua",
+    "script-opts/scale-selector.conf",
+    "script-opts/scale-selector-gears.conf",
+    "shaders/",
+    "licenses/",
+    "tests/test_p2_support.py",
+    "tests/test_p1_support.py",
+    "tests/fixtures/p2/",
+    "tools/p2_lib.py",
+    "tools/p2_verify.py",
+    "tools/p1_lib.py",
+    "tools/p1_check_evidence.py",
+    "docs/P2实施计划.json",
+    "docs/P2/P2实现说明.md",
+    "docs/插件/缩放选择器-P2用户说明.md",
+    "docs/验证/开发/p2-001/"
+  ],
+  "required_tests": [
+    "CTL-01", "CTL-02", "CTL-03", "CTL-04", "CTL-05", "CTL-06", "CTL-07", "CTL-08", "CTL-09",
+    "SHD-01", "SHD-02", "SHD-03", "SHD-04", "SHD-08", "SHD-09", "SHD-10", "SHD-11", "SHD-12", "SHD-13",
+    "GEO-01", "GEO-07", "WINDOW-01", "PIC-05",
+    "UNIT-P2-01"
+  ],
+  "user_checks": [
+    "P2-UC-1 菜单观感/文案偏好复核（真实档位加入后；沿用 P1-UC-1..4 口径，不伪造 approve）",
+    "P2-UC-2 SDR 1080p→1440p 四档初步真人偏好标注；正式公平对照仍留 P4 PIC-01",
+    "GEO-04-MANUAL 系统 DPI 缩放/跨显示器拖动实操由用户执行；仅观察，不改全局显示设置；结果记 pending_user_checks"
+  ],
+  "risks": [
+    "无 ffmpeg CLI：10bit 源生成存在不确定性。缓解：三条独立路径预检探测（标准库 y4m C420p10、mpv av://lavfi 合成、PPM/PGM 纯 RGB），实现首步跑媒体探针；若三条均不可生成可靠 10bit 输入，SHD-09 10bit 分支如实标未测并将 ready 相关缺口上报，不冒充通过。",
+    "RGB 源获取：mpv 可直接解码 PPM/PNG 图像或 av://lavfi:testsrc2；若 lavfi 在本构建不可用，回退 PPM（P6）方案，证据中记录实际来源。",
+    "HDR 守卫测试只能用 vf=format 的 transfer/primaries 元数据覆盖合成，不是 HDR 编码片源：所有 HDR 证据文件名与内容必须标注 metadata-override-synthetic，禁止冒充真实 HDR 片源。",
+    "vo-passes 的 user shader pass 计数依赖 desc 字符串匹配（P1 已验证该探针），gpu-next 行为变化会破坏检测：每个 SHD 用例同时绑定 glsl-shaders 列表、vo-passes、user-data 导出三路证据交叉印证。",
+    "mpv.com 包装器改写反斜杠参数（P1 已知）：继续直呼 mpv.exe + list-argv。",
+    "Windows 控制台原始 CRLF：沿用 docs/验证/开发/.gitattributes 现则，新 JSON/清单保持 UTF-8/LF，原始 console 产物保持原样不入 LF 化改写。",
+    "Lua 无 SHA-256 能力：资源哈希审计只能由 Python（p2_verify 资源预检 + 单测读清单）承担，Lua 侧仅做存在性检查并 fallback；该边界写入 P2 说明，不声称运行时哈希防护。",
+    "改 tools/p1_lib.py 或 tests/test_p1_support.py 可能破坏原 91 项：只做加法与 P2 兼容迁移，每次改动后全量跑 tests/；迁移断言逐条写明理由（如 P1 静态策略测试假设全部产品档位 disabled，P2 激活 fsr1/sgsr1/anime4k/nearest 后必须迁移为仍断言 ls1/bcas/nis/xbr/sharpbilinear/integer disabled + off 标签恒为关）。",
+    "SHD-13 编译失败构造物若混入正式 shaders/ 会成为真实缺陷源：损坏 shader 只放 tests/fixtures/p2/，仅复制进隔离配置目录，绝不进发布目录。",
+    "external 状态换档若实现为静默接管会违反外部改动优先原则：锁定为拒绝+提示先 Off，UI 与自测用例固化该行为。",
+    "Anime4K 等效对照需隔离环境具备与 stock 相同的 CTRL+1..6 绑定与 shader 路径：隔离 input.conf 复制 stock 绑定块并指向隔离 shaders/anime4k/，对照仅比对 glsl-shaders 列表与 pass 数，不比画质。",
+    "超 2× 行为（SHD-01 附加变体）窗口尺寸大（720p→2160p）：用 window-scale IPC 缩放而非改桌面分辨率，测试后恢复。",
+    "范围蔓延到 P3（NIS/xBR/sharpbilinear/integer）与 HDR 画质（PIC-06）：本计划明确排除，UI 仍显示未实现占位。"
+  ],
+  "summary": "P2 计划就绪：前置全部核实（执行授权-P2.json 在案、p1-002 PASS_OBJECTIVE 候选 a51258be…9385、p2_guard.py REQUIRED 23 项、真实资源在本机可只读获取：备份 payload 与 APPDATA/mpv 均有 stock Anime4K 41 个 glsl 与 CTRL+1..6 链定义、docs/证据/port-FSR.glsl(sha256 56d8597f…)与 port-SGSR.glsl(sha256 10a3d1ad…)连同移植取证索引/许可文本齐备、D:/MPV/mpv.exe v0.40.0-393 可用、PATH 无 ffmpeg 已确认）。本计划为执行权威：实现者按 methods 顺序执行，唯一源码写者只写 write_paths 列出的路径；主链替换、RGB/HDR 守卫、防陈旧、回退与 P1 四项 minor 的限域修复均有明确决策；测试矩阵覆盖 guard 全部 23 项必测 ID 加 UNIT-P2-01，媒体全部由标准库/lavfi 合成，HDR 用 vf=format 元数据覆盖合成并显式标注。GEO-04 系统级实操留用户。ready=pass，提交后自动进入实现，无需再次确认。",
+  "methods": [
+    {"step": 1, "owner": "executor", "action": "跑 taskflows/p2_guard.py preflight（只读校验基线/授权/前候选/备份），确认输出 PASS 且 candidate=a51258be…9385；任何 FAIL 即停，不得改证据凑过。"},
+    {"step": 2, "owner": "executor", "action": "媒体能力探针：用标准库生成 y4m C420jpeg 与 C420p10、PPM(P6)，并探测 mpv av://lavfi 可用性；结果落 docs/验证/开发/p2-001/media-probe.json。据此锁定 SHD-01/02/09/10/11 的媒体方案，10bit 三路径全不可用则按 risks 上报。"},
+    {"step": 3, "owner": "executor", "action": "资源零改动复制：从备份 payload（_备份/缩放插件/mpv-config-20261002-233943/payload/mpv-config/shaders，冻结源）复制 CTRL+1..6 六条链引用的全部去重 glsl（Clamp_Highlights、Restore_CNN_VL、Restore_CNN_Soft_VL、Restore_CNN_M、Restore_CNN_Soft_M、Upscale_CNN_x2_VL、Upscale_CNN_x2_M、Upscale_Denoise_CNN_x2_VL、AutoDownscalePre_x2、AutoDownscalePre_x4）到 shaders/anime4k/，逐文件 SHA-256 与 APPDATA/mpv/shaders 只读副本交叉核对，不一致即停；生成 shaders/ 下资源清单（含来源路径、来源/副本双哈希、 Anime4K MIT 许可出处 docs/证据/anime4k-readme.md）。不触碰 ArtCNN、不下载任何新文件。"},
+    {"step": 4, "owner": "executor", "action": "移植适配：以 docs/证据/port-FSR.glsl（FSR v1.0.2，agyild，MIT 头保留）为基生成 shaders/p2-FSR1.glsl，固定 SHARPNESS 常量（默认 0.2）、保留 //!WHEN 与每轴≤2× WIDTH/HEIGHT 钳制；以 docs/证据/port-SGSR.glsl（SGSR1 luma 版，BSD-3 头保留，2025-12-23 hotfix）为基生成 shaders/p2-SGSR1.glsl，//!PARAM 固定值并核 0–1 钳制；两者均在文件头保留原版权/许可与出处 gist raw 链接+哈希，licenses/ 写 FSR/SGSR/Anime4K 归属说明（引用已有许可证据，不新下载），docs/P2/P2实现说明.md 记录适配差异。不宣称超出已核许可的可分发承诺。"},
+    {"step": 5, "owner": "executor", "action": "Lua P2 档位接入（scripts/scale-selector.lua + scale-selector-gears.conf）：fsr1/sgsr1/anime4k/nearest 转真实可选（内建链，不受本地 conf _set 冒名），nis/xbr/sharpbilinear/integer 保持未实现占位，ls1/bcas 禁用文案原样保留；anime4k 经 conf 选 a..f 模式映射 stock CTRL+1..6 精确链（默认 a=CTRL+1），路径指向 shaders/anime4k/ 副本；nearest 内建 _set=scale=nearest;cscale=nearest;dscale=nearest（显式决策并记录：三值全 nearest，缩小即点采样，UI 不另造黑边）；fsr1/sgsr1 走 LUMA 档注册表标记（RGB/HDR 守卫与 WHEN 检测用）。off_label 改为解析器常量关（V2-01 修复），缺资源/编译失败文案区分文件缺失/非常规文件/编译失败（REV-02 同域修复）。"},
+    {"step": 6, "owner": "executor", "action": "主链替换与回退语义：external 状态下选任何档位一律拒绝并提示先 Off（不静默接管、不追加到外部 Anime 链——CTL-03/SHD-04 语义延伸）；active 内换档沿用 plan_gear_writes 元素级替换自有链；Off/缺资源/编译失败回退沿用 P1 状态机并扩展到新档位资源（存在性检查失败→fallback 显示原因）；新增负例：有外部链时激活 fsr1 断言 glsl-shaders 外部条目原样且无 fsr 条目混入。"},
+    {"step": 7, "owner": "executor", "action": "防陈旧与守卫：观察 video-reconfig、video-out-params、video-crop、current-window-scale 变化→重估当前档位适用性与状态显示（LUMA hook 未触发时菜单如实显示跳过/未缩放原因，SHD-08）；激活与运行时均查 video-out-params：RGB 像素格式或 gamma∈{pq,hlg} 即拒用 LUMA 档并显示原因（CTL-09/SHD-10/SHD-11），nearest 不设 LUMA 守卫；几何只读 video-out-params/窗口像素，维持 GEO-01 无反馈审计。"},
+    {"step": 8, "owner": "executor", "action": "tools/p2_lib.py（如需薄封装）与 tools/p2_verify.py：复用 p1_lib IsolatedEnv/IPC/Evidence 与 p1_verify 既有 CTL/GEO/SHD-12/PIC-05 用例逻辑（只读导入或受控复制适配），新增 CTL-09、SHD-01..04、SHD-08..11、SHD-13、WINDOW-01 用例；隔离环境复制 scripts/script-opts/shaders/tests fixtures，input.conf 注入 stock CTRL+1..6 绑定块（指向隔离 shaders/anime4k/）用于 SHD-04 等效对照；每个用例产物 console.txt+mpv.log+transcript.jsonl+inputs.json+截图全量落盘（含 CTL-05 各状态重启 console，修复 REV-01/V2-02 收集缺口），清单由收集器自动生成双份（implementer+freeze/lead）。"},
+    {"step": 9, "owner": "executor", "action": "单测：新增 tests/test_p2_support.py（解析器：新内建档位防冒名、off 恒为关、RGB/HDR 判定纯函数、主链替换 oracle、cscale/dscale 显式策略、资源清单哈希审计、无 clr/F8-only 回归）；tests/test_p1_support.py 仅做 P2 兼容迁移并逐条注明理由；tests/fixtures/p2/ 放损坏/不兼容 PARAM shader（SHD-13 专用）。原 91 项必须全绿。tools/p1_lib.py、tools/p1_check_evidence.py 仅限域小修（缺文件文案等），不改行为契约。"},
+    {"step": 10, "owner": "test-engineer", "action": "unit-tests + freeze：全量 python -B -X utf8 -m unittest discover tests（91 旧项+新项）；跑 tools/p2_verify.py 真实 mpv 回归（vo=gpu-next、gpu-api=vulkan，直呼 mpv.exe），产出 docs/验证/开发/p2-001/tests.json（cases 覆盖全部 required_tests，pending_user_checks 记 GEO-04-MANUAL 与 P2-UC 项）、candidate.json、双 evidence-manifest；p1_check_evidence 联合机器门 problems=[]；旧 p1-001/p1-002 目录零写入。"},
+    {"step": 11, "owner": "reviewer + security-reviewer", "action": "按 taskflow 两路限域复审（technical/safety），结论走 p2_guard.py result；blocker/major 即 REWORK 循环；最后写 docs/插件/缩放选择器-P2用户说明.md 与 docs/P2/P2实现说明.md（新建 P2 说明，不覆盖 P1 文档）。"}
+  ],
+  "resource_inventory": [
+    {"path": "C:/Users/kkiw/AppData/Roaming/mpv/shaders（41 个 Anime4K_*.glsl）+ input.conf CTRL+1..6/F5/CTRL+0 绑定", "role": "本机现有 stock 链只读参照源", "provenance": "活动配置，只读不写；与备份逐哈希交叉核对"},
+    {"path": "D:/workspace/小项目/mpv插件/_备份/缩放插件/mpv-config-20261002-233943/payload/mpv-config/{shaders,input.conf}", "role": "stock Anime4K 零改动复制首选源（冻结快照）", "provenance": "docs/备份记录.json：manifest 232fcda3…、ZIP 207e8d3f…、source_unchanged=true"},
+    {"path": "docs/证据/port-FSR.glsl", "role": "FSR1 适配基文件", "provenance": "sha256 56d8597fc6b7bf6d13f8c3b2bdf1cdc43b06175d51746aab44cf1dca16929b9e；AMD FidelityFX FSR v1.0.2，MIT 头内嵌，agyild 移植；移植取证索引.json 有 gist raw 取证"},
+    {"path": "docs/证据/port-SGSR.glsl", "role": "SGSR1 适配基文件", "provenance": "sha256 10a3d1ada2c439607caac32de2a5adceab1cd1580261511aaf67bafd415065fe；Qualcomm SGSR1，BSD-3-Clause，luma 适配版（非 RGB 原版），含 2025-12-23 hotfix"},
+    {"path": "docs/证据/{fsr-license.txt,sgsr-license.txt,anime4k-readme.md,移植取证索引.json}", "role": "许可/取证依据（引用，不新下载）", "provenance": "P0 研究证据，P2 期间只读"},
+    {"path": "D:/MPV/mpv.exe", "role": "被测播放器（mpv v0.40.0-393-gad59ff1b4，libplacebo v7.357.0，内置 FFmpeg 库可用于 av://lavfi）", "provenance": "P1 同版本；PATH 无 ffmpeg CLI 已确认，媒体全部标准库/合成生成"},
+    {"path": "tools/p1_lib.py / tools/p1_verify.py / tools/p1_check_evidence.py", "role": "隔离环境/IPC/证据门复用基座（可限域修改并回归）", "provenance": "p1-002 候选源码，原字节留档于 docs/阶段源码快照/p1-002（只读）"},
+    {"path": "taskflows/p2_guard.py", "role": "P2 机器门（REQUIRED 23 项、write_paths 边界、plan 校验）", "provenance": "既有 taskflow，只读不可改"},
+    {"path": "docs/验证/开发/p1-002/technical-status.json", "role": "前阶段客观通过依据", "provenance": "PASS_OBJECTIVE，candidate a51258be…9385，4 项 minor 为本阶段限域修复输入"}
+  ],
+  "test_strategy": {
+    "backend_pin": "所有真实 mpv 用例固定 --vo=gpu-next --gpu-api=vulkan，直呼 D:/MPV/mpv.exe（list-argv）；沿用 P1 backend_facts 记录。",
+    "media": "无 ffmpeg CLI：标准库生成 y4m（C420jpeg 8bit 基线 320x240；1080p 源 1920x1080 供 SHD-01/02 主场景；C420p10 供 SHD-09 10bit）；PPM(P6) 供 RGB（SHD-10、CTL-09）；av://lavfi 为备选并在 media-probe.json 记录取舍；SHD-01 附加 720p→2160p（window-scale 放大）验证每轴≤2× 钳制后 mpv 接管。",
+    "hdr_guard": "SHD-11 用 vf=format:transfer=pq:primaries=bt.2020 等 mpv 色彩覆盖选项把 SDR 合成源标为 HDR 元数据，证据显式标注 metadata-override-synthetic，不冒充 HDR 编码片源；仅验证识别/禁用/回退与 UI 文案，不做 HDR 画质评价。",
+    "pass_verification": "每 SHD 用例三路证据：IPC 读 glsl-shaders 列表（等价对照 SHD-04）、vo-passes（user shader pass 数/链结构/输出尺寸）、user-data 导出的状态与菜单条目；SHD-08 断言 hook 跳过时显示真实状态；GEO-01 审计 journal 无被缩放后尺寸回读。",
+    "window_and_stale": "WINDOW-01：IPC set current-window-scale/geometry 触发本窗口 resize 与比例变化，断言 pass 链重建、无陈旧 pass、状态导出与 vo-passes 一致、退出后无残留；完整系统 DPI/跨屏（GEO-04）列 pending_user_checks 由用户实操。",
+    "regression_and_gates": "原 91 项单测全绿不删改（P2 兼容迁移须注明）；p2_guard preflight/plan-check/check/result 全链执行；证据 create-only、双清单联合绑定、p1_check_evidence --require-tests problems=[]；p1-001/p1-002 与阶段快照零写入、零重跑。",
+    "artifact_rules": "每变体 console.txt+mpv.log+mpv.transcript.jsonl+inputs.json+截图全收集，CTL-05 各状态重启 console 必须入清单（修复 REV-01/V2-02）；新 JSON UTF-8/LF；原始 Windows 控制台产物保持原样。",
+    "fallback_negative": "CTL-07 扩展：新档位资源缺失/路径错误→fallback+原因；SHD-13 用 tests/fixtures/p2 损坏 shader 在隔离环境构造编译失败→回退上一稳定档、无残留 pass；external 拒换档负例固化。",
+    "boundaries": "不写 APPDATA/mpv、D:/MPV、备份 payload、原 taskflows、guard.py、阶段快照、原计划/测试计划/旧证据；不改全局显示设置；真人偏好与 GEO-04 只 pending 不假测。"
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "name": "mpv-scale-p1-review",
+  "description": "Bounded read-only reviews of already implemented/frozen P1. No implementation replay; compact argv prompts reference artifact paths instead of expanding reports.",
+  "strictInterpolation": true,
+  "concurrency": 2,
+  "budget": {
+    "maxTokens": 1600000
+  },
+  "phases": [
+    {
+      "id": "snapshot-check",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-c",
+        "import importlib.util,json; from pathlib import Path; s=importlib.util.spec_from_file_location('g',Path('taskflows/guard.py')); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); _,_,h=g.candidate('P1','p1-001'); assert h=='d17d5f01b7946373f476ce9b27be4848156cc7bbc3a539513becc8e10b32e317'; g.verified_backup(); print(json.dumps({'status':'PASS','candidate_sha256':h}))"
+      ],
+      "timeout": 60000
+    },
+    {
+      "id": "technical-review",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "cache": {
+        "scope": "off"
+      },
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "dependsOn": [
+        "snapshot-check"
+      ],
+      "task": "独立只读技术审查，不看另一审核者结论。阶段P1，计划请读取docs/P1实施计划.json；原始完整计划为docs/P1计划-GLM原始.json，机器绑定固定SHA d17d5f01b7946373f476ce9b27be4848156cc7bbc3a539513becc8e10b32e317。核对docs/验证/开发/p1-001/candidate.json及全部文件SHA、tests.json，审核源码与真实证据是否满足本阶段测试ID/算法身份/后端/ownership/回退/几何/公平测量。确认候选scope覆盖实际共享模块和shader，不能只审变更片段或只凭旧备份测试通过。不得更改源码/报告/配置、不执行live恢复或安装；额外测试只能只读或临时隔离数据；并行审核禁止重跑GPU性能基准，GPU测量只由单一集成验证负责人采集。没测不当通过；只读review不是部署验收。P5限部署就绪，不要求本次真实INS-02/04；用户评分留人工门。发现阻断项block，保留具体file:line/重现与修复，不自动修复。仅JSON {verdict:'pass'或'block',candidate_sha256:本候选SHA,findings:[{id,severity:'blocker'或'major'或'minor',file,issue,fix}],checks:[],limitations:[],reason}，禁止围栏。\n用户已授权自动开始P1并要求不用等确认，故不把缺少启动确认列为阻断。当前独立审查只给客观实现结论，不伪造用户主观体验验收。findings必须完整保留；两个角色结束后集成者统一判REWORK或客观通过。\n任务基线：HEAD仍8f6b14e，P1六个源码/测试文件均为原脏改之外的新增，候选已冻结，两路审核阶段不改源码。验收依据是candidate.json+tests.json及源/原始证据；验证负责人独立复跑的说明在docs/验证/开发/p1-001/verify-lead/集成验证负责人报告.md；已知F-01保存在docs/验证/开发/p1-001/集成发现-v1.json。特别核对Off/external语义是否仍覆盖外部合法更改、gear配置能否冒名开启LS1/BCAS、证据引用完整且可复查、rerun是否会覆写冻结证据。禁止运行p1_verify默认路径（它可能改已审证据），并行不运行任何GPU测试；静态/临时合成测试可执行但用-B且不写项目源码。读取大日志时按case选取片段，勿通读整个mpv RST或重复P0审查。最终严格只给下面形状的JSON，不加标题或围栏，不把字符串字段变成对象：{\"verdict\":\"pass或block\",\"candidate_sha256\":\"d17d5f01b7946373f476ce9b27be4848156cc7bbc3a539513becc8e10b32e317\",\"findings\":[{\"id\":\"...\",\"severity\":\"blocker或major或minor\",\"file\":\"相对路径:行号\",\"issue\":\"...\",\"fix\":\"...\"}],\"checks\":[],\"limitations\":[],\"reason\":\"字符串\"}。本次只做客观评估，不需等待用户确认。",
+      "output": "json",
+      "retry": {
+        "max": 2,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "safety-review",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "cache": {
+        "scope": "off"
+      },
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "dependsOn": [
+        "snapshot-check"
+      ],
+      "task": "独立只读安全/集成风险审核，非作者且不看另一审核者结论。阶段P1，计划请读取docs/P1实施计划.json；原始完整计划为docs/P1计划-GLM原始.json；固定候选固定SHA d17d5f01b7946373f476ce9b27be4848156cc7bbc3a539513becc8e10b32e317。核对docs/验证/开发/p1-001/candidate.json/文件SHA与真实测试报告；检查路径/许可/边界、Off恢复和外部改链、保留CTRL+1..6/F7 RIFE、单主链、非法配置/资源缺失/失败退回。P5核验只动自身文件/管理块的安装卸载、dry-run、再次备份/显式授权/回滚设计与隔离测试，禁止真实写入；INS-02/04留独立实际部署，不冒称已完成。确认报告没有原媒体/凭据写入或把mock冒充实际编译/画质/GPU/ACL/断电测试。不得修改候选或真实配置；攻击复现仅临时合成目录；并行审核禁止启动GPU性能基准或修改测量环境。已披露非OS沙箱/非跨进程事务残余风险如实列出，不假称解决。实际阻断风险block并给复现/修复，禁止现场改源码。仅JSON {verdict:'pass'或'block',candidate_sha256:本候选SHA,findings:[{id,severity:'blocker'或'major'或'minor',file,issue,fix}],checks:[],limitations:[],reason}，无代码围栏。\n用户已授权自动开始P1并要求不用等确认，故不把缺少启动确认列为阻断。当前独立审查只给客观实现结论，不伪造用户主观体验验收。findings必须完整保留；两个角色结束后集成者统一判REWORK或客观通过。\n任务基线：HEAD仍8f6b14e，P1六个源码/测试文件均为原脏改之外的新增，候选已冻结，两路审核阶段不改源码。验收依据是candidate.json+tests.json及源/原始证据；验证负责人独立复跑的说明在docs/验证/开发/p1-001/verify-lead/集成验证负责人报告.md；已知F-01保存在docs/验证/开发/p1-001/集成发现-v1.json。特别核对Off/external语义是否仍覆盖外部合法更改、gear配置能否冒名开启LS1/BCAS、证据引用完整且可复查、rerun是否会覆写冻结证据。禁止运行p1_verify默认路径（它可能改已审证据），并行不运行任何GPU测试；静态/临时合成测试可执行但用-B且不写项目源码。读取大日志时按case选取片段，勿通读整个mpv RST或重复P0审查。最终严格只给下面形状的JSON，不加标题或围栏，不把字符串字段变成对象：{\"verdict\":\"pass或block\",\"candidate_sha256\":\"d17d5f01b7946373f476ce9b27be4848156cc7bbc3a539513becc8e10b32e317\",\"findings\":[{\"id\":\"...\",\"severity\":\"blocker或major或minor\",\"file\":\"相对路径:行号\",\"issue\":\"...\",\"fix\":\"...\"}],\"checks\":[],\"limitations\":[],\"reason\":\"字符串\"}。本次只做客观评估，不需等待用户确认。",
+      "output": "json",
+      "retry": {
+        "max": 2,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "objective-result",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "dependsOn": [
+        "technical-review",
+        "safety-review"
+      ],
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "-c",
+        "import importlib.util,json,sys,hashlib\nfrom pathlib import Path\nr=json.load(sys.stdin)\nspec=importlib.util.spec_from_file_location('flow_guard',Path('taskflows/guard.py'))\ng=importlib.util.module_from_spec(spec); spec.loader.exec_module(g)\nc,t,h=g.candidate('P1','p1-001')\nassert all(r[k]['candidate_sha256']==h for k in ['technical','safety'])\nbackup=g.verified_backup()\nblocked=any(r[k]['verdict']!='pass' or any(f['severity'] in ['blocker','major'] for f in r[k]['findings']) for k in ['technical','safety'])\nintegration=json.loads(Path('docs/验证/开发/p1-001/集成发现-v1.json').read_text(encoding='utf8'))\nresult={'integration_findings':integration['findings'],'status':'REWORK' if blocked else 'PASS_OBJECTIVE','stage':'P1','session':'p1-001','candidate_sha256':h,'reviews':r,'pending_user_checks':t.get('pending_user_checks',[]),'user_subjective_acceptance_claimed':False,'authorization_source':'docs/执行授权-P1.json','live_configuration_written':False,'live_deployment_completed':False,'backup_source_unchanged':backup,'note':'Objective implementation/testing verdict only; not a fabricated user approval or product quality/performance acceptance.'}\nout=Path('docs/验证/开发/p1-001/technical-status.json')\nwith out.open('x',encoding='utf-8',newline='\\n') as stream: json.dump(result,stream,ensure_ascii=False,indent=2)\nprint(json.dumps({'status':result['status'],'candidate_sha256':h,'findings':[dict(f,reviewer=k) for k in ['technical','safety'] for f in r[k]['findings']],'pending_user_checks':result['pending_user_checks'],'record':out.as_posix(),'live_configuration_written':False},ensure_ascii=False,indent=2))\n"
+      ],
+      "input": "{\"technical\":{steps.technical-review.json},\"safety\":{steps.safety-review.json}}",
+      "timeout": 60000,
+      "final": true
+    }
+  ]
+}

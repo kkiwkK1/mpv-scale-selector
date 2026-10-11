@@ -1,0 +1,206 @@
+{
+  "name": "mpv-scale-p3-r2-readonly-reviews-v8",
+  "description": "Review-only recovery from two provider Connection errors. Unchanged frozen r2 candidate; no source writes or GPU reruns.",
+  "strictInterpolation": true,
+  "concurrency": 2,
+  "budget": {
+    "maxTokens": 2000000
+  },
+  "phases": [
+    {
+      "id": "candidate-check",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_revision_guard.py",
+        "check"
+      ],
+      "dependsOn": [],
+      "timeout": 300000
+    },
+    {
+      "id": "technical-review",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "对固定P3候选做独立只读对抗审查；仅指定GLM-5.3-Flash/xhigh。前次两路只2回合Connectionerror无审查结论，本任务新上下文，不是默认PASS。candidate docs/验证/开发/p3-001/revision-r2/candidate.json SHA256必须0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67。先读取该candidate/tests.json、同目录verify-lead报告与author-delivery，再按candidatefiles查源码+原始实测。机器check={steps.candidate-check.output}不是独立审查PASS。重点技术与算法/状态机/实证充分性：NIS compute/coeff/barrier/bounds/WHEN、xBR21点3xMAIN、SharpAUTO1退化/manual2x和真实linear CPUgolden、Integerk/rotationSARresizepausedload/Off与externalownership、stock6mode与前P2回归。特别核GEO03controlledframe实际RGBpixels新鲜、epoch/stablepause、counter饱和非GPU停摆以及真正10bit载荷与sourcepins。\n读docs/P3/P3独立集成限域修正brief-v5.json、P3候选修订基线-r2.json、P3-r2中断收尾brief-v6.json及原p3-001/verify-lead/integration-report.md/joint-drift-supplement.json（历史资料非当前正证）。原VL3-01 currentrender缺失已修，必须核当前sameSHA作者全35与独立全35都真实；原VL3-05六旧hash不一致/1CRLF仍客观存在（其中故意篡改negativefixture应区分），不能凭mtime或新hash重绑宣称历史恢复。新2440保护只能防后续改动，新正证仅revision-r2。独立判断当前影响/修正范围，若历史完整性仍属blockingmajor就block并保留，不因领导者boundary表述默契降级。原root candidate62aa/testsFAIL不能当当前候选；旧报告错plan路径和日期外部勘误不可改旧文掩盖。\n禁止写任何源码/旧证据/报告、禁止GPU/真实配置/部署/git/恢复；可只读hash/checkers及安全临时mock，所有已执行证据与freezeSHA一致，后写会失效。实际mpv实验已独立集成完成，不重复GPU。用户主观/DPI跨屏仍pending，P4性能RIFE未测，不称收益。最多约25-40定点读/查回合聚焦实质，勿反复dump157KB验证器全文件。\n输出仅JSON符合expect：verdict pass|block,candidate_sha256,findings:[{id,severity:blocker|major|minor,file,issue,fix}],checks:[],limitations:[],reason。每finding给具体file/位置/实证，不把无GPU独立重跑当已覆盖；发现major/blocker必须block，不能只结论没证据。两路为同模型独立上下文，不冒称异质模型。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "adversarial-review",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "candidate-check"
+      ],
+      "task": "对固定P3候选做独立只读对抗审查；仅指定GLM-5.3-Flash/xhigh。前次两路只2回合Connectionerror无审查结论，本任务新上下文，不是默认PASS。candidate docs/验证/开发/p3-001/revision-r2/candidate.json SHA256必须0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67。先读取该candidate/tests.json、同目录verify-lead报告与author-delivery，再按candidatefiles查源码+原始实测。机器check={steps.candidate-check.output}不是独立审查PASS。重点安全与证据对抗：保留ID/禁用LS1BCAS/Off身份failclosed、路径private/reparse/traversal、无活动配置写/隔离无凭据子环境/selfPID/无全局DPI或kill、createonly/旧证据保护/完整tripletrestartconsole/PNG诚实标注/source-test-manifest完整绑定/伪0==0和陈旧pass拒绝。特别核修订guard是否弱化门槛，负例自测与当前raw双矩阵。\n读docs/P3/P3独立集成限域修正brief-v5.json、P3候选修订基线-r2.json、P3-r2中断收尾brief-v6.json及原p3-001/verify-lead/integration-report.md/joint-drift-supplement.json（历史资料非当前正证）。原VL3-01 currentrender缺失已修，必须核当前sameSHA作者全35与独立全35都真实；原VL3-05六旧hash不一致/1CRLF仍客观存在（其中故意篡改negativefixture应区分），不能凭mtime或新hash重绑宣称历史恢复。新2440保护只能防后续改动，新正证仅revision-r2。独立判断当前影响/修正范围，若历史完整性仍属blockingmajor就block并保留，不因领导者boundary表述默契降级。原root candidate62aa/testsFAIL不能当当前候选；旧报告错plan路径和日期外部勘误不可改旧文掩盖。\n禁止写任何源码/旧证据/报告、禁止GPU/真实配置/部署/git/恢复；可只读hash/checkers及安全临时mock，所有已执行证据与freezeSHA一致，后写会失效。实际mpv实验已独立集成完成，不重复GPU。用户主观/DPI跨屏仍pending，P4性能RIFE未测，不称收益。最多约25-40定点读/查回合聚焦实质，勿反复dump157KB验证器全文件。\n输出仅JSON符合expect：verdict pass|block,candidate_sha256,findings:[{id,severity:blocker|major|minor,file,issue,fix}],checks:[],limitations:[],reason。每finding给具体file/位置/实证，不把无GPU独立重跑当已覆盖；发现major/blocker必须block，不能只结论没证据。两路为同模型独立上下文，不冒称异质模型。",
+      "output": "json",
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "candidate_sha256": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      }
+    },
+    {
+      "id": "objective-result",
+      "type": "script",
+      "cwd": "D:\\workspace\\小项目\\mpv插件\\缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p3_revision_guard.py",
+        "result"
+      ],
+      "timeout": 120000,
+      "dependsOn": [
+        "technical-review",
+        "adversarial-review"
+      ],
+      "input": "{\"technical\":{steps.technical-review.json},\"adversarial\":{steps.adversarial-review.json}}",
+      "final": true
+    }
+  ]
+}

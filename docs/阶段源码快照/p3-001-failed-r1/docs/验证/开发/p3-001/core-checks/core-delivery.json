@@ -1,0 +1,120 @@
+{
+  "schema": "mpv-scaler-p3-core-delivery/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "run": "run-004",
+  "role": "core-validation (test-engineer, independent)",
+  "status": "PASS",
+  "status_scope": "仅限 12-case 真实 core smoke（本限域探针）实测 12/12 PASS；不代表 35-ID 全矩阵、不代表全阶段交付/独立验收（见 limits 与 pending_downstream）。",
+  "basis": {
+    "brief": "docs/P3/P3核心限域修正brief-v2.json（CORE-R3：独立 core-validation 只修最新 TEMP 探针并实跑 run-002+，源码不写，失败返作者）",
+    "handover": "docs/验证/开发/p3-001/core-fix-r2/（CORE-R1/R2 修复已交付；selftest 112/0；回滚正负例已在 fix-r2 D 实证）",
+    "frozen": "P3 计划/brief/190 Python 单测冻结未动；190 未复跑（fix-r2 已两轮 PASS 记录在案）"
+  },
+  "run_history": [
+    {
+      "run": "run-001",
+      "dir": "core-checks/run-001",
+      "result": "1 PASS / 11 FAIL（历史证据，原字节保持）",
+      "correction": "唯一 PASS（INTEGER-ROTATE-CROP-SAR）为 fallback 空真：实测 state_active=false、chain_verified=false、gear=''、四相 state=fallback、k 全为遗留 1；SAR 相全屏真期望 k=2≠1 恰证陈旧。run-001 文件不改，本报告与 run-002+ 实测纠正。"
+    },
+    {
+      "run": "run-002",
+      "dir": "core-checks/run-002",
+      "result": "10 PASS / 2 FAIL（原字节保持；原样保留）",
+      "fails": [
+        "INTEGER-1X-BARS（截图与插件固定 3s OSD 竞态，视频矩形本身实测已精确 (320,180)-(2240,1260)）",
+        "INTEGER-SESSION-SWITCH-PAUSE（runner 自身 phase_b 漏 epoch 键 → KeyError）"
+      ]
+    },
+    {
+      "run": "run-003",
+      "dir": "core-checks/run-003",
+      "result": "10 PASS / 2 FAIL（原字节保持）",
+      "fails": [
+        "INTEGER-1X-BARS（OSD 之外又实测 present 停摆：fresh/redraw 计数 1.3s 完全不变，过期 OSD 冻结在画面；旧 fresh 判定有 flake）",
+        "INTEGER-SESSION-SWITCH-PAUSE（runner 的 0.0-falsy：zoom or -9 把真实 0.0 当缺省）"
+      ]
+    },
+    {
+      "run": "run-004",
+      "dir": "core-checks/run-004",
+      "result": "12 PASS / 0 FAIL（最终本轮实测）",
+      "fixes": [
+        "SESSION zoom 判定 None-safe",
+        "新帧判定去 flake：counts_changed OR (estimated-vf-fps>1 AND time-pos 变化)；暂停/死亡仍 FAIL",
+        "1X/2X 截图前 pause 一拍强制重绘；1X 黑边 fallback 用按几何构造必然无 OSD 的扫描带（如实标记 fallback_used=true）"
+      ]
+    }
+  ],
+  "measured_highlights": {
+    "selftest": "真实 mpv 内嵌 selftest status=pass，112 cases / 0 failures（run-001 旧源的 108/2 已真实关闭）；产品 gears conf 实际加载、解析告警 0",
+    "shader_cases": "NIS(1366x768 非块整除窗口)/xBR(gbrp)/Sharp AUTO(1280x720→1366x768)/Sharp2x/Sharp scale0 各自单链真实 compile，DESC 命中 + 非空 GPU samples（绝不 0==0），链恰为单文件（~~/shaders/<期望>），fresh 帧递增；AUTO 1x 退化与 scale0 钳制 skip_note 如实出现",
+    "static_audits": "NIS workgroup/两系数纹理/barrier 后 guard/1366x768 store-index、xBR 21 参考点、Sharp AUTO/manual2x/scale0 纯函数审计全部落盘 static-audits.json",
+    "integer_1x": "全屏读回 fullscreen=true + osd 2560x1440 + window PNG 2560x1440；k=1；video-unscaled native bool true；黑边 fallback 带（OSD-free）实测 320/320/180/180 精确；Off 回滚零残留（residue=[]，off_report.restored 含全部六属性，unscaled 回 native bool false）",
+    "integer_2x": "k=2、zoom=1.0、native bool true、无黑边、截图 2560x1440、present 计数直接递增",
+    "integer_k1": "640x360 窗 k=0 诚实回退：unscaled native bool false、zoom 0、不裁切（vop 1280x720）、skip_note 含 k<1",
+    "session_switch_pause": "同进程 1080→720 loadfile：k 1→2、zoom 0→1（None-safe 判定）、epoch 8→11、两相 state=active+gear=integer；截图 2560x1440",
+    "rotate_crop_sar": "四相全部 active+integer；k 与观察 vop 推导一致（1/1/2/2）；crop 走 video-crop（success）；SAR 相 dw≠w 且 k=2（dw/dh 感知，非 w/h）——run-001 遗留 k=1 空真被非空真门彻底纠正",
+    "integer_to_fsr": "Integer(k=2)→FSR1：几何属性还原（zoom 回基线、unscaled 回 native bool false）、scale 无 nearest 残留、链仅 p2-FSR1；外改 zoom=3 与外挂 shader 均让出 external 且原值保留、插件不静默覆盖",
+    "pins": "12/12 case 命令行核对 --vo=gpu-next / --gpu-api=vulkan / --loop-file=inf；5 个全屏 case 另有 --fullscreen=yes（run-001 根因：仅写 conf 被 start() 命令行 --fullscreen=no 覆盖，全屏从未生效）",
+    "fullscreen_gates": "5 个全屏 case 全部激活前读回 fullscreen==true 且 osd 2560x1440；1X/2X 逐像素 PNG 2560x1440，SESSION/ROTATE/FSR IHDR 尺寸 2560x1440"
+  },
+  "rollback_examples": {
+    "positive_in_run": "INTEGER-1X-BARS 内真实 Off 回滚：基线快照→激活→Off，residue=[]、off_report.restored 含 video-unscaled/video-zoom 等 6 项、unscaled 读回 native bool false",
+    "transfer_in_run": "Integer→FSR 几何零残留转移（geom_restored=true, fsr native bool false）",
+    "external_preserved_in_run": "external 让出后 zoom=3.0 与外挂 shader 保持、不被回滚/覆盖（外改保留负向语义）",
+    "fault_injection_negative": "读回不一致故障注入的回滚负例不在本 smoke 范围，由 core-fix-r2 D（真实 mpv + stub env，基线复现 bug、修复后零残留）实证，此处引用"
+  },
+  "inputsha": {
+    "shaders": "inputsha-shaders.json：6 个实际 shader 资源启动前字节级复制进各 case 隔离 cfg，src/dst sha256 全部 match=true",
+    "media": "mediahash.json：14 个合成媒体 sha256/尺寸/SAR/帧数",
+    "console": "各 case console.txt/mpv.log/transcript/window.png 全部进 evidence-manifest（create-only，48 项，manifest-verify consistent=true）；runner 自身进度控制台按设计在 manifest 外，终态 sha256=dee6bba387006a0e819c2ab6a56743696e5e95b1ab132b2045a30fd398c52705（runner-console-sha256.json）"
+  },
+  "sourcehash": {
+    "scripts/scale-selector.lua": "53d985aae0bca6bd18edcb42e2db8310b61d3e75909ccc60b85e3de5bd5ebc06",
+    "script-opts/scale-selector-gears.conf": "62e1bb838eb2e5768b2992d38b025ca5cd869316945a14f1824f76b11d7c19a3",
+    "shaders/p3-NIS.glsl": "046693c49bad8ca9f125694793ae8da32f7c0a5b6aaeb42c60334e1ece8bc358",
+    "shaders/p3-xBR-lv2.glsl": "ce31e8c26b1aace9cbe2b8d1de2ba52ac8fbd453374a80a720720916379fe2b5",
+    "shaders/p3-Sharp-Bilinear-AUTO.glsl": "e2aac70b32026dcc4cf97b367fb8bcd3ad704a7ee46dc6670f1fa312738319ff",
+    "shaders/p3-Sharp-Bilinear-2x.glsl": "877ec2aecde40cdf03e6c5d0404aaa9189aa4a04c3498bc8cbe2ac55c04d021e",
+    "shaders/p3-resource-manifest.json": "d9a41f3ab8b49139a8e19f657ed60c9afed3cad5cbcbe44a96e2349b9a5dc5c5",
+    "tools/p1_lib.py": "36448e8e635ad9410ee6c7825e90b0e2cd0baf6fdd445b5b3560a4de4195b698",
+    "tools/p1_verify.py": "aa48b78d7f41269dfe8ed9a7137a6c99c8497b070ccd22fe33bf6d04a3c88c8f",
+    "tools/p3_lib.py": "a266d32da16818f3805d96acdd254aec9b94abff58b558dc9bca7a4d3f3d0eb6"
+  },
+  "source_integrity_note": "运行时实测 scripts/scale-selector.lua sha256=53d985aae0bca6bd18edcb42e2db8310b61d3e75909ccc60b85e3de5bd5ebc06，与 core-fix-r2/source-sha256.json 的 sha256_after_fix 完全一致（源码未被本轮改动，只读）。但 core-fix-r2/core-fix-delivery.json 里的 sha256_after 字符串（53d985aae0bca6bd2e6d01817a6cf75634818a51ff0eaaea0a2b47698b3d06a4）与该 run 自己的 source-sha256.json 及当前源均不一致，疑为交接文档笔误——如实记录，源码不动，留后续 harness 核对。",
+  "constraints": {
+    "live_configuration_written": false,
+    "active_appdata_mpv_writes": 0,
+    "d_mpv_writes": 0,
+    "api_credentials_in_child_env": false,
+    "own_pid_only": true,
+    "isolation": "HOME/USERPROFILE/APPDATA/LOCALAPPDATA/TEMP/watch-later/screenshots 全在系统 TEMP（p1_lib.IsolatedEnv）；仅停本 runner 启动的 PID；运行后无残留 env 目录、无孤儿 mpv 进程",
+    "write_domain": "仅 core-checks/run-00{2,3,4}/ 证据 + 各自 smoke-runner.py；核心源码/Lua/shader/libs/plan/guard/旧 run 全部只读字节保持",
+    "note": "mpv/vulkan 驱动在 CWD（即证据目录内）产生 NVIDIA Corporation/umdlogs 缓存，属证据目录内副产物，已随 manifest 记录"
+  },
+  "flaky_risks": [
+    "mpv 窗口 present 停摆（遮挡/合成器空转）：present 计数可能 1.3s 不变、过期 OSD 冻结——run-004 以解码器活性+time-pos 变化兜底判定并如实记录；INTEGER-1X-BARS 两轮均复现该停摆（fps=24.0、time-pos 回绕前进），像素断言用 OSD-free 扫描带",
+    "插件 OSD 固定 3s（mp.osd_message 第二参覆盖 --osd-duration）：任何截图类断言必须等 >3s 且防停摆",
+    "vo-passes 计数在 loop 回绕/停摆下不是单调证据——已改为多证据判定",
+    "创建证据 create-only：同目录重跑会 FileExistsError，失败轮原样保留另开新 run（本轮 run-002→003→004 即此协议）"
+  ],
+  "validation": {
+    "command": "cd docs/验证/开发/p3-001/core-checks/run-004 && PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1 python -B smoke-runner.py",
+    "exit_code": 0,
+    "wall_seconds": 136.4,
+    "manifest_verify": "consistent=true, problems=[]"
+  },
+  "limits": [
+    "本 delivery 只覆盖 12-case smoke；35-ID 全矩阵、EVI-01 证据门、p3_verify/p3_check_evidence 未做（build-verifier 下游范围）",
+    "8/10bit 分档（SHD-09）、HDR 边界（SHD-10/11）、逐像素 CPU oracle、真人 DPI/跨屏（GEO-04）、性能样本不在本 scope",
+    "INTEGER-1X-BARS 的黑边终值来自按几何构造的 OSD-free 扫描带 fallback（主全帧扫描被冻结 OSD 污染，fallback_used=true 如实标记）；数值本身 320/320/180/180 精确",
+    "未复跑 190 Python 单测（冻结项；fix-r2 记录两轮 PASS）"
+  ],
+  "human_subjective_acceptance_claimed": false,
+  "pending_downstream": [
+    "build-verifier：35-ID 全矩阵 + EVI-01 证据门（独立构建，两审不省略）",
+    "integration + 对冻结候选的两轮对抗审查"
+  ]
+}

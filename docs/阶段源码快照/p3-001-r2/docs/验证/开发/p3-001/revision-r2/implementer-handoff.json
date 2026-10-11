@@ -1,0 +1,76 @@
+{
+  "schema": "p3-implementer-handoff/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "revision": "r2",
+  "status": "READY_FOR_AUTHOR",
+  "generated_at": "2026-10-06T10:32:44+0800",
+  "role": "independent source-readonly closeout after 63-turn Connection-error interruption (fix writer process confirmed gone; no code written by this closeout)",
+  "actual_source_sha256": {
+    "tools/p3_verify.py": "7f34df43670d8c09e2766a3825ed8a8a0ea870f2464db873fdb1598b9573df7f",
+    "tests/test_p3_support.py": "109132230d1f80a26ba1fe19e72ee72feb56af8a7a26feb4cb361bb77465b836",
+    "docs/P3/P3实现说明.md": "b0c9f9637f0cbf4a1acce628400590646240c4d929b8bcc1e92cc5f048c1b364",
+    "docs/插件/缩放选择器-P3用户说明.md": "13dcda73bb36a0f235b8f929a4f722983d21c0a90543ae5f1fcb7f670969a71d"
+  },
+  "partial_fix_v5_match": "MATCH (all 4 files byte-identical to docs/验证/开发/p3-001/revision-r2/partial-fix-v5/sourcehash.json + source-snapshot)",
+  "three_fresh_probe_dirs": [
+    "docs/验证/开发/p3-001/revision-r2/local-fix/geo03-fresh-1",
+    "docs/验证/开发/p3-001/revision-r2/local-fix/geo03-fresh-2",
+    "docs/验证/开发/p3-001/revision-r2/local-fix/geo03-fresh-3"
+  ],
+  "fresh_probe_summary": {
+    "all_pass": true,
+    "fresh_1": "leader-run, bytes untouched",
+    "fresh_2": {
+      "run_at": "2026-10-06T10:20:34+0800",
+      "case_elapsed_s": 108.0,
+      "objective_results_sha256": "289e6466ebe3d20c9d86de2859cf7c43926637890a2232566310d02fb53cd332",
+      "machine_gate": "problems=[] exit=0"
+    },
+    "fresh_3": {
+      "run_at": "2026-10-06T10:23:23+0800",
+      "case_elapsed_s": 99.9,
+      "objective_results_sha256": "bf2b7577f684316b3f6bc91c1058bbe633ddb82b9b0f3aa9d3abe21de02393d9",
+      "machine_gate": "problems=[] exit=0"
+    },
+    "proof_basis": "real decoded-RGB pixel change via controlled frame-step (new-output-pixels, fresh 0->1, chain_epoch 8 stable), NOT counter growth / decoder activity / PNG-byte metadata; counter_saturation_witness + 24fps blind_alias_witness recorded on-site; pause actual readback and restore (pause_before=false, restore_ok=true); same_moment structured records; gear=integer k=2, native_unscaled=true, scalars nearest, uniform_fraction 1.0 vs control 0.615"
+  },
+  "unit_logs": {
+    "prior_leader": {
+      "path": "docs/验证/开发/p3-001/revision-r2/interruption-unit-r2.txt",
+      "sha256": "c094eab3badca098883995f07720ad1ee1ddc81897a524fdfc345cc402b0e977",
+      "result": "Ran 282 tests — OK (skipped=1)"
+    },
+    "closeout_rerun": {
+      "command": "python -X utf8 -m unittest discover -s tests -p \"test_*.py\" -v",
+      "result": "Ran 282 tests in 117.054s — OK (skipped=1)",
+      "old_270_preserved": true,
+      "extra_skips": 0,
+      "thresholds_unweakened": true,
+      "new_negative_cases_on_file": 12
+    }
+  },
+  "prior_validation_links": {
+    "VL3-01": "docs/P3/P3独立集成限域修正brief-v5.json #VL3-01 (sha256 ec051d29fce8557d1b93e70398ccd725a0a899904adb0dfe1776bdcd98e0eed5) — controlled-leg conditions now satisfied by all three fresh runs",
+    "VL3-05": "same brief #VL3-05 — old nonacceptance manifests retained as history; old failed candidate sha256 62aa973ab6a68e299bf5b88289abef241f1bd2030e0709101ff34f55b534a53e unchanged and not used as positive"
+  },
+  "closeout_evidence": "docs/验证/开发/p3-001/revision-r2/local-fix/closeout-r2.json",
+  "limitations": [
+    "fresh dirs measure GEO-03 only (focused per brief-v6); the other 34 required ids remain for the author full-35 run",
+    "guard recheck in this closeout was mock/unit-level only; full 35 author + independent dual review not yet run",
+    "one pre-disclosed Windows-privilege unit skip remains (existing, not new)",
+    "PNG png_bytes_differ_but_pixels_identical control is null in positive runs (expected); metadata-only rejection is proven at unit level",
+    "all human checks pending; no user acceptance, no P4/RIFE/perf claims made"
+  ],
+  "next_steps_mandatory": [
+    "source-readonly author runs full 35 on same source SHA (author 35)",
+    "independent full 35 integration + dual tech/safety review on same candidate SHA",
+    "freeze handled by the next independent owner; no reviewer role performed here",
+    "revision gate binds this closeout brief-v6 + handoff alongside baseflow/revisionguard; no old-hash rewriting"
+  ],
+  "time_accounting": {
+    "closeout_session_wall_min": 19,
+    "mpv_probe_wall_s": 335,
+    "unit_suite_s": 117.054
+  }
+}

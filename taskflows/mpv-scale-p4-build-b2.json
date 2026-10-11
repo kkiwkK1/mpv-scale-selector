@@ -1,0 +1,166 @@
+{
+  "name": "mpv-scale-p4-build-b2",
+  "description": "Additive isolated collector code and mock tests, independent full regression/freeze and safety-method gate before any real RIFE/GPU initialization.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 2200000
+  },
+  "phases": [
+    {
+      "id": "precheck",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_gate.py",
+        "pre"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "collector",
+      "type": "agent",
+      "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "edit",
+        "write"
+      ],
+      "timeout": 5400000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "precheck"
+      ],
+      "task": "W2单一collector实现写者，指定Flash/xhigh。完整read docs/P4/P4-B2采集器实现与首载brief.md及其中新B1-r2交接API/已批准plan，scope只新增tools/p4_collect.py和tests/test_p4_collect.py、createonly build-b2/author证据。不运行mpv/GPU/VS/nvidia-smi、不clone真实runtime；仅标准库纯实现及TEMP mock测试。本brief详细规定clone隔离/原树inventory/路径私密vpy/原子Lua采样/rife短12帧首载样本/N1媒体依赖实接线/定时窗/productionlock/PIDfinally/参数readback/当前actualformat。前序7源固定不得改；缺API现实BLOCKED，不用假值骗analysis。当前B1全509test+48guard，新增保持全部行为；完整source可参考p1/p3辅助只读但不能误继承fullscreen覆盖/活动env等风险。优先做实际可执行的prepare-runtime和identity-probe短样本CLI、pilot与capture基础入口，生产拒，prepare-media全长生成不要在本任务跑。单元测试需真实invoke安全入口preflight(deny复用dir before任何spawn)、runtime缺hash/envcredentialstrip/PIDcleanup/samplesarray/0timing/window/missingactualevidence；mock不是凭空写pass。CLI模式调用实际库验证不旁路，DLL/model首次日志不能证明时NOT_ESTABLISHED，不伪性能数据。任何无法实现在本unit的功能明确NOT_IMPLEMENTED/REWORK，勿造已实现；60calls软cap，不无限扩展成全benchmarkframework。最后按brief写unit=collector handoff exact2source SHA、tests数组真实console/raw rc/APIs/safeCLI/limitations/gpu_startedfalse，实际全tests+guard回归后才BUILT。"
+    },
+    {
+      "id": "build-freeze",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_gate.py",
+        "build"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "collector"
+      ]
+    },
+    {
+      "id": "safety-review",
+      "type": "agent",
+      "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "B2 collector独立执行前安全+方法复核，固定Flash/xhigh。只读源码+TEMPmock，不启动真实mpv/VS/GPU/clone/nvidia。固定候选{steps.build-freeze.output}，读docs/P4/P4-B2采集器实现与首载brief.md、build-b2/author/handoff.json、两新源码与B1更新API，复核将授权readonlyexecutor执行短RIFE首次加载所需安全前置是否真实落实。具体查所有CLI入口--help默认无副作用/production恒拒/复用目录spawn前拒绝/不能传活动root/links/runtimeinventory前后/DLL模型pins/vpy仅pathdelta/cloneenv VSSCRIPT+PATH+pycache/cache/home/temp/禁凭据与隐私正文进repo/ownPIDtimeoutfinallyclosehandles后manifest；高风险配置先验而非运行后才发现越树写入。原库fullscreen false覆盖及HQ共同config/defaultpropertyreadback不得偷换；Lua采样rawnative samplesarray/count+source/actualmargins非spec伪填；未观测帧索引/fps不得估算后冒实测；N1 verify_required_inputs与gate_run_evidence真实接线(或该CLI明确尚不可用并failclosed不能pretendREADY)。12帧Y4M真实载荷/参数/sourcepin/预注册noncopyblend/rife日志；voimage只能滤镜证据非shader A/B。差异数据合法NOT_ESTABLISHED不假PASS。必须界定这个候选现在能安全执行哪些CLI、哪些未实现不能当完整B2，若必需功能stub返回恒BLOCK则明确REWORK而非只夸安全；不要求本轮GPU数据先于许可。最多40工具调用定点检查/负例，newmajor/blocker真实block，minor具体。最终JSON verdict pass|block,candidate_sha256实算,findings[id,severity,file,issue,fix],checks[],limitations[],reason。",
+      "dependsOn": [
+        "build-freeze"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "candidate_sha256": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "record-review",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_gate.py",
+        "record"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "safety-review"
+      ],
+      "input": "{steps.safety-review.json}",
+      "final": true
+    }
+  ]
+}

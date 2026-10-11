@@ -1,0 +1,112 @@
+{
+  "schema": "p3-r2-local-fix-closeout/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "revision": "r2",
+  "role": "independent source-readonly closeout (r2), no source writes performed",
+  "generated_at": "2026-10-06T10:32:44+0800",
+  "briefs": {
+    "closeout_brief_v6": {
+      "path": "docs/P3/P3-r2中断收尾brief-v6.json",
+      "sha256": "83317258ff610d835fe5b26864a23959d3ad4fc38f1e71ed7cd5928f09fdc634"
+    },
+    "controlling_brief_v5": {
+      "path": "docs/P3/P3独立集成限域修正brief-v5.json",
+      "sha256": "ec051d29fce8557d1b93e70398ccd725a0a899904adb0dfe1776bdcd98e0eed5",
+      "note": "VL3-01 与 VL3-05 按 brief-v6 authority 继续约束本收尾"
+    }
+  },
+  "partial_source_match": {
+    "record": "docs/验证/开发/p3-001/revision-r2/partial-fix-v5/sourcehash.json",
+    "record_sha256": "7c5842540b18c0c8ad2180a3ccb3ed39d69ab92712daeee3143b1fe01e86f210",
+    "status": "MATCH",
+    "files": {
+      "tools/p3_verify.py": "7f34df43670d8c09e2766a3825ed8a8a0ea870f2464db873fdb1598b9573df7f",
+      "tests/test_p3_support.py": "109132230d1f80a26ba1fe19e72ee72feb56af8a7a26feb4cb361bb77465b836",
+      "docs/P3/P3实现说明.md": "b0c9f9637f0cbf4a1acce628400590646240c4d929b8bcc1e92cc5f048c1b364",
+      "docs/插件/缩放选择器-P3用户说明.md": "13dcda73bb36a0f235b8f929a4f722983d21c0a90543ae5f1fcb7f670969a71d"
+    },
+    "snapshot_identical": true,
+    "note": "actualsource 与 partial-fix-v5 记录及 source-snapshot 四文件逐一 sha256 比对全部一致；63回合中断后无任何源漂移"
+  },
+  "fresh_geo03_runs": {
+    "target": ">=3 fresh raw runs total; fresh-1 was leader's, fresh-2/3 executed this closeout",
+    "gpu_serial": true,
+    "create_only": true,
+    "runs": [
+      {
+        "dir": "docs/验证/开发/p3-001/revision-r2/local-fix/geo03-fresh-1",
+        "origin": "leader (prior, bytes untouched)",
+        "status": "PASS"
+      },
+      {
+        "dir": "docs/验证/开发/p3-001/revision-r2/local-fix/geo03-fresh-2",
+        "origin": "closeout run 2026-10-06T10:20:34+0800",
+        "case_elapsed_s": 108.0,
+        "wall_s": 168,
+        "status": "PASS",
+        "objective_results_sha256": "289e6466ebe3d20c9d86de2859cf7c43926637890a2232566310d02fb53cd332",
+        "evidence_manifest_sha256": "d0cfe86dcd5c99b86621592510bb20e6426d8345924bab81d8900ad97b53a074",
+        "manifest_verify_sha256": "975bc6beee435a5c6b12c789daa9534006aee022d16943ebb0a803c8e5deb0f5",
+        "machine_gate": "tools/p3_check_evidence.py --evidence-dir …geo03-fresh-2 --session p3-001 -> problems=[] exit=0"
+      },
+      {
+        "dir": "docs/验证/开发/p3-001/revision-r2/local-fix/geo03-fresh-3",
+        "origin": "closeout run 2026-10-06T10:23:23+0800",
+        "case_elapsed_s": 99.9,
+        "wall_s": 167,
+        "status": "PASS",
+        "objective_results_sha256": "bf2b7577f684316b3f6bc91c1058bbe633ddb82b9b0f3aa9d3abe21de02393d9",
+        "evidence_manifest_sha256": "1326b95e0dd869c14117e97a7032610c41861b0baddf43ccbf7f01efb016de1a",
+        "manifest_verify_sha256": "b3dba12a36f3f0ac70556b805446d74b52016db2e3b1e4a8b5fe713de9d61a68",
+        "machine_gate": "tools/p3_check_evidence.py --evidence-dir …geo03-fresh-3 --session p3-001 -> problems=[] exit=0"
+      }
+    ],
+    "onsite_witnesses_fresh2_and_fresh3": {
+      "backend": "direct D:/MPV/mpv.exe vo=gpu-next gpu-api=vulkan, isolated temp cfg/HOME/APPDATA cache, no API child env, self-PID sweep, fullscreen 2560x1440 gate ok",
+      "activation": "gear=integer k=2, chain_verified_raw=true, native_unscaled bool=true, scalers all nearest",
+      "block_uniformity": "integer uniform_fraction=1.0 (230400 blocks) vs control 0.615x, control_not_uniform=true, integer_vs_control_shots_differ=true",
+      "freshness": "method=new-output-pixels, render_fresh=true, chain_epoch=8 stable, fresh 0->1",
+      "controlled_leg": "leg=controlled-frame-step, ipc_records frame-step error=success, pixel_diff on decoded RGB same dims/bitdepth (8418 compared, 8194 differ, max delta 178), new_output_pixels=true, stability_ok=true",
+      "counter_saturation_witness": "fresh=[768,768] frozen bounded samplecount while controlled step yields new pixels — saturation cannot be read as dead player (VL3-01)",
+      "blind_alias_witness": "24fps repeating synthetic pattern: fresh-2 blind 0.5s sample had 0 differing points while playing — aliasing trap documented; blind sampling never used as freshness proof",
+      "pause_control": "pause_before=false, paused_readback=true, restore to unpaused, restore_ok=true (actual BEFORE/AFTER readback in finally)",
+      "same_moment": "structured same_moment records (pixelformat yuv420p, w/dw, osd 2560x1440, vo-passes counts, same_window=true)",
+      "metadata_only": "png_bytes_differ_but_pixels_identical=null in positives; metadata-only rejection covered by unit negative test_metadata_only_png_byte_change_is_not_new_pixels"
+    }
+  },
+  "unit_rerun": {
+    "command": "python -X utf8 -m unittest discover -s tests -p \"test_*.py\" -v",
+    "result": "Ran 282 tests in 117.054s — OK (skipped=1)",
+    "skip": "single pre-disclosed Windows privilege skip, unchanged; no extra skips; old 270 behavior thresholds unweakened",
+    "new_negative_cases": 12,
+    "new_negative_class": "TestP3FreshnessR2ControlledLeg (incl. metadata-only PNG rejection, stale-epoch rejection, dimension/bitdepth mismatch rejection, pause-restore-on-pipe-death, counter-growth-without-controlled rejection)",
+    "prior_leader_log": {
+      "path": "docs/验证/开发/p3-001/revision-r2/interruption-unit-r2.txt",
+      "sha256": "c094eab3badca098883995f07720ad1ee1ddc81897a524fdfc345cc402b0e977",
+      "result": "Ran 282 tests in 117.345s — OK (skipped=1)"
+    }
+  },
+  "guard_note": {
+    "scope": "safety mock-level recheck only (unit-embedded guard tests, e.g. test_p2s04_env_files_still_enforced_by_p3_guard); no live API writes, no temp pollution, no non-self PID kill",
+    "full_author_35": "NOT run in this closeout — next role is source-readonly author 35, then independent full 35 + freeze by separate owners"
+  },
+  "integrity": {
+    "old_2440_p3_files": "untouched",
+    "old_failed_candidate": "docs/验证/开发/p3-001/candidate.json sha256 62aa973ab6a68e299bf5b88289abef241f1bd2030e0709101ff34f55b534a53e unchanged; never used as current positive",
+    "historical_bad_manifests": "retained as nonacceptance history per VL3-05; no rebinding/normalization",
+    "git": "no commits/pushes; working tree only gained new evidence files under revision-r2/local-fix + root implementer-handoff.json"
+  },
+  "runtime_safety": {
+    "mpv": "no active mpv process before runs (verified via tasklist); GPU strictly serial (fresh-2 then fresh-3)",
+    "isolation": "harness temp HOME/APPDATA cache, no live config/DMPV/backup writes, no global kill, no DPI change, no deploy/restore/commit",
+    "human_checks": "all still pending; no user acceptance signed; no P4/RIFE/perf claims"
+  },
+  "time_accounting": {
+    "fresh2_start": "2026-10-06T10:20:34+0800",
+    "fresh3_end": "2026-10-06T10:26:10+0800",
+    "closeout_session_wall_min": 19,
+    "unit_suite_s": 117.054,
+    "case_elapsed_s_total": 207.9
+  }
+}

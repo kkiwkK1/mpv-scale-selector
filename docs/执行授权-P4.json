@@ -1,0 +1,15 @@
+{
+  "stage": "P4",
+  "session": "p4-001",
+  "authorization_source": "explicit_user_chat",
+  "user_request": "P4：公平画质与性能 A/B、帧节奏和真实 RIFE 余量测试；",
+  "scope": "isolated P4 research/instrumentation/measurement/analysis, actual RIFE with readonly original runtime or temp copy; no deployment",
+  "allow_isolated_implementation_and_tests": true,
+  "allow_live_configuration_write": false,
+  "allow_commit_or_push": false,
+  "human_subjective_acceptance_claimed": false,
+  "prior_objective_candidate_sha256": "0b70e6644f5eb47dc0c3ad1b86db759e062ba0c162acdf074783533ba2185e67",
+  "model": "zai-coding-cn/glm-5.3-flash",
+  "requested_thinking": "xhigh",
+  "created_at": "2026-10-07T01:39:04+0800"
+}

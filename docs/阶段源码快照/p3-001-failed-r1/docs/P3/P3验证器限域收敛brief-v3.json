@@ -1,0 +1,46 @@
+{
+  "stage": "P3",
+  "session": "p3-001",
+  "plan_sha256": "95920f221bb70bbadb66f71b68c5487fba0dbf77f74f2f0bccd34d3d5d8dac4d",
+  "source_run": "mpv-scale-p3-verifier-re-muvoxe3q-9b8ed6",
+  "failure": "case-harness timed out after 7200000ms / 188 turns; no handoff, author/integration/reviews all skipped",
+  "source_baseline": "docs/验证/开发/p3-001/partial-harness-run1/sourcehash.json",
+  "source_snapshot": "docs/验证/开发/p3-001/partial-harness-run1/source-snapshot/",
+  "already_completed": "evidence-tools done / 指定Flash / 51tools; new EVI 56 tests, 246 total passed (1 Windows symlink privilege skip explicitly retained); evidence-tools-contract/localreport/new-unit-tests.log and synthetic CLI fixtures immutable. Do not rerun EVI writer.",
+  "current_tests": "leader after timeout:259 tests, 1 failure +1 platform skip. Original190 kept. Failure test_edge_discriminator_prefers_exact_replica expects0 but quantizedbyte vsfloat reference gives0.4. Full log archived partial-harness-run1/leader-unit-tests.txt.",
+  "root_findings": [
+    {
+      "id": "V3-Q1",
+      "severity": "major",
+      "finding": "xBR metric zero-quantization mismatch in new unit. Use a documented common 8-bit quantization space for capture vs replica (or explicit exact encodable fixture + separate half-LSB check); do not simply relax a true byte-equality zero assertion or increase oracle tolerances.",
+      "checks": "Keep exact encoded replica zero/incorrect reference rejected, add round/half-LSB/16-bit downshift boundaries. GPU oracle remains max/mean thresholds unchanged."
+    },
+    {
+      "id": "V3-C1",
+      "severity": "major",
+      "finding": "Leader current-source raw GPU subset harness-r8 (all4FAIL) has correct window PNG sizes. xBR PNG visually contains notification text top-left; active notification is fixed3s, current wait1.2+closemenu+1.0 captures before expiration. Mean0.95/max220 at few overlay pixels; Sharp mean1.6/max233 similarly. Old r7 experimentally captured video notwindow and indexed nonexistent output pixels; current code returned to window; keep r7/r8 byte evidence, don't misuse them for final proof.",
+      "fix": "Wait real notification expiry >3s from final activation, close ASS menu, force genuine repaint for still image before raw window capture. Use exact osd/png dimension gate BEFORE sampling and clear bounds failure (not silent clamp/resample/crop). Ensure OSD-free pixels independently: no masking away differences/increasing tol_max/ignoring worst pixels to get PASS. Can use IPC show-text empty if actual documented and raw repaint confirmation, not alter product controller. Retain max/mean fixed thresholds; CPUgolden and sampling domain independent of observed captured values."
+    },
+    {
+      "id": "V3-M1",
+      "severity": "major",
+      "finding": "SHD10/11 same_moment collected after wait_state(off) but before video-out-params available; leader-r8 pixfmt empty and gamma None. Loaded/off is not media ready. DESC after shader switch can race old/no pass; require exact gear new epoch actualpass/samples.",
+      "fix": "Wait real video_outparams nonempty with source w/h/pixfmt and gamma where required BEFORE same-moment decode/guard; no metadata invented. RGB_MAIN still-image force redraw and actualnonempty DESC/samples after exact gear/epoch so xBR/Sharp2x don't sample prior pass. Activation refusal is STATE-based (navigated False/True alone doesn't prove guard); current state-based fix retains no-shader ownership. HDRmetadata override scope unchanged."
+    },
+    {
+      "id": "V3-M2",
+      "severity": "major",
+      "finding": "P3Context.make_y4m ten_bit=True writes C420p10 header but body still 8-bit luma/chroma bytes. A decoder may report 10-bit while consuming malformed frames; old SHD09 PASS therefore NOT accepted as bit-depth proof.",
+      "fix": "Emit actual little-endian 16-bit words (10-bit samples0..1023) for ALL Y/U/V planes, exact2x lengths, valid headers and per-frame markers; preserve8bit layout/SAR. Unit byte-size/offset/word/value/header tests reject falsely marked8bit. Real per-gear8/10 decode+geometry same observation+pass+sourceinput bytes/hash and markers re-run; P2 original8/10 coverage must still hold alongside five new P3 identities."
+    },
+    {
+      "id": "V3-E1",
+      "severity": "minor",
+      "finding": "harness semantics_authority strings point at non-existent flattened docs paths (actual three briefs inside docs/P3/) and build-handoff is missing due timeout.",
+      "fix": "Correct new candidate metadata/doc links, add build-handoff with actual fileSHA not handcopied guessed hash. Don't modify frozen plan/old notes to erase failures. Freshness uses timing sample counts, not unbounded presented-frame counter; retain truthful method and no decoder fallback; pixel-method must compare decoded pixels not merely PNG bytehash (metadata-only PNG changes aren't fresh render proof)."
+    }
+  ],
+  "diagnostic": "docs/验证/开发/p3-001/leader-diagnostic/harness-r8/; four ID SHD06/07/10/11 FAIL under sourcepins current snapshot. Actual full35 remains NOT RUN. Original implementer/smoke-r1..r7 remain unchanged, all failed paths retained.",
+  "scope": "One bounded serial finish-harness writer fixes only tools/p3_verify.py / legitimate tests/test_p3_support.py and approved pure tool helper/docs if needed; core controller/shaders/resources untouched. No rewrite157KB harness, no EVI writer replay, no new broad research or full35 inside writer. Run259+unit regress and same4ID small affected smoke new dirs, then READY_FOR_AUTHOR marker; any algorithm discrepancy still real REWORK not oracle weakening. Next source-readonly author runs35, independent integration freezes samecandidate and readonly dualtech/safety reviews. Any source edit invalidates affected raw evidence and must replay affected/full as required.",
+  "constraints": "All agent Flash/xhigh. Frozen authorization/plan/guard/baseline/protected2128/old evidence kept. directmpv.exe gpu-next/Vulkan only, synthetic/tmpcfg/HOME/APPDATA/TEMP/cache and no credential childenv, selfPID only; no active APPDATAmpv/DMPV/backup writes, no globalkill/DPI/deploy/gitcommit/user-acceptance forgery. Platformsymlink permission skip disclosed; no oldbehavior tests skipped."
+}

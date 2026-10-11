@@ -1,0 +1,125 @@
+{
+  "name": "mpv-scale-p4-b2-rework-tail-v3",
+  "description": "Resume only post-writer checks after archived leader wrong console prefix; no source writer replay.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 2200000
+  },
+  "phases": [
+    {
+      "id": "build-freeze",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_rework_gate.py",
+        "build"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "safety-review",
+      "type": "agent",
+      "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash"
+      ],
+      "timeout": 3600000,
+      "idleTimeout": 0,
+      "idempotent": true,
+      "cache": {
+        "scope": "off"
+      },
+      "task": "B2r2限域独立安全复审，Flash/xhigh。严格仅JSON最终输出，severity只允许blocker/major/minor(上轮security模板high/medium/info错误不可沿用；informational放checks/limitations)。不写项目source/evidence，不运行真实mpv/GPU/VS/nvidia/clone，仅read和TEMPmock。完整读docs/P4/P4-B2限域修正brief-v2.md+原contract-failed-review.json与build-b2-r2/author/handoff。新固定候选{steps.build-freeze.output}的candidate_path以输出为准，实hash绑定；机器全单测已过。不重复全5715/宽泛源码扫。逐项F1..5/L1真实负例：identity publiccall EXITED/TIMEOUT/启动失败/poststart异常均dir创建正确/ownPIDfinally/log关闭后manifest；任何--sandbox-root/API把新子目录指DMPV/APPDATA/备份/项目/links/TEMP根本身均任何写前拒，aliases也拒，不只CLIcheck；ignoredtrialflag诚实修；失败rc非0；真实阻塞readline的活进程不回行仍在deadline内返回并仅killownPID，不用mock返回行betweenlines冒wallcap，close不再死锁，reader线程可回收。不能因为本轮未真正GPU就要假PASS数据，首载功能必须mockendtoend可执行。原witness/modelpins/env无cred/privatevpy仅TEMP和productiondeny相关未退化即可，无需重审2800行每点。最多30定点工具调用完成；最终仅JSON verdict pass|block,candidate_sha256实算,findings:[{id,severity:blocker|major|minor,file,issue,fix}],checks:[],limitations:[],reason:string。说明当前允哪种CLI，未实现不能当完成B2。",
+      "dependsOn": [
+        "build-freeze"
+      ],
+      "output": "json",
+      "retry": {
+        "max": 1,
+        "backoffMs": 0
+      },
+      "expect": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "candidate_sha256",
+          "findings",
+          "checks",
+          "limitations",
+          "reason"
+        ],
+        "properties": {
+          "verdict": {
+            "enum": [
+              "pass",
+              "block"
+            ]
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity",
+                "file",
+                "issue",
+                "fix"
+              ],
+              "properties": {
+                "severity": {
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "candidate_sha256": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "record-review",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_rework_gate.py",
+        "record"
+      ],
+      "timeout": 300000,
+      "dependsOn": [
+        "safety-review"
+      ],
+      "input": "{steps.safety-review.json}",
+      "final": true
+    }
+  ]
+}

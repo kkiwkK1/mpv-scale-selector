@@ -1,0 +1,67 @@
+{
+  "schema": "mpv-scaler-p3-core-smoke-report/v1",
+  "stage": "P3",
+  "session": "p3-001",
+  "run": "run-004",
+  "role": "core-validation (independent 12-case smoke; NOT the 35-ID matrix)",
+  "scope": {
+    "in_scope": [
+      "真实 mpv gpu-next/vulkan 加载 Lua + 产品 conf",
+      "内嵌 selftest 全 pass（IPC 实跑；run-001 的 108/2fail 须已真实关闭）",
+      "全部实际 shader 资源启动前字节级复制进真实隔离 cfg（src/dst sha256 双记录）",
+      "各 shader 单链真实 compile + 实际 DESC 命中(+非空 samples) + 新帧（非 0==0）+ 链单文件",
+      "全屏 case 激活前读回 fullscreen==true + osd 2560x1440 + window 截图尺寸 2560x1440",
+      "NIS 部分目标窗口(1366×768 非块整除)+workgroup/两系数纹理/barrier后guard 审计",
+      "xBR RGB MAIN 3× DESC 新帧 + 21 参考点审计",
+      "Sharp AUTO 1× 退化说明 / 手动 2× / scale0 防护 / linear 采样实跑",
+      "Integer 1080=1×黑边(真实窗口捕获像素 320/180±2) / 720=2×满屏 / k<1 诚实缩小",
+      "video-unscaled native bool（true/false 类型断言）全 Integer case",
+      "Off 回滚正例（基线快照零残留 + off_report.restored 含已写属性）@INTEGER-1X-BARS",
+      "Integer 同会话 pause+loadfile 换片 k 重算 / rotate / crop / SAR(dw/dh)（每相 state active+gear integer 非空真）",
+      "Integer→FSR 几何属性还原 + 外改 zoom/shader external 让出（外改保留不回滚）",
+      "每 case --loop-file=inf/vo/gpu-api 命令行钉住核对（pins）"
+    ],
+    "explicitly_out_of_scope": [
+      "35 ID 全矩阵、EVI-01 全目录证据门、p3_verify/p3_check_evidence 工具（下一角色 build-verifier 独立构建）",
+      "8/10bit 每档分测（SHD-09）、HDR 合成元数据边界（SHD-10/11）",
+      "像素级 CPU oracle 全对照（xBR 逐像素/Sharp 坐标/NIS 系数逐点）",
+      "故障注入读回不一致回滚负例（core-fix-r2 D 已实证，引用不复做）",
+      "GEO-04 真人 DPI/跨屏、性能样本 PER-04-COMPUTE 全量"
+    ]
+  },
+  "mpv": {
+    "exe": "D:/MPV/mpv.exe",
+    "args_pin": "--vo=gpu-next --gpu-api=vulkan (命令行+mpv.conf)；全屏 case 命令行尾随 --fullscreen=yes"
+  },
+  "run001_correction": {
+    "prior_report": "run-001/smoke-report.json：12 case 1 PASS / 11 FAIL",
+    "prior_sole_pass": "INTEGER-ROTATE-CROP-SAR",
+    "verdict": "不具生效佐证的空真 PASS：实测记录 state_active=false、chain_verified=false、gear=''、reason=读回不一致:video-unscaled，四相 state 全为 fallback；其 k 一致全部来自遗留 plugin_k=1 与观察 vop 推导 k 的空比较（SAR 相 640x360 A2:1 全屏真期望 k=2≠1，遗留 k=1 恰证陈旧）。run-001/ 全部原文件字节保持，本报告仅作结论纠正；本 run 该 case 增加每相 state active+gear integer 非空真门与 SAR k=2 专项断言。",
+    "run001_dir_untouched": true
+  },
+  "fullscreen_gate_note": "run-001 根因之一：MpvSession.start 命令行硬编码 --fullscreen=no，命令行覆盖 mpv.conf，仅写 conf 的 fullscreen=yes 从未生效；本 run 命令行尾随 --fullscreen=yes（同选项最后出现生效）并以fullscreen 属性读回 + osd 2560x1440 + 截图 PNG 尺寸三重核对",
+  "totals": {
+    "cases": 12,
+    "passed": 12,
+    "failed": 0
+  },
+  "passed_cases": [
+    "SELFTEST-LOAD",
+    "NIS-PARTIAL-TARGET",
+    "XBR-RGB-3X",
+    "SHARP-AUTO-DEGENERATE",
+    "SHARP-2X",
+    "SHARP-AUTO-SCALE0",
+    "INTEGER-1X-BARS",
+    "INTEGER-2X-FULL",
+    "INTEGER-K1-DOWNSCALE",
+    "INTEGER-SESSION-SWITCH-PAUSE",
+    "INTEGER-ROTATE-CROP-SAR",
+    "INTEGER-TO-FSR-RESTORE"
+  ],
+  "failed_cases": [],
+  "wall_seconds": 136.4,
+  "human_subjective_acceptance_claimed": false,
+  "live_configuration_written": false,
+  "note": "smoke 结论仅覆盖本报告 scope；不冒称全阶段通过/独立验收；如存在 FAIL，core-delivery 状态必须为 REWORK 而非 PASS。"
+}

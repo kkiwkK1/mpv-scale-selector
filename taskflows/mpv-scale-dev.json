@@ -1,0 +1,113 @@
+{
+  "name": "mpv-scale-dev",
+  "description": "mpv缩放选择器分阶段实施：备份前检→人工批准→单写者实现→隔离验证→同候选双路审核→用户验收。每次只运行P1–P5中的一个阶段，P5仅交付部署就绪包，不自动安装。",
+  "version": 1,
+  "strictInterpolation": true,
+  "concurrency": 2,
+  "budget": {"maxTokens": 600000},
+  "args": {
+    "stage": {"type": "enum", "values": ["P1", "P2", "P3", "P4", "P5"], "default": "P1", "description": "本次里程碑；只执行一阶段"},
+    "session": {"type": "string", "default": "p1-001", "description": "从未使用的证据ID，限小写字母/数字/连字符，最多64字符"},
+    "previous": {"type": "string", "default": "", "description": "上一阶段的已验收session；P2–P5必填"},
+    "gpuApi": {"type": "enum", "values": ["vulkan", "opengl"], "default": "vulkan", "description": "首版固定gpu-next与所选API；不自动切换后端掩盖失败"}
+  },
+  "phases": [
+    {
+      "id": "preflight", "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": ["python", "-B", "-X", "utf8", "taskflows/guard.py", "preflight", "--stage", "{args.stage}", "--session", "{args.session}", "--previous", "{args.previous}"],
+      "timeout": 60000
+    },
+    {
+      "id": "plan-stage", "type": "agent", "agent": "planner",
+      "model": "zai-coding-cn/glm-5.3-flash", "thinking": "xhigh",
+      "tools": ["read", "bash"], "cache": {"scope": "off"},
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件", "timeout": 900000, "idleTimeout": 0,
+      "dependsOn": ["preflight"],
+      "task": "只读规划本次{args.stage}，不要写文件/启动mpv/部署。前置检查与已有脏改：{steps.preflight.output}。读取docs/实施计划.md、docs/测试计划.md、docs/可行性研究报告.md和docs/备份与恢复.md完整适用章节。该流程每次仅执行一阶段；严禁修改原研究证据、已审查记录、已有备份payload或活动APPDATA/mpv/D:/MPV，既有脏改保留。只有一个源码实施者，两个只读审查者可并行，同工作区不得并发启动第二个开发流程。\nP1=Lua菜单/ownership/Off/external/fallback/退出/禁用LS1和BCAS；P2=SDR原高质量基线/stock Anime4K/FSR1/SGSR1/Nearest，实际pass/WHEN、8bit/10bit、RGB/HDR守卫；P3=NIS compute/xBR/Sharp Bilinear/Integer与几何；P4=公平A/B、预热后GPU fresh/redraw、掉帧、RIFE余量、用户评分；P5=安装器/卸载器/dry-run/许可/用户说明，仅部署就绪，INS-02/04真实安装留在独立人工授权操作，不以P5-ready冒充真实部署已完成。固定vo=gpu-next、gpu-api={args.gpuApi}。\n输出本阶段允许写入的源码/测试/文档路径、任务基线、与上一阶段依赖、具体测试IDs（required_tests为非空字符串数组，每项为测试计划里的单一ID，不写范围或对象）、验收门槛、用户需确认项、安全检查和停止条件；未知资源或无法实测不得假定通过。若阶段前提不具备明确阻断，不能扩大范围。只输出JSON {stage,scope,write_paths,required_tests,user_checks,risks,summary}，禁止代码围栏。",
+      "output": "json", "retry": {"max": 1, "backoffMs": 0},
+      "expect": {"type": "object", "required": ["stage", "scope", "write_paths", "required_tests", "user_checks", "risks", "summary"], "properties": {"stage": {"type": "string"}, "scope": {"type": "string"}, "write_paths": {"type": "array"}, "required_tests": {"type": "array", "items": {"type": "string"}}, "user_checks": {"type": "array"}, "risks": {"type": "array"}, "summary": {"type": "string"}}}
+    },
+    {
+      "id": "approve-work", "type": "approval", "dependsOn": ["plan-stage"],
+      "task": "是否开始{args.stage}的隔离实现/验证？计划：{steps.plan-stage.json}。批准只允许项目内实现和临时配置测试，不允许写活动mpv、部署/恢复或覆盖旧证据。P5也仅做部署就绪包。请先处理阻断风险。Edit是修改建议，不是写入授权，需重新确认。"
+    },
+    {
+      "id": "work-permit", "type": "script", "dependsOn": ["approve-work"],
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": ["python", "-B", "-X", "utf8", "taskflows/guard.py", "approval"],
+      "input": "{steps.approve-work.output}", "timeout": 10000
+    },
+    {
+      "id": "implement-stage", "type": "agent", "agent": "executor-code",
+      "model": "zai-coding-cn/glm-5.3-flash", "thinking": "xhigh",
+      "tools": ["read", "bash", "edit", "write"], "idempotent": false, "cache": {"scope": "off"},
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件", "timeout": 7200000, "idleTimeout": 0,
+      "dependsOn": ["plan-stage", "work-permit", "preflight"],
+      "task": "你是本阶段唯一源码写者。阶段{args.stage}，证据ID{args.session}，固定gpu-next/{args.gpuApi}。权限检查：{steps.work-permit.output}；计划：{steps.plan-stage.json}；基线与原有脏改：{steps.preflight.output}。先读实施/测试计划和最终研究报告；只实现计划允许的本阶段路径，保留所有基线脏改，不改taskflows/guard.py/本flow定义、不改已有研究/审查记录/原始备份，不提交或推送Git。当前目录已含研究shader不意味着可直接分发，来源/许可/固定hash需落实。\n严格不写APPDATA/mpv、D:/MPV或日常HOME/凭据；测试只使用专用临时config-dir、HOME/APPDATA/cache/watch-later与合成/复制输入。不安装、不恢复活动配置，P5只做安装/卸载工具及隔离dry-run。保留stock Anime4K、CTRL+1..6与F7，F8先查脚本绑定；一次一条主链；Off只恢复仍拥有的状态，外部改链让出，不clear全部、不陈旧覆盖。LS1/BCAS禁用并解释；FSR1每轴<=2x、NIS内含锐化、SGSR1为Qualcomm LUMA适配；RGB/HDR不支持时真实回退。\n为本阶段添加可重复的本地单测和隔离验证入口、真实日志与复现命令，负责跑本地检查。P4不能捏造GPU时序/用户评分，未测如实标记；P5不把尚未执行的INS-02/04写成通过。创建本次新证据目录 docs/验证/开发/{args.session}，不得覆盖别的session。检查故障先报告，不能绕过后端/许可证/测量或越阶段补功能。输出JSON {stage,changed_files,local_checks,limitations,summary}，本地检查不能代替独立验证/审核。",
+      "output": "json",
+      "expect": {"type": "object", "required": ["stage", "changed_files", "local_checks", "limitations", "summary"], "properties": {"stage": {"type": "string"}, "changed_files": {"type": "array"}, "local_checks": {"type": "array"}, "limitations": {"type": "array"}, "summary": {"type": "string"}}}
+    },
+    {
+      "id": "unit-tests", "type": "script", "dependsOn": ["implement-stage"],
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": ["python", "-B", "-X", "utf8", "-m", "unittest", "discover", "-s", "tests", "-v"],
+      "timeout": 300000
+    },
+    {
+      "id": "verify-and-freeze", "type": "agent", "agent": "test-engineer",
+      "model": "zai-coding-cn/glm-5.3-flash", "thinking": "xhigh",
+      "tools": ["read", "bash", "write"], "idempotent": false, "cache": {"scope": "off"},
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件", "timeout": 7200000, "idleTimeout": 0,
+      "dependsOn": ["implement-stage", "unit-tests", "plan-stage"],
+      "task": "你是单一集成验证负责人，非实施者。计划：{steps.plan-stage.json}；实现：{steps.implement-stage.json}；精确单测输出：{steps.unit-tests.output}。执行{args.stage}适用测试矩阵，固定gpu-next/{args.gpuApi}，所有运行使用独立临时HOME/config-dir/cache与合成/复制输入；禁止写活动配置/部署/真实恢复/读凭据。只能写docs/验证/开发/{args.session}/的新报告与测试临时数据，不改源码/共享测试脚本；发现问题保留证据并失败，不边改边审核。\nP1查状态/外部改链/Off与键位；P2/P3实测编译/pass/输出/WHEN/回退/几何；P4收集真正GPU数据vo-passes ns÷1e6=ms，区分fresh/redraw、预热、掉帧、帧节奏、RIFE、时钟，公平stock Anime4K A/B；用户主观评分不得伪造，可列pending_user_checks并交下一人工门；缺少必需客观结果必须FAIL。P5这里只验证安装/卸载dry-run与隔离失败路径、许可与部署包；把INS-02/04明确排除本次deployment-readiness范围，不写live、不声称部署通过。\n冻结同一候选：创建UTF-8/LF的tests.json，至少{stage:'{args.stage}',session:'{args.session}',status:'PASS'或'FAIL',required_unmeasured:[],live_configuration_written:false,pending_user_checks:[],cases:[{id:单个测试ID,status:'PASS'或'FAIL'或'NOT_MEASURED'或'PENDING_USER'或'OUT_OF_SCOPE',evidence:原始证据路径,command:复现命令}]（每个ID只一个条目，多种输入写入variants；覆盖计划required_tests，只有真实用户检查可PENDING_USER且必须列入pending_user_checks）}。创建candidate.json：{schema:'mpv-scaler-stage/v1',stage:'{args.stage}',session:'{args.session}',files:{项目相对POSIX路径:SHA256},tests_sha256:tests.json文件SHA256}。files覆盖全部本阶段相关源码、测试入口、shader/参数/许可和被依赖的共享模块，不包含会继续追加的报告、.git/.pi/.local或备份。不采用模型口头PASS：实际失败status=FAIL，必需未测列required_unmeasured，后续机器门将拒绝。候选冻结后不得改源码/证据。\n输出JSON {stage,candidate_path,candidate_sha256,test_report,tests_status,required_unmeasured,pending_user_checks,limitations}，禁止围栏；不能用已完成32项备份测试替代产品测试。",
+      "output": "json",
+      "expect": {"type": "object", "required": ["stage", "candidate_path", "candidate_sha256", "test_report", "tests_status", "required_unmeasured", "pending_user_checks", "limitations"], "properties": {"stage": {"type": "string"}, "candidate_path": {"type": "string"}, "candidate_sha256": {"type": "string"}, "test_report": {"type": "string"}, "tests_status": {"enum": ["PASS", "FAIL"]}, "required_unmeasured": {"type": "array"}, "pending_user_checks": {"type": "array"}, "limitations": {"type": "array"}}}
+    },
+    {
+      "id": "candidate-check", "type": "script", "dependsOn": ["verify-and-freeze", "plan-stage"],
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": ["python", "-B", "-X", "utf8", "taskflows/guard.py", "check", "--stage", "{args.stage}", "--session", "{args.session}"],
+      "input": "{steps.plan-stage.json}", "timeout": 60000
+    },
+    {
+      "id": "technical-review", "type": "gate", "agent": "reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash", "thinking": "xhigh",
+      "tools": ["read", "bash"], "cache": {"scope": "off"},
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件", "timeout": 1800000, "idleTimeout": 0,
+      "dependsOn": ["candidate-check", "plan-stage"],
+      "task": "独立只读技术审查，不看另一审核者结论。阶段{args.stage}，计划{steps.plan-stage.json}，机器绑定{steps.candidate-check.output}。核对docs/验证/开发/{args.session}/candidate.json及全部文件SHA、tests.json，审核源码与真实证据是否满足本阶段测试ID/算法身份/后端/ownership/回退/几何/公平测量。确认候选scope覆盖实际共享模块和shader，不能只审变更片段或只凭旧备份测试通过。不得更改源码/报告/配置、不执行live恢复或安装；额外测试只能只读或临时隔离数据；并行审核禁止重跑GPU性能基准，GPU测量只由单一集成验证负责人采集。没测不当通过；只读review不是部署验收。P5限部署就绪，不要求本次真实INS-02/04；用户评分留人工门。发现阻断项block，保留具体file:line/重现与修复，不自动修复。仅JSON {verdict:'pass'或'block',candidate_sha256:本候选SHA,findings:[{id,severity:'blocker'或'major'或'minor',file,issue,fix}],checks:[],limitations:[],reason}，禁止围栏。",
+      "output": "json", "retry": {"max": 1, "backoffMs": 0},
+      "expect": {"type": "object", "required": ["verdict", "candidate_sha256", "findings", "checks", "limitations", "reason"], "properties": {"verdict": {"enum": ["pass", "block"]}, "candidate_sha256": {"type": "string"}, "findings": {"type": "array", "items": {"type": "object", "required": ["id", "severity", "file", "issue", "fix"], "properties": {"severity": {"enum": ["blocker", "major", "minor"]}}}}, "checks": {"type": "array"}, "limitations": {"type": "array"}, "reason": {"type": "string"}}}
+    },
+    {
+      "id": "safety-review", "type": "gate", "agent": "security-reviewer",
+      "model": "zai-coding-cn/glm-5.3-flash", "thinking": "xhigh",
+      "tools": ["read", "bash"], "cache": {"scope": "off"},
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件", "timeout": 1800000, "idleTimeout": 0,
+      "dependsOn": ["candidate-check", "plan-stage"],
+      "task": "独立只读安全/集成风险审核，非作者且不看另一审核者结论。阶段{args.stage}，计划{steps.plan-stage.json}；固定候选{steps.candidate-check.output}。核对docs/验证/开发/{args.session}/candidate.json/文件SHA与真实测试报告；检查路径/许可/边界、Off恢复和外部改链、保留CTRL+1..6/F7 RIFE、单主链、非法配置/资源缺失/失败退回。P5核验只动自身文件/管理块的安装卸载、dry-run、再次备份/显式授权/回滚设计与隔离测试，禁止真实写入；INS-02/04留独立实际部署，不冒称已完成。确认报告没有原媒体/凭据写入或把mock冒充实际编译/画质/GPU/ACL/断电测试。不得修改候选或真实配置；攻击复现仅临时合成目录；并行审核禁止启动GPU性能基准或修改测量环境。已披露非OS沙箱/非跨进程事务残余风险如实列出，不假称解决。实际阻断风险block并给复现/修复，禁止现场改源码。仅JSON {verdict:'pass'或'block',candidate_sha256:本候选SHA,findings:[{id,severity:'blocker'或'major'或'minor',file,issue,fix}],checks:[],limitations:[],reason}，无代码围栏。",
+      "output": "json", "retry": {"max": 1, "backoffMs": 0},
+      "expect": {"type": "object", "required": ["verdict", "candidate_sha256", "findings", "checks", "limitations", "reason"], "properties": {"verdict": {"enum": ["pass", "block"]}, "candidate_sha256": {"type": "string"}, "findings": {"type": "array", "items": {"type": "object", "required": ["id", "severity", "file", "issue", "fix"], "properties": {"severity": {"enum": ["blocker", "major", "minor"]}}}}, "checks": {"type": "array"}, "limitations": {"type": "array"}, "reason": {"type": "string"}}}
+    },
+    {
+      "id": "approve-stage", "type": "approval",
+      "dependsOn": ["technical-review", "safety-review", "candidate-check"],
+      "task": "请确认{args.stage}阶段结果：机器检查{steps.candidate-check.output}；技术审核{steps.technical-review.json}；安全审核{steps.safety-review.json}。若存在pending_user_checks（交互/画质评分等），先实际完成这些用户检查，再批准；未完成则拒绝/暂停。批准仅确认当前隔离阶段/P5部署就绪，不是允许修改活动mpv。P5真实部署仍须再次备份与另一次明确授权，这个流程不执行安装。源码变化须重新验证/审核；不能仅用旧PASS放行。Edit不等于最终批准。"
+    },
+    {
+      "id": "record-acceptance", "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "dependsOn": ["approve-stage", "technical-review", "safety-review"],
+      "run": ["python", "-B", "-X", "utf8", "taskflows/guard.py", "accept", "--stage", "{args.stage}", "--session", "{args.session}", "--approval", "{steps.approve-stage.output}"],
+      "input": "{\"technical\":{steps.technical-review.json},\"safety\":{steps.safety-review.json}}",
+      "timeout": 60000
+    },
+    {
+      "id": "final-check", "type": "script", "final": true,
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件", "dependsOn": ["record-acceptance"],
+      "run": ["python", "-B", "-X", "utf8", "taskflows/guard.py", "finish", "--stage", "{args.stage}", "--session", "{args.session}"],
+      "timeout": 60000
+    }
+  ]
+}

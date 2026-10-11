@@ -1,0 +1,6 @@
+{
+  "schema": "p3-manifest-verify/v1",
+  "session": "p3-001",
+  "evidence_manifest_sha256": "bd2ba6e6cd9cd1a7697ae5cd60052e9eab80e8e742a733892c5c34c39ee6dba7",
+  "runner_console_sha256": "ced80a0b8dac51f4c2b641cf4a7d38d72943093c28aea53aa160ee0f24c1f9aa"
+}

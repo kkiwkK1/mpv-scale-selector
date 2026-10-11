@@ -1,0 +1,100 @@
+{
+  "status": "READY_FOR_AUTHOR",
+  "stage": "P3",
+  "session": "p3-001",
+  "role": "P3 唯一限域源码修正者（brief-v4 scope: V4-FALLBACK / V4-PASS-RACE / V4-GEO-CONTRACT 三根因；glm flash/xhigh）",
+  "brief": "docs/P3/P3全矩阵首轮限域修正brief-v4.json",
+  "generated_at": "2026-10-06T08:30:06+0800",
+  "external_time_erratum": {
+    "note": "旧 verifier-build/build-handoff.json 的 generated_at=2025-12-27 与实际运行时间不符（外部时间勘误，brief-v4 nonblocking_correction_note）。旧记录按 create-only 原字节保留、不改写；本新 handoff 使用实际系统时间 time.strftime。两个日期均不作为候选证据，全部 sha 均为实际计算。",
+    "old_record_path": "docs/验证/开发/p3-001/verifier-build/build-handoff.json",
+    "old_record_preserved": true
+  },
+  "prior_findings_referenced": {
+    "author_delivery_full_r1": "docs/验证/开发/p3-001/implementer/author-delivery.json（原字节保留，author-delivery-r2.json 留给下一位作者）",
+    "full_r1_evidence_gate": "docs/验证/开发/p3-001/implementer/full-r1/evidence-gate.json（status=FAIL，6 条 problems 原样保留）",
+    "full_r1_source_pins": "docs/验证/开发/p3-001/implementer/full-r1/source-pins.json",
+    "old_build_handoff": "docs/验证/开发/p3-001/verifier-build/build-handoff.json（原字节保留）",
+    "gate_problems_addressed": [
+      "预期候选 PASS: CTL-06 ('FAIL') → V4-FALLBACK 已闭（见 root_closures）",
+      "预期候选 PASS: SHD-04 ('FAIL') → V4-PASS-RACE 已闭",
+      "case GEO-04: sessions 含重复名 → 已去重（单次插入）",
+      "case GEO-04: PASS 缺 freshness 结构化证据 → 两个 active 窗口均实测 freshness",
+      "case GEO-04: PASS 缺 video-unscaled 原生 bool 键记录 → variant 级 native_unscaled",
+      "case GEO-05: PASS 缺 video-unscaled 原生 bool 键记录 → variant 级 native_unscaled"
+    ]
+  },
+  "actual_source_sha256": {
+    "scripts/scale-selector.lua": "85f13b4945377010df2ba6e19fa08c363f9312530aaafac07a2cd3dccb3bacf6",
+    "tools/p2_verify.py": "a599e04023ffb11c8cbdec5e399becda154eb545704eeee4575fc2ce0397f8a4",
+    "tools/p3_verify.py": "2cceb8513c2ad54a62ac7684b0d188b38ea3398358f4963285e47a0e9e087952",
+    "tests/test_p2_support.py": "97e9b5601830f2c9cc07504421a0aff998c3b339edc7e67208aec321062da3cb"
+  },
+  "local_delta": {
+    "scope": "仅 brief-v4 write_scope：产品 Lua 默认表/selftest、tools/p2_verify.py SHD-04、tools/p3_verify.py GEO-04/05 发射端、必要 scoped 单测。其余 30 条 writepaths 外零写入；EVI 工具/资源算法/旧 frozenplan/permit/baseline/guard 文件原字节未动；checker（p3_check_evidence.py）只读未改。",
+    "V4-FALLBACK": [
+      "scripts/scale-selector.lua: 新增唯一来源 local DEFAULT_GEARS_IDS（完整 12 档注册表，含 sharpbilinear2x，与发布 conf gears= 行同序）；parse_gears_conf 缺失 gears= 与空/无有效 token 两条回退路径统一从该表回退（原两处 11 项字面量删除）",
+      "scripts/scale-selector.lua selftest +4 用例（112→116）：missing gears= / 空值 / 无有效 token 三条负例均断言 12 档同序 + 唯一 flags 用例（off 恒 active、仅 ls1/bcas 占位 disabled、sharpbilinear2x 内建 whole 链固定 p3-Sharp-Bilinear-2x.glsl）；LS1/BCAS disabled、Off 身份/auth fail-closed、CTL06 期望计数全部未削弱"
+    ],
+    "V4-PASS-RACE": [
+      "tools/p2_verify.py: 新增 wait_new_chain_pass_positive(s, keywords, timeout_s) —— 链替换后等待新链 //!DESC pass 携非空 GPU samples 正计数（非盲睡、非 0==0）；case_shd04 六模式 stock/selector 双侧各自等待正计数后再取数（original asserts 全保留：list_equal、counts equal、>=1、required hits、chain_verified，另加双侧 positive proof）",
+      "variant 记录 stock_new_chain_proof / gear_new_chain_proof（count_positive + pass_count）"
+    ],
+    "V4-GEO-CONTRACT": [
+      "tools/p3_verify.py case_geo04 v1: 删除重复的 result[sessions] += stems（单次插入；原始 raw triplet/console 字节未删）；v1 在 resize/k/epoch 重算与暂停一致性之后实测 freshness_block（fr_a）并配对当前 epoch（freshness_epoch_matches_recompute，入 PASS 条件）；variant 顶层补 native_unscaled=native1（S.get 真实 bool 读回）与 chain_epoch",
+      "tools/p3_verify.py case_geo04 v2: xbr_state 增 epoch；xbr 迁移后（off2 前）实测 freshness_block（fr_b）并配对迁移时 epoch（freshness_epoch_matches_transfer，入 PASS 条件）；variant 顶层补 native_unscaled=xbr_state[native]（xbr active 期间真实 bool false 读回）与 chain_epoch；checker 未改",
+      "tools/p3_verify.py case_geo05: variant 顶层补 native_unscaled=phases[sar2x][native_unscaled]（observe() 期间真实 S.get bool 读回，非 dict 形状搬运）；freshness/chain_epoch 配对原已存在未动"
+    ],
+    "tests": [
+      "tests/test_p2_support.py +2 类 5 用例：TestV4FallbackDefaultRegistry（Lua 默认表↔发布 conf 12 档同序漂移门卫、两条回退路径唯一来源、selftest 三负例在场、身份边界断言）+ TestV4PassRaceNewChainProof（延迟新 pass 被等待并正计数 / 0==0 被拒绝）"
+    ]
+  },
+  "unit_tests": {
+    "command": "python -X utf8 -m unittest discover -s tests -p \"test_*.py\"",
+    "result": "270 tests, OK, skipped=1",
+    "delta_vs_prior": "prior 265 全部保留（0 删除、0 追加 skip、0 断言放宽）+ 5 新增",
+    "platform_skip_disclosure": "tests/test_p3_evidence.py::test_symlink_inside_evidence_dir_rejected skipped — 'symlink creation not available on this platform'（Windows symlink 特权；既有 skip，按约束保留并披露）"
+  },
+  "lua_selftest": {
+    "cases_total": 116,
+    "note": "真实 Lua selftest（经 mpv IPC 导出，full-r1 为 112）；含 brief 要求的 missing/empty 两条以上负例（实为三条回退路径负例 + flags 用例）。CTL-06 全部 8 变体 real run 中 selftest status=pass。"
+  },
+  "root_closures": {
+    "V4-FALLBACK": {
+      "evidence": "docs/验证/开发/p3-001/rework-v4/objective-results.json#CTL-06（8 变体 PASS：a-missing-gears-key 菜单条目数==发布 conf 12 计数，未削弱断言）",
+      "mechanism": "发布 conf gears= 12 项 vs Lua 两回退各 11 项（漏 sharpbilinear2x）→ CTL-06-a 计数不等 FAIL；统一唯一来源后闭合"
+    },
+    "V4-PASS-RACE": {
+      "evidence": "docs/验证/开发/p3-001/rework-v4/objective-results.json#SHD-04（六模式 stock/selector proof 均正计数且相等，例 mode-a 20==20；fresh=vo-passes-fresh-increase）",
+      "mechanism": "glsl-shaders 属性读回先于新链首帧渲染 → stock 侧过早计数得 0（0 vs 20/28）→ 双侧等待新链 DESC+非空 samples 正计数后闭合；单测含延迟/零零两负例"
+    },
+    "V4-GEO-CONTRACT": {
+      "evidence": "docs/验证/开发/p3-001/rework-v4/objective-results.json#GEO-04/#GEO-05（sessions 去重 2 项；v1 freshness vo-passes-fresh-increase 0→226 epoch=12 配对；v1/v2/GEO-05 variant 级 native bool {value: true, native_type: 'bool'}）",
+      "mechanism": "发射端修复：去重单次插入、freshness 在几何更新后当前 epoch 实测并配对、原生 bool 键对齐 checker 契约；checker 只读未改"
+    }
+  },
+  "gpu_subset_run": {
+    "scope": "仅受影响 CTL-06/SHD-04/GEO-04/GEO-05（非全 35；全矩阵留给下一位只读作者 full-r2）",
+    "evidence_dir": "docs/验证/开发/p3-001/rework-v4（create-only 全新目录）",
+    "command": "python -X utf8 tools/p3_verify.py --case CTL-06 --case SHD-04 --case GEO-04 --case GEO-05 --session p3-001 --evidence-dir docs/验证/开发/p3-001/rework-v4",
+    "results": "4/4 PASS（CTL-06 9.4s / SHD-04 45.6s / GEO-04 21.4s / GEO-05 19.8s；真实 mpv gpu-next + vulkan，隔离 temp 配置，合成媒体）",
+    "objective_results_sha256": "562dcdcefdfb79040669c266a63ad42da98d708f1a4ea3232a0226f2e9d5ce3c",
+    "evidence_manifest_sha256": "4de3d41aa62ce72a222c4e54ce70b52df69d9b56eeff9f2ee0d00580c8abfb73",
+    "subset_gate": {
+      "checker": "tools/p3_check_evidence.py（只读）--required-ids CTL-06 SHD-04 GEO-04 GEO-05 --write-gate",
+      "problems": [],
+      "gate_path": "docs/验证/开发/p3-001/rework-v4/evidence-gate.json",
+      "gate_sha256": "7ca1a6725161b47e2c3d3862fe288d4318174673424f85526a6539874036a3b8"
+    }
+  },
+  "not_done_here": {
+    "full_35_matrix": "本位不跑全 35（brief：下一步只读作者 full-r2 + 机器门禁 + 独立集成 + 双读审查）；产品源码已改，按 brief 全部 35 需在 full-r2 复跑",
+    "author_delivery": "不覆写 author-delivery.json；下位作者产出 author-delivery-r2.json / full-r2"
+  },
+  "safety_disclosure": {
+    "gpu": "gpu-next + vulkan + 直连 mpv.exe，合成 y4m 媒体",
+    "isolation": "隔离 temp cfg/HOME/APPDATA/TEMP cache，self-PID 管理，无并发写者/GPU",
+    "no_live_writes": "无 live APPDATA mpv/DMPV 写、无备份写、无全局 DPI 改动、无全局 kill、无 install/restore/deploy/commit/push",
+    "human_pending": "人工主观验收 pending；P4 性能/RIFE 与 P5 部署未触碰"
+  }
+}

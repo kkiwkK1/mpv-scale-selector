@@ -1,0 +1,50 @@
+{
+  "name": "mpv-scale-p4-identity2-diagnosis",
+  "description": "Readonly offline fact-check of actual RIFE short output, EOF source semantics and decoded pixels; no new GPU run or source/evidence revision.",
+  "strictInterpolation": true,
+  "concurrency": 1,
+  "budget": {
+    "maxTokens": 1000000
+  },
+  "phases": [
+    {
+      "id": "fixed-evidence",
+      "type": "script",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "run": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "taskflows/p4_b2_r3_gate.py",
+        "post"
+      ],
+      "timeout": 300000,
+      "dependsOn": []
+    },
+    {
+      "id": "diagnose",
+      "type": "agent",
+      "agent": "analyst",
+      "model": "zai-coding-cn/glm-5.3-flash",
+      "thinking": "xhigh",
+      "cwd": "D:/workspace/小项目/mpv插件/缩放插件",
+      "tools": [
+        "read",
+        "bash",
+        "write"
+      ],
+      "timeout": 1800000,
+      "idleTimeout": 0,
+      "idempotent": false,
+      "cache": {
+        "scope": "off"
+      },
+      "dependsOn": [
+        "fixed-evidence"
+      ],
+      "final": true,
+      "task": "只读offline事实复核者，固定Flash/xhigh。刚完成真实identity-run-002，源候选f3ef8ba3...不改、原50项证据不改、不再运行mpv/VS/GPU/nvidia，不clone，纯读源/日志/已有PNG+Y4M进行CPU像素诊断。仅可新写docs/验证/开发/p4-001/identity-run-002-diagnosis-v1/，已有该目录两文件(source-fetch.json与按mpv固定build ad59ff1b4获取的vf_vapoursynth.c)保持原byte。至多25toolcalls。不改原report/criteria/threshold/model/sample/生产锁。\n要回答四个窄问题：(1)原报告把debug 'returning error on EOF/reinit'叫真实推理故障是否准确？已获取匹配build短commit的公开mpv source，读infiltGetFrame、vs_frame_done、process EOF分支：这是源耗尽协议还是failed标志，区分log级别/真正fatal，引用确切代码行，匹配当次initiateEOF/finishingup/returnEOF序列。source匹配短commit不冒称DLL所有源/二进制等价。(2)N=12和source+SelectEvery(odd middle)+Interleave相邻插值，2N-1=23有无正常边界解释？不能仅算数就宣布全部帧正确：读取23实际PNG的magic/dims/bitdepth和原Y4M帧索引条，独立核S帧index0..11对应输出0,2,..22(若无法锚定说清)，11中间帧与左右源帧非copy/非50%blend的真实decoded RGB差异，不用PNGhash不同冒像素变化。标准库tools/p3_lib.decode_png可只读复用(注意返回dict含rows/get_pixel/pixel16)，逐三帧流式避免内存暴涨；若为性能只看局部ROI/采样步长必须记录确切ROI和范围不能冒全图。保留原全图2/255计划阈值是否达到，不事后用ROI门代过关；可报告原始分布解释合成小物体全图均值稀释。写可复跑纯CPUprobe.py+输出json，每输入sha绑定。\n(3)现有证据究竟证明：实际VS filter已初始化、帧输出确实插值/非重复 vs 精确model70权重文件/实际GPUdevice？可以根据未改的私有vpy算法摘要+DLL/唯一models目录的原pins做约束推断，但没有设备/模型运行身份直接证据不能提升为全RIFE-01pass。无需再联网找不确定插件项目，唯已有固定mpvsource充分解释EOF。已知日志nominalfps/PTS缺项如实未知，不按目标fps补造。(4)指出最小下一步观测方式，不修改活动vpy；例如经单独预注册的新隔离观测probe记录VS输出Duration与model/device而非新增泛化表格。只建议，不执行新GPU。\n产出diagnostic-report.json+简洁说明.md（结论DIAGNOSTIC_ONLY，保留原NOT_ESTABLISHED与完整身份未通过；若原report措辞错误写外部更正而非覆写）、纯CPUprobe及其rawout；evidence-manifest.json files={本目录所有文件仓库相对path:sha}除自身。实录source/displayframe索引证明、EOF语义、framecountqualification、复制/混帧原始值，所有没测信息不伪造。新报告要明确gpu_started=false原报告只代表未取到证据，不等证明CPU-only；也不要没有device证据就断言实际GPU。最后source及旧50证据未变化复核。"
+    }
+  ]
+}

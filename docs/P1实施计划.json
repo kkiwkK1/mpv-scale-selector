@@ -1,0 +1,67 @@
+{
+  "stage": "P1",
+  "ready": "pass",
+  "scope": "{\"session\": \"p1-001\", \"goal\": \"在隔离临时配置下交付缩放选择器P1骨架：F8菜单（绑定审查已确认F8在input.conf与scripts中零占用）、off/active/external/fallback状态机、托管属性快照与恢复（glsl-shaders列表、scale/cscale/dscale、插件设置的显示几何）、\\\"关\\\"档位、外部改链检测与让出、退出清理、LS1/BCAS禁用占位与原因文案；显式固定vo=gpu-next、gpu-api=vulkan。\", \"in_scope\": [\"scripts/新增插件Lua与script-opts/新增默认配置\", \"状态机与ownership：接管时记录托管基线，一次仅一档，外部修改优先、永不静默覆盖\", \"\\\"关\\\"：仅恢复托管且未被外部改动的属性，禁用glsl-shaders-clr全清\", \"external检测覆盖CTRL+1..6/F5/F6/CTRL+0及其他脚本set_property路径，让出并提示\", \"fallback：资源缺失/非法配置/桩档位失败时显示真实原因并回退上一稳定状态，无半生效残留\", \"退出清理：各状态quit后无跨会话残留（P1决定不持久化，重启回到off）\", \"菜单骨架预留P2+条目但必须显示\\\"未实现/后续阶段\\\"且不可选；LS1/BCAS禁用+原因（LS1无源码/权重/移植许可；BCAS身份未核实），不以CAS/Bicubic+CAS冒名\", \"CTL-04/06/07/08所需测试桩（缺失shader路径、非法配置、占位档位）由测试工具在临时目录运行时生成，不入库；如需入库仅放docs/验证/开发/p1-001/并在证据标注\\\"测试桩非产品档位\\\"\"], \"out_of_scope\": [\"P2+真实缩放档位（FSR1/SGSR1/stock Anime4K/Nearest等）及其shader接入\", \"HDR/RGB画质、8bit/10bit深度验证\", \"任何安装/部署/写活动APPDATA/mpv或D:/MPV\", \"LS1或BCAS任何可用实现或冒名替代\", \"修改stock Anime4K链内容、RIFE、mpv内核\"], \"task_baseline\": {\"git_head\": \"8f6b14e3a9aaf8585f5aa30dce70328509878a04\", \"research_tag\": \"research-baseline-20261002 (0cea666a4d4c)\", \"backup\": \"D:/workspace/小项目/mpv插件/_备份/缩放插件/mpv-config-20261002-233943；manifest_sha256=232fcda3c364f9b8d1a4ac73c458795e303d3c8adcec12fbd43a93cf4f17d7b6；archive_sha256=207e8d3ffc701a819871eef99a8ede14ed96d6002353dcc30991e123018b6864\", \"prior_dirty_changes_preserved\": [\"docs/Taskflow使用说明.md\", \"docs/执行授权-P1.json\", \"taskflows/\"], \"environment_facts\": \"mpv v0.40.0-393-gad59ff1b4、libplacebo v7.357.0（D:/MPV/mpv.com）；input.conf占用F1-F3/F5/F6/F7/F9/CTRL+0..6，playback-status.lua与rife-env.lua无add_key_binding，F8空闲（作为CTL-01绑定审查证据基础）；活动mpv.conf含profile=high-quality（scale=ewa_lanczossharp）、fullscreen、vf-add=@rife:vapoursynth；ffmpeg不在PATH，测试输入须用Python标准库可生成的合成图像/片段并记录SHA-256\"}, \"dependency_on_prior_stage\": \"P0准备已完成且本session preflight=PASS（备份verify --compare-source通过、55文件指纹匹配）。guard.py对P1的dependency=null为设计行为；P0→P1进入许可由用户聊天授权与docs/执行授权-P1.json提供（allow_isolated_implementation_and_tests=true，live写=false）。本阶段验收产出的docs/验证/开发/p1-001/acceptance.json（user_approved=true）是P2的硬前置。\", \"acceptance_gates\": [\"12项required_tests在docs/验证/开发/p1-001/tests.json各有PASS或PENDING_USER条目（每ID一条，变体并入该条），required_unmeasured=[]，失败如实记录，不得以计划或桩通过冒充产品通过\", \"taskflows/guard.py check通过：candidate.json冻结后源文件指纹不变；两路只读审查（technical/safety）对同一candidate_sha256给出verdict=pass且无blocker/major findings\", \"CTL-02/03/08客观核对：属性diff日志证明无全清、外部改动完整保留、Off仅恢复托管且未冲突属性\", \"CTL-04/05客观核对：快速切换与各状态退出重启后无shader/几何残留，终态与所选一致；menu显示与属性/vo-passes事实一致\", \"live_configuration_written=false；全程零写入APPDATA/mpv、D:/MPV、备份payload\", \"user_checks以PENDING_USER保留至approval门，用户以字面\\\"(approve)\\\"确认后才生成acceptance.json；不伪造approve输出\"], \"test_execution_note\": \"客观测试用--config-dir=<临时目录>隔离配置+JSON IPC（--input-ipc-server）驱动按键/属性查询/quit与截图自动取证，显式--vo=gpu-next --gpu-api=vulkan，必要时--fullscreen=no保证确定性（GEO-07另行显式切全屏）；截图与日志定向到docs/验证/开发/p1-001/或临时目录，禁止使用活动配置指向的screenshot-directory。IPC自动化只证功能与状态真实性，不替代真人交互感受。\"}",
+  "write_paths": [
+    "scripts/",
+    "script-opts/",
+    "shaders/",
+    "src/",
+    "tests/",
+    "tools/",
+    "docs/P1",
+    "docs/插件",
+    "docs/验证/开发/p1-001/"
+  ],
+  "required_tests": [
+    "CTL-01",
+    "CTL-02",
+    "CTL-03",
+    "CTL-04",
+    "CTL-05",
+    "CTL-06",
+    "CTL-07",
+    "CTL-08",
+    "GEO-01",
+    "GEO-07",
+    "SHD-12",
+    "PIC-05"
+  ],
+  "user_checks": [
+    "P1-UC-1：F8菜单开/关与条目浏览的交互感受（OSD布局、字号、响应速度、文案排版）须用户亲自确认可接受；自动化仅证功能可达与状态真实，不证体验",
+    "P1-UC-2：\"关\"档位说明与LS1/BCAS禁用原因文案的准确性与可接受性（PIC-05的主观部分；\"不可选/不冒名\"的客观核对已含于自动检查，不推给用户）",
+    "P1-UC-3：external让出提示与Off前diff确认流程的提示内容/时机/确认方式是否符合期望（CTL-08客观diff正确性自动验证，交互方式取舍留用户）",
+    "P1-UC-4：真实播放中off/active/external/fallback状态显示的可读性是否可接受"
+  ],
+  "risks": [
+    {
+      "risk": "observe_property对glsl-shaders的外部检测与插件自身写入形成事件回环：屏蔽不严会自触发external，或漏检F5/CTRL+0的clr语义",
+      "mitigation": "写入前后标志位+变更来源判定；tests/内Lua逻辑级测试+CTL-03/04 IPC压力用例；缺陷记finding并修复后重新冻结candidate，不得带病标PASS"
+    },
+    {
+      "risk": "P1无真实档位，CTL-04/06/07/08依赖测试桩验证状态机；桩实现错误会制造假阴性/假阳性",
+      "mitigation": "桩在临时目录运行时生成、p1-test-命名、证据标注\"测试桩非产品档位\"；审查者核对桩未伪装成P2功能（范围守护）"
+    },
+    {
+      "risk": "本机构建gpu-next+vulkan初始化失败或窗口/驱动环境导致IPC驱动不稳定",
+      "mitigation": "失败如实记录并触发停止条件评估；禁止静默换--vo=gpu或换API掩盖；重试须记录次数与差异"
+    },
+    {
+      "risk": "开发中途用户合法修改活动配置导致guard finish时compare-source失败",
+      "mitigation": "属预期：单独verify快照本体仍须通过；guard以备份记录指纹为准；绝不改备份或回写用户配置"
+    },
+    {
+      "risk": "菜单占位条目可被选中或暗示可用，违反\"禁用项不冒名\"",
+      "mitigation": "占位条目一律disabled+原因文案；SHD-12/PIC-05自动核对文案与不可选状态；两路审查专项检查"
+    },
+    {
+      "risk": "Windows中文路径与编码问题导致Lua/工具异常或证据乱码",
+      "mitigation": "工具与测试统一UTF-8（-X utf8），临时目录优先ASCII路径；证据文件UTF-8/LF"
+    },
+    {
+      "risk": "会话证据被复用或覆盖破坏可追溯性",
+      "mitigation": "guard强制session目录不存在才能开始；所有证据只增不改，更正以追加条目注明；测试输入与生成文件逐个记录SHA-256"
+    }
+  ],
+  "summary": "P0前提完备：备份BAK-01..03通过且preflight复核PASS、32项单测通过、准备检查v2=PASS、双路复审无阻断；F8经实测审查空闲；mpv二进制与版本事实已在P0勘察确认；用户已通过聊天+docs/执行授权-P1.json明确授权隔离实施与测试。真实档位行为、画质、性能不在P1范围，按规则不构成前置阻断；未知资源（如各档pass行为）不假定通过。 Source: docs/P1计划-GLM原始.json. Automatic objective result only; no interactive approve fabricated and no subjective acceptance claimed. Off diff means current-vs-last-written ownership comparison; no extra modal confirmation is required."
+}
