@@ -959,6 +959,8 @@ local S = {
 local overlay = nil
 local open_menu, close_menu, activate_gear, do_off
 local verify_timer = nil
+-- M-2：守卫属性回调的去抖定时器（一次性；同帧多个 GUARD_PROPS 触发合并为一次重估）
+local guard_recheck_timer = nil
 -- 前置声明（P2 链验证/回退/守卫释放；实现见下方同名赋值）
 local verify_chain_tick, rollback_after_verify_failure,
     release_all_to_fallback, release_for_guard, enter_fallback
@@ -1023,6 +1025,14 @@ local function read_vo_params()
         pixelformat = vop.pixelformat, gamma = vop.gamma,
         osd_w = jget("osd-width"), osd_h = jget("osd-height"),
     }
+end
+
+-- M-2：read_vo_params 结果的全部字段逐项比较（off 状态守卫提前返回用）
+local function vo_same_context(a, b)
+    if type(a) ~= "table" or type(b) ~= "table" then return false end
+    return a.w == b.w and a.h == b.h and a.dw == b.dw and a.dh == b.dh
+        and a.pixelformat == b.pixelformat and a.gamma == b.gamma
+        and a.osd_w == b.osd_w and a.osd_h == b.osd_h
 end
 
 ------------------------------------------------------------------
@@ -1132,7 +1142,7 @@ local function render_menu()
         end
         parts[#parts + 1] = text .. "\\N"
     end
-    parts[#parts + 1] = "\\N{\\fs" .. math.floor(fs * 0.66) .. "}{\\c&HBBBBBB&}↑/↓ 选择 · Enter 确认 · Esc/F8 关闭\\N关＝恢复接管前配置（不停止mpv必需的缩放/色彩管理）\\NP3：LUMA 档（FSR1/SGSR1/Anime4K/NIS）RGB/HDR 自动禁用；xBR/Sharp 档支持 RGB、HDR 自动禁用；Integer 黑边明示{\\c}"
+    parts[#parts + 1] = "\\N{\\fs" .. math.floor(fs * 0.66) .. "}{\\c&HBBBBBB&}↑/↓ 选择 · Enter 确认 · Esc 或菜单键关闭\\N关＝恢复接管前配置（不停止mpv必需的缩放/色彩管理）\\NP3：LUMA 档（FSR1/SGSR1/Anime4K/NIS）RGB/HDR 自动禁用；xBR/Sharp 档支持 RGB、HDR 自动禁用；Integer 黑边明示{\\c}"
     overlay.data = "{\\an7}{\\bord1}{\\shad1}{\\1c&HFFFFFF&}{\\3c&H000000&}" .. table.concat(parts)
     overlay:update()
 end
@@ -1322,6 +1332,9 @@ verify_chain_tick = function()
     local missing = chain_keywords_missing(gear)
     if #missing == 0 then
         S.chain_verified = true
+        -- M-1：验证成功才把当前档升格为稳定档（激活时不再同步写 stable），
+        -- 使 rollback_after_verify_failure 的「回滚到上一稳定档」重放分支真正可达
+        S.stable = S.active
         S.skip_note = chain_skip_note(gear, vo)
         -- stock 链的 //!WHEN 门控 pass（如 AutoDownscalePre/Upscale-M）在特定
         -- 窗口区间合法跳过：缺失时如实备注，不判失败（stock 设计行为）
@@ -1450,17 +1463,62 @@ integer_reapply_geometry = function(gear)
             want[e.prop] = e.value
         end
     end
+    -- L-1（仿 activate_gear 的快照+回滚）：重写前按所有权账本快照本次将写
+    -- 属性的回滚值与当前 k；任一项写失败或读回不一致时，回滚本次已写的
+    -- 兄弟属性并恢复 k；回滚本身也未生效（连续失败）则走 release_for_guard
+    -- 释放回退兜底，绝不留半生效几何。
+    local prev_k = S.integer_k
+    local prev_values = {}
+    for prop in pairs(want) do
+        prev_values[prop] = S.wrote[prop] and S.last[prop] or S.baseline[prop]
+    end
+    -- 独立 written 账本（同 activate_gear）：set 实际成功即入账（先于读回
+    -- 校验），读回不一致的那一项也必须回滚
+    local written = {}
     local failed = nil
     for prop, value in pairs(want) do
         local cur = jget(prop)
         if not values_equal_prop(prop, cur, value) then
-            local ok = write_owned(prop, value)
-            if not ok then failed = prop end
+            local ok, werr = write_owned(prop, value)
+            if not ok then
+                failed = prop .. ": " .. tostring(werr or "?")
+                break
+            end
+            written[prop] = true
+            -- 读回校验（mpv 可能静默丢弃/改写非法值）
+            if not values_equal_prop(prop, jget(prop), value) then
+                failed = "读回不一致: " .. prop
+                break
+            end
         end
     end
     S.skip_note = chain_skip_note(gear, vo)
     if failed then
-        msg.warn("integer geometry rewrite failed for", failed)
+        -- 回滚本次已写的兄弟属性（含读回不一致的那一项），并把 k 还原为
+        -- 回滚后几何对应的旧值
+        local rolled_back = true
+        for prop, v in pairs(prev_values) do
+            if written[prop] then
+                local ok = v ~= nil and v ~= UNAVAIL
+                    and pcall(mp.set_property_native, prop, v)
+                if ok then
+                    S.last[prop] = v
+                    journal_add(prop)
+                else
+                    rolled_back = false
+                end
+            end
+        end
+        S.integer_k = prev_k
+        if not rolled_back then
+            -- 连续失败：释放全部托管写入到基线并如实回退
+            release_for_guard("integer 几何重写失败且回滚未生效: " .. failed)
+            return
+        end
+        msg.warn("integer geometry rewrite failed, rolled back:", failed)
+        S.chain_epoch = S.chain_epoch + 1
+        sync_user_data()
+        return
     end
     S.chain_epoch = S.chain_epoch + 1
     sync_user_data()
@@ -1645,7 +1703,10 @@ activate_gear = function(gear_id, opts)
     S.owned = adds
     S.chain_kind = gear.whole and "whole" or "compat"
     S.state = "active"
-    S.stable = gear_id
+    -- M-1：激活时不再同步写 stable——stable 推迟到验证成功后才升格为当前档
+    --（否则任何验证失败都命中 rollback 的 stable==active 而直接整链释放回 off，
+    --「回滚到上一稳定档」重放分支不可达）。无 keywords 档位（nearest/integer
+    -- 等）立即 verified=true，无验证窗口，可同步升格 stable。
     S.active = gear_id
     S.reason = ""
     S.chain_epoch = S.chain_epoch + 1
@@ -1662,6 +1723,7 @@ activate_gear = function(gear_id, opts)
         schedule_verify_tick(0.6)
     else
         S.chain_verified = true
+        S.stable = gear_id
     end
     sync_user_data()
 end
@@ -1734,7 +1796,11 @@ end
 -- 守卫属性变化（视频/窗口/裁剪变化）：重估适用性并刷新导出（防陈旧 pass 显示）
 local function on_guard_context_changed()
     if S.shutting then return end
-    S.vo = read_vo_params()
+    local vo = read_vo_params()
+    -- M-2：off 状态且 vo 各字段与上次相同——守卫无新信息，提前返回
+    --（不递增 chain_epoch、不重读重估重导出；帧间抖动已先经去抖定时器合并）
+    if S.state == "off" and vo_same_context(S.vo, vo) then return end
+    S.vo = vo
     S.chain_epoch = S.chain_epoch + 1
     if S.state == "active" and S.active then
         local gear = S.model.by_id[S.active]
@@ -1776,6 +1842,19 @@ local function on_guard_context_changed()
     sync_user_data()
 end
 
+-- M-2：守卫回调去抖（参照 verify_timer 先例）——回调只置脏并重启一次性
+-- 定时器，到点才真正重读/重估/导出；重复触发即重启，合并为一次执行
+local function clear_guard_recheck_timer()
+    if guard_recheck_timer then
+        guard_recheck_timer:stop()
+        guard_recheck_timer = nil
+    end
+end
+local function schedule_guard_recheck()
+    clear_guard_recheck_timer()
+    guard_recheck_timer = mp.add_timeout(0.1, on_guard_context_changed)
+end
+
 local function install_observers(props)
     for _, p in ipairs(props) do
         mp.observe_property(p, "native", function(_, value)
@@ -1797,12 +1876,13 @@ local function install_observers(props)
             end
         end)
     end
-    -- 守卫属性：只读观察（不在基线快照内，永不触发 external），驱动防陈旧重估
+    -- 守卫属性：只读观察（不在基线快照内，永不触发 external），驱动防陈旧重估。
+    -- M-2：回调只置脏并重启去抖定时器，到点才执行 on_guard_context_changed
     for _, p in ipairs(GUARD_PROPS) do
         mp.observe_property(p, "native", function(_, value)
             journal_add(p)
             if value == nil then return end
-            on_guard_context_changed()
+            schedule_guard_recheck()
         end)
     end
 end
@@ -2479,6 +2559,7 @@ end
 local function shutdown_handler()
     S.shutting = true
     clear_verify_timer()
+    clear_guard_recheck_timer()
     close_menu()
     msg.info("shutdown, final state:", S.state, "gear:", S.active or "none",
         "(不持久化，重启回到 off；本插件未写任何状态文件)")
